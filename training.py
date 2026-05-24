@@ -709,8 +709,8 @@ for epoch in range(1, NUM_EPOCHS + 1):
     for batch_idx, batch in enumerate(train_loader):
         batch = {k: v.to(device) for k, v in batch.items()}
 
-        # with torch.amp.autocast("cuda", dtype=torch.bfloat16):
-        with torch.amp.autocast("cuda", dtype=torch.float8_e4m3fn):
+        with torch.amp.autocast("cuda", dtype=torch.bfloat16):
+        # with torch.amp.autocast("cuda", dtype=torch.float8_e4m3fn):
             outputs = ft_model(
                 input_ids=              batch["desc_input_ids"],
                 attention_mask=         batch["desc_attention_mask"],
