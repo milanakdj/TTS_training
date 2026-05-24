@@ -111,7 +111,7 @@ print(f"Warmup steps : {WARMUP_STEPS}")
 import wandb
 
 wandb.init(
-    project = "nanochat",
+    project = "tts",
     entity  = "himalaya-ai-lab",
     config  = {
         "num_epochs":       NUM_EPOCHS,
