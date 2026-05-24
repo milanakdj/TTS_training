@@ -765,8 +765,8 @@ for epoch in range(1, NUM_EPOCHS + 1):
                 with torch.no_grad():
                     for val_batch in val_loader:
                         val_batch = {k: v.to(device) for k, v in val_batch.items()}
-                        # with torch.amp.autocast("cuda", dtype=torch.bfloat16):
-                        with torch.amp.autocast("cuda", dtype=torch.float8_e4m3fn):
+                        with torch.amp.autocast("cuda", dtype=torch.bfloat16):
+                        # with torch.amp.autocast("cuda", dtype=torch.float8_e4m3fn):
                             val_out = ft_model(
                                 input_ids=              val_batch["desc_input_ids"],
                                 attention_mask=         val_batch["desc_attention_mask"],
