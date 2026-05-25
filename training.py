@@ -61,35 +61,20 @@ login(token=hf_token)
 
 # ── Edit these ───────────────────────────────────────────────────────────────
 # HF_USERNAME      = "lilgoose777"
-OUTPUT_REPO      = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v1"
+OUTPUT_REPO      = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v2"
 DATASET_REPO     = "Titung/cc100-nepali-tts"
 FINETUNE_BASE    = "ai4bharat/indic-parler-tts-pretrained"
 
-# MAX_TRAIN_STEPS  = 1000
-# BATCH_SIZE       = 2
-# GRAD_ACCUM_STEPS = 4
-# LEARNING_RATE    = 5e-6
-# WARMUP_STEPS     = 600
-# SAVE_STEPS       = 1000
-# MAX_AUDIO_SEC    = 12
-# MAX_AUDIO_TOKENS = 850
-# MAX_TRAIN_STEPS  = 5000   # was 1000 -- too few to learn anything meaningful
-# NUM_EPOCHS       = 1
-# BATCH_SIZE       = 4      # keep
-# GRAD_ACCUM_STEPS = 4      # keep (eff. batch = 8)
-# LEARNING_RATE    = 1e-4   # keep
-# WARMUP_STEPS     = 50    # was 600 -- should be ~5-10% of total steps, not 60%
-# SAVE_STEPS      = 150   # Save & validate every N steps (~25% of your run)
-# ZIP_EVERY_STEPS = 300   # Zip full checkpoints less frequently (saves time)
-
+MAX_STEPS = None
 NUM_EPOCHS       = 3
 BATCH_SIZE       = 32      # up from 4 — 128GB handles this easily
 GRAD_ACCUM_STEPS = 2       # eff. batch = 64 (was 16)
-LEARNING_RATE    = 5e-5    # scale up slightly with larger eff. batch
+LEARNING_RATE    = 3e-6   # old LR setting
 WARMUP_STEPS     = 200     # recalculate after knowing total steps
 SAVE_STEPS       = 200
 ZIP_EVERY_STEPS  = 600
-
+# MAX_STEPS = 1000  # if not set then will train what ever is set to NUM_EPOCHS, this is an override
+GPU =  "DGX"
 
 ckpt_dir = "./checkpoints"
 os.makedirs(ckpt_dir, exist_ok=True)
@@ -102,7 +87,7 @@ MAX_AUDIO_TOKENS = 550    # keep
 print(f"Output repo  : {OUTPUT_REPO}")
 print(f"Dataset      : {DATASET_REPO}")
 print(f"Base model   : {FINETUNE_BASE}")
-# print(f"Train steps  : {MAX_TRAIN_STEPS}")
+print(f"Train steps  : {MAX_STEPS}")
 print(f"Train EPOC  : {NUM_EPOCHS}")
 print(f"Eff. batch   : {BATCH_SIZE * GRAD_ACCUM_STEPS}")
 print(f"Warmup steps : {WARMUP_STEPS}")
@@ -110,13 +95,17 @@ print(f"Warmup steps : {WARMUP_STEPS}")
 
 import wandb
 
+# ── W&B Init ──────────────────────────────────────────────────────────────────
+from kaggle_secrets import UserSecretsClient
+os.environ["WANDB_API_KEY"] = UserSecretsClient().get_secret("WANDB_API_KEY")
+
 wandb.init(
     project = "tts",
     entity  = "himalaya-ai-lab",
     config  = {
         "num_epochs":       NUM_EPOCHS,
         "batch_size":       BATCH_SIZE,
-        "name"    : "indic_tts_gb10-bf16-bs32-lr5e5",   
+        "name"    : "indic_tts_gb10-bf16-bs32-lr3e6",   
         "grad_accum_steps": GRAD_ACCUM_STEPS,
         "learning_rate":    LEARNING_RATE,
         "warmup_steps":     WARMUP_STEPS,
@@ -124,7 +113,8 @@ wandb.init(
         "zip_every_steps":  ZIP_EVERY_STEPS,
         "max_audio_sec":    MAX_AUDIO_SEC,
         "max_audio_tokens": MAX_AUDIO_TOKENS,
-        "gpu":              "NVIDIA GB10 (DIGITS)",
+        "max_steps": MAX_STEPS,
+        "gpu":              GPU,
     }
 )
 
@@ -541,17 +531,19 @@ print("Model dtype:", set(p.dtype for p in ft_model.parameters()))
 print("BF16 supported:", torch.cuda.is_bf16_supported())
 print("Has scaler:", 'scaler' in dir())  # should ideally be False or unused
 
+"""TRAIN BASED ON EPOCH"""
+
 # import time
 # import numpy as np
 # import os
 # import zipfile
 # import shutil
 
+
 # ft_model.train()
 # global_step   = 0
 # best_val_loss = float("inf")
 # train_losses  = []
-# ZIP_EVERY_EPOCHS = 5
 
 # optimizer.zero_grad()
 # start_time = time.time()
@@ -580,6 +572,7 @@ print("Has scaler:", 'scaler' in dir())  # should ideally be False or unused
 
 #         loss.backward()
 
+#         # ── Optimizer Step ────────────────────────────────────────────────
 #         if (batch_idx + 1) % GRAD_ACCUM_STEPS == 0:
 #             torch.nn.utils.clip_grad_norm_(
 #                 [p for p in ft_model.parameters() if p.requires_grad],
@@ -589,16 +582,16 @@ print("Has scaler:", 'scaler' in dir())  # should ideally be False or unused
 #             scheduler.step()
 #             optimizer.zero_grad()
 #             global_step += 1
-#             torch.cuda.empty_cache()
 
 #             actual_loss = loss.item() * GRAD_ACCUM_STEPS
 #             train_losses.append(actual_loss)
 #             epoch_losses.append(actual_loss)
 
+#             # ── Logging ───────────────────────────────────────────────────
 #             if global_step % 10 == 0:
 #                 elapsed       = time.time() - start_time
-#                 steps_per_sec = global_step / elapsed
-#                 remaining     = (MAX_TRAIN_STEPS - global_step) / steps_per_sec / 60
+#                 steps_per_sec = global_step / max(elapsed, 1e-9)
+#                 remaining     = (MAX_TRAIN_STEPS - global_step) / max(steps_per_sec, 1e-9) / 60
 #                 vram_gb       = torch.cuda.memory_allocated() / 1e9
 #                 print(
 #                     f"  Step {global_step:4d} | "
@@ -608,62 +601,74 @@ print("Has scaler:", 'scaler' in dir())  # should ideally be False or unused
 #                     f"ETA: {remaining:.1f}min"
 #                 )
 
-#     # ── End of epoch: log avg train loss ─────────────────────────────
+#             # ── Validation & Best Checkpoint ──────────────────────────────
+#             if global_step % SAVE_STEPS == 0 and global_step > 0:
+#                 ft_model.eval()
+#                 val_losses = []
+#                 with torch.no_grad():
+#                     for val_batch in val_loader:
+#                         val_batch = {k: v.to(device) for k, v in val_batch.items()}
+#                         with torch.amp.autocast("cuda", dtype=torch.bfloat16):
+#                             val_out = ft_model(
+#                                 input_ids=              val_batch["desc_input_ids"],
+#                                 attention_mask=         val_batch["desc_attention_mask"],
+#                                 prompt_input_ids=       val_batch["input_ids"],
+#                                 prompt_attention_mask=  val_batch["attention_mask"],
+#                                 decoder_attention_mask= val_batch["decoder_attention_mask"],
+#                                 labels=                 val_batch["labels"],
+#                             )
+#                             val_losses.append(val_out.loss.item())
+
+#                 val_loss = np.mean(val_losses)
+#                 print(f"\n  📊 Step {global_step} | Val Loss: {val_loss:.4f}")
+
+#                 if val_loss < best_val_loss:
+#                     best_val_loss = val_loss
+#                     ft_model.save_pretrained(ckpt_dir)
+#                     ft_tokenizer.save_pretrained(ckpt_dir)
+#                     ft_desc_tokenizer.save_pretrained(ckpt_dir + "/desc_tokenizer")
+#                     print(f"  💾 New best! val_loss={best_val_loss:.4f} → saved to {ckpt_dir}")
+
+#                 ft_model.train()
+
+#             # ── Periodic Full Checkpoint + Zip ────────────────────────────
+#             if global_step % ZIP_EVERY_STEPS == 0 and global_step > 0:
+
+#                 periodic_ckpt_dir = f"{ckpt_dir}/checkpoint_step_{global_step}"
+#                 ft_model.eval()
+#                 ft_model.save_pretrained(periodic_ckpt_dir)
+#                 ft_tokenizer.save_pretrained(periodic_ckpt_dir)
+#                 ft_desc_tokenizer.save_pretrained(periodic_ckpt_dir + "/desc_tokenizer")
+
+#                 # Save training state
+#                 torch.save({
+#                     "epoch":          epoch,
+#                     "global_step":    global_step,
+#                     "optimizer":      optimizer.state_dict(),
+#                     "scheduler":      scheduler.state_dict(),
+#                     "best_val_loss":  best_val_loss,
+#                     "train_losses":   train_losses,
+#                 }, os.path.join(periodic_ckpt_dir, "training_state.pt"))
+
+#                 # Inline zip to avoid missing function errors
+#                 zip_name = f"{ckpt_dir}/checkpoint_step_{global_step}.zip"
+#                 print(f"  🗜️ Zipping → {zip_name} ...")
+#                 with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
+#                     for root, dirs, files in os.walk(periodic_ckpt_dir):
+#                         for file in files:
+#                             file_path = os.path.join(root, file)
+#                             arcname   = os.path.relpath(file_path, start=os.path.dirname(periodic_ckpt_dir))
+#                             zf.write(file_path, arcname)
+#                 print(f"  ✅ Saved {zip_name} ({os.path.getsize(zip_name)/1e6:.1f} MB)")
+
+#                 shutil.rmtree(periodic_ckpt_dir)
+#                 ft_model.train()
+
+#             torch.cuda.empty_cache()  # Keep VRAM stable during long runs
+
+#     # ── End of epoch: log avg train loss ──────────────────────────────────
 #     avg_train_loss = np.mean(epoch_losses) if epoch_losses else float("nan")
 #     print(f"\n  Epoch {epoch} avg train loss: {avg_train_loss:.4f}")
-
-#     # ── Validation every SAVE_EVERY_EPOCHS ───────────────────────────
-#     if epoch % SAVE_EVERY_EPOCHS == 0:
-#         ft_model.eval()
-#         val_losses = []
-#         with torch.no_grad():
-#             for val_batch in val_loader:
-#                 val_batch = {k: v.to(device) for k, v in val_batch.items()}
-#                 with torch.amp.autocast("cuda", dtype=torch.bfloat16):
-#                     val_out = ft_model(
-#                         input_ids=              val_batch["desc_input_ids"],
-#                         attention_mask=         val_batch["desc_attention_mask"],
-#                         prompt_input_ids=       val_batch["input_ids"],
-#                         prompt_attention_mask=  val_batch["attention_mask"],
-#                         decoder_attention_mask= val_batch["decoder_attention_mask"],
-#                         labels=                 val_batch["labels"],
-#                     )
-#                     val_losses.append(val_out.loss.item())
-
-#         val_loss = np.mean(val_losses)
-#         print(f"  📊 Epoch {epoch} | Val Loss: {val_loss:.4f}")
-
-#         if val_loss < best_val_loss:
-#             best_val_loss = val_loss
-#             ckpt_dir = "./best_checkpoint"
-#             ft_model.save_pretrained(ckpt_dir)
-#             ft_tokenizer.save_pretrained(ckpt_dir)
-#             ft_desc_tokenizer.save_pretrained(ckpt_dir + "/desc_tokenizer")
-#             print(f"  💾 New best! val_loss={best_val_loss:.4f} → saved to {ckpt_dir}")
-
-#         ft_model.train()
-#         torch.cuda.empty_cache()
-
-#     # ── Periodic zip every ZIP_EVERY_EPOCHS ──────────────────────────
-#     if epoch % ZIP_EVERY_EPOCHS == 0:
-#         periodic_ckpt_dir = f"./checkpoint_epoch_{epoch}"
-#         ft_model.eval()
-#         ft_model.save_pretrained(periodic_ckpt_dir)
-#         ft_tokenizer.save_pretrained(periodic_ckpt_dir)
-#         ft_desc_tokenizer.save_pretrained(periodic_ckpt_dir + "/desc_tokenizer")
-#         torch.save({
-#             "epoch":          epoch,
-#             "global_step":    global_step,
-#             "optimizer":      optimizer.state_dict(),
-#             "scheduler":      scheduler.state_dict(),
-#             "best_val_loss":  best_val_loss,
-#             "train_losses":   train_losses,
-#         }, os.path.join(periodic_ckpt_dir, "training_state.pt"))
-#         zip_checkpoint(periodic_ckpt_dir, f"epoch_{epoch}")
-#         shutil.rmtree(periodic_ckpt_dir)
-#         ft_model.train()
-
-#         torch.cuda.empty_cache()
 
 # print("\n" + "=" * 65)
 # print("🎉 FINETUNING COMPLETE")
@@ -673,9 +678,7 @@ print("Has scaler:", 'scaler' in dir())  # should ideally be False or unused
 # print(f"   Time taken   : {(time.time() - start_time)/60:.1f} min")
 # print("=" * 65)
 
-
-#code up wan't saving at 0.25 epochs
-
+"""The code below uses MAX STEP as a metric instead of EPOCH"""
 
 import time
 import numpy as np
@@ -683,12 +686,36 @@ import os
 import zipfile
 import shutil
 
-# ── Blackwell-specific (add here) ─────────────────────────────────────────
+
+# ── MAX_TRAIN_STEPS resolution (Bug 4 fixed) ──────────────────────────────────
+# MAX_STEPS takes priority if set; otherwise fall back to whatever MAX_TRAIN_STEPS was
+MAX_TRAIN_STEPS = MAX_STEPS if MAX_STEPS is not None else MAX_TRAIN_STEPS
+
+# ── Zip helper (Bug 2 fixed — uses ckpt_dir) ──────────────────────────────────
+def zip_checkpoint(periodic_ckpt_dir, step):
+    """Zip a checkpoint directory into ckpt_dir and return the zip filename."""
+    zip_name = f"{ckpt_dir}/checkpoint_step_{step}.zip"   # ✅ Fix 2
+    print(f"  🗜️  Zipping checkpoint → {zip_name} ...")
+    with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(periodic_ckpt_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname   = os.path.relpath(file_path, start=os.path.dirname(periodic_ckpt_dir))
+                zf.write(file_path, arcname)
+    size_mb = os.path.getsize(zip_name) / 1e6
+    print(f"  ✅  Saved {zip_name} ({size_mb:.1f} MB)\n")
+    return zip_name
+
+# ── Blackwell-specific optimisations ─────────────────────────────────────────
 torch.backends.cuda.matmul.allow_tf32 = True
-torch.backends.cudnn.allow_tf32 = True
-torch.set_float32_matmul_precision('high')
+torch.backends.cudnn.allow_tf32       = True
+torch.set_float32_matmul_precision("high")
 ft_model = torch.compile(ft_model, mode="reduce-overhead")
-# ──────────────────────────────────────────────────────────────────────────
+
+# ── Training state ────────────────────────────────────────────────────────────
+print("=" * 65)
+print("🏋️  STARTING FINETUNING")
+print("=" * 65)
 
 ft_model.train()
 global_step   = 0
@@ -697,20 +724,22 @@ train_losses  = []
 
 optimizer.zero_grad()
 start_time = time.time()
+epoch      = 0
 
-for epoch in range(1, NUM_EPOCHS + 1):
-    print(f"\n{'='*65}")
-    print(f"  EPOCH {epoch}/{NUM_EPOCHS}")
-    print(f"{'='*65}")
-
-    ft_model.train()
-    epoch_losses = []
+# ── Training loop ─────────────────────────────────────────────────────────────
+while global_step < MAX_TRAIN_STEPS:
+    epoch += 1
 
     for batch_idx, batch in enumerate(train_loader):
+
+        # ── Bug 7 fix: guard at top of inner loop too ─────────────────────
+        if global_step >= MAX_TRAIN_STEPS:
+            break
+
         batch = {k: v.to(device) for k, v in batch.items()}
 
+        # ── Forward ───────────────────────────────────────────────────────
         with torch.amp.autocast("cuda", dtype=torch.bfloat16):
-        # with torch.amp.autocast("cuda", dtype=torch.float8_e4m3fn):
             outputs = ft_model(
                 input_ids=              batch["desc_input_ids"],
                 attention_mask=         batch["desc_attention_mask"],
@@ -721,9 +750,10 @@ for epoch in range(1, NUM_EPOCHS + 1):
             )
             loss = outputs.loss / GRAD_ACCUM_STEPS
 
+        # ── Backward ──────────────────────────────────────────────────────
         loss.backward()
 
-        # ── Optimizer Step ────────────────────────────────────────────────
+        # ── Gradient accumulation step ────────────────────────────────────
         if (batch_idx + 1) % GRAD_ACCUM_STEPS == 0:
             torch.nn.utils.clip_grad_norm_(
                 [p for p in ft_model.parameters() if p.requires_grad],
@@ -736,7 +766,6 @@ for epoch in range(1, NUM_EPOCHS + 1):
 
             actual_loss = loss.item() * GRAD_ACCUM_STEPS
             train_losses.append(actual_loss)
-            epoch_losses.append(actual_loss)
 
             # ── Logging ───────────────────────────────────────────────────
             if global_step % 10 == 0:
@@ -745,20 +774,23 @@ for epoch in range(1, NUM_EPOCHS + 1):
                 remaining     = (MAX_TRAIN_STEPS - global_step) / max(steps_per_sec, 1e-9) / 60
                 vram_gb       = torch.cuda.memory_allocated() / 1e9
                 print(
-                    f"  Step {global_step:4d} | "
+                    f"  Step {global_step:4d}/{MAX_TRAIN_STEPS} | "
                     f"Loss: {actual_loss:.4f} | "
                     f"LR: {scheduler.get_last_lr()[0]:.2e} | "
                     f"VRAM: {vram_gb:.1f}GB | "
                     f"ETA: {remaining:.1f}min"
                 )
+                # ✅ Fix 5 — wandb train logging
                 wandb.log({
-                    "train/loss":        actual_loss,
-                    "train/lr":          scheduler.get_last_lr()[0],
-                    "train/vram_gb":     vram_gb,
+                    "train/loss":    actual_loss,
+                    "train/lr":      scheduler.get_last_lr()[0],
+                    "train/vram_gb": vram_gb,
                     "train/global_step": global_step,
+
                 }, step=global_step)
 
             # ── Validation & Best Checkpoint ──────────────────────────────
+            # ✅ Fix 6 — inside grad accum block, no duplicate band-aid guard
             if global_step % SAVE_STEPS == 0 and global_step > 0:
                 ft_model.eval()
                 val_losses = []
@@ -766,7 +798,6 @@ for epoch in range(1, NUM_EPOCHS + 1):
                     for val_batch in val_loader:
                         val_batch = {k: v.to(device) for k, v in val_batch.items()}
                         with torch.amp.autocast("cuda", dtype=torch.bfloat16):
-                        # with torch.amp.autocast("cuda", dtype=torch.float8_e4m3fn):
                             val_out = ft_model(
                                 input_ids=              val_batch["desc_input_ids"],
                                 attention_mask=         val_batch["desc_attention_mask"],
@@ -780,226 +811,78 @@ for epoch in range(1, NUM_EPOCHS + 1):
                 val_loss = np.mean(val_losses)
                 print(f"\n  📊 Step {global_step} | Val Loss: {val_loss:.4f}")
 
-                if val_loss < best_val_loss:
-                    best_val_loss = val_loss
-                    ft_model.save_pretrained(ckpt_dir)
-                    ft_tokenizer.save_pretrained(ckpt_dir)
-                    ft_desc_tokenizer.save_pretrained(ckpt_dir + "/desc_tokenizer")
-                    print(f"  💾 New best! val_loss={best_val_loss:.4f} → saved to {ckpt_dir}")
-
+                # ✅ Fix 5 — wandb val logging
                 wandb.log({
-                    "val/loss":       val_loss,
-                    "val/best_loss":  best_val_loss,
+                    "val/loss":      val_loss,
+                    "val/best_loss": best_val_loss,
                 }, step=global_step)
 
+                if val_loss < best_val_loss:
+                    best_val_loss = val_loss
+                    # ✅ Fix 1 — no ckpt_dir = "..." here; use the one defined at top
+                    ft_model.save_pretrained(f"{ckpt_dir}/best_checkpoint")
+                    ft_tokenizer.save_pretrained(f"{ckpt_dir}/best_checkpoint")
+                    ft_desc_tokenizer.save_pretrained(f"{ckpt_dir}/best_checkpoint/desc_tokenizer")
+                    print(f"  💾 New best! val_loss={best_val_loss:.4f} → saved to {ckpt_dir}/best_checkpoint\n")
 
                 ft_model.train()
+                torch.cuda.empty_cache()
 
             # ── Periodic Full Checkpoint + Zip ────────────────────────────
+            # ✅ Fix 3 — ZIP_EVERY_STEPS comes from config, not hardcoded here
+            # ✅ Fix 6 — inside grad accum block
             if global_step % ZIP_EVERY_STEPS == 0 and global_step > 0:
-
+                # ✅ Fix 2 — uses ckpt_dir prefix
                 periodic_ckpt_dir = f"{ckpt_dir}/checkpoint_step_{global_step}"
                 ft_model.eval()
                 ft_model.save_pretrained(periodic_ckpt_dir)
                 ft_tokenizer.save_pretrained(periodic_ckpt_dir)
                 ft_desc_tokenizer.save_pretrained(periodic_ckpt_dir + "/desc_tokenizer")
 
-                # Save training state
                 torch.save({
-                    "epoch":          epoch,
-                    "global_step":    global_step,
-                    "optimizer":      optimizer.state_dict(),
-                    "scheduler":      scheduler.state_dict(),
-                    "best_val_loss":  best_val_loss,
-                    "train_losses":   train_losses,
+                    "epoch":         epoch,
+                    "global_step":   global_step,
+                    "optimizer":     optimizer.state_dict(),
+                    "scheduler":     scheduler.state_dict(),
+                    "best_val_loss": best_val_loss,
+                    "train_losses":  train_losses,
                 }, os.path.join(periodic_ckpt_dir, "training_state.pt"))
 
-                # Inline zip to avoid missing function errors
-                zip_name = f"{ckpt_dir}/checkpoint_step_{global_step}.zip"
-                print(f"  🗜️ Zipping → {zip_name} ...")
-                with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-                    for root, dirs, files in os.walk(periodic_ckpt_dir):
-                        for file in files:
-                            file_path = os.path.join(root, file)
-                            arcname   = os.path.relpath(file_path, start=os.path.dirname(periodic_ckpt_dir))
-                            zf.write(file_path, arcname)
-                print(f"  ✅ Saved {zip_name} ({os.path.getsize(zip_name)/1e6:.1f} MB)")
-
+                zip_checkpoint(periodic_ckpt_dir, global_step)
                 shutil.rmtree(periodic_ckpt_dir)
                 ft_model.train()
+                torch.cuda.empty_cache()
 
-            torch.cuda.empty_cache()  # Keep VRAM stable during long runs
+            # ── MAX_TRAIN_STEPS guard (inner loop) ────────────────────────
+            # ✅ Fix 7 — clean exit when steps hit limit mid-epoch
+            if global_step >= MAX_TRAIN_STEPS:
+                print(f"\n  🛑 Reached MAX_TRAIN_STEPS={MAX_TRAIN_STEPS}, stopping.")
+                break
 
-    # ── End of epoch: log avg train loss ──────────────────────────────────
-    avg_train_loss = np.mean(epoch_losses) if epoch_losses else float("nan")
-    print(f"\n  Epoch {epoch} avg train loss: {avg_train_loss:.4f}")
+    # ✅ Fix 7 — propagate stop signal to while loop
+    if global_step >= MAX_TRAIN_STEPS:
+        break
 
-wandb.finish()
-
+# ── Done ──────────────────────────────────────────────────────────────────────
 print("\n" + "=" * 65)
 print("🎉 FINETUNING COMPLETE")
-print(f"   Total epochs : {NUM_EPOCHS}")
+print(f"   Total epochs : {epoch}")
 print(f"   Total steps  : {global_step}")
 print(f"   Best val loss: {best_val_loss:.4f}")
 print(f"   Time taken   : {(time.time() - start_time)/60:.1f} min")
 print("=" * 65)
 
-# import time
-# import numpy as np
-# import os
-# import zipfile
-# import shutil
+best_ckpt_path = f"{ckpt_dir}/best_checkpoint"
+if not os.path.exists(best_ckpt_path):
+    print("⚠️  No best_checkpoint found — saving final model as best...")
+    ft_model.eval()
+    ft_model.save_pretrained(best_ckpt_path)
+    ft_tokenizer.save_pretrained(best_ckpt_path)
+    ft_desc_tokenizer.save_pretrained(f"{best_ckpt_path}/desc_tokenizer")
+    print(f"✅ Saved to {best_ckpt_path}")
 
-# print("=" * 65)
-# print("🏋️  STARTING FINETUNING")
-# print("=" * 65)
 
-# ft_model.train()
-# global_step   = 0
-# best_val_loss = float("inf")
-# train_losses  = []
-
-# optimizer.zero_grad()
-# start_time = time.time()
-# epoch = 0
-
-# ZIP_EVERY_STEPS = 1000  # ← zip checkpoint every N steps
-
-# def zip_checkpoint(ckpt_dir, step):
-#     """Zip a checkpoint directory and return the zip filename."""
-#     zip_name = f"checkpoint_step_{step}.zip"
-#     print(f"  🗜️  Zipping checkpoint → {zip_name} ...")
-#     with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-#         for root, dirs, files in os.walk(ckpt_dir):
-#             for file in files:
-#                 file_path = os.path.join(root, file)
-#                 arcname   = os.path.relpath(file_path, start=os.path.dirname(ckpt_dir))
-#                 zf.write(file_path, arcname)
-#     size_mb = os.path.getsize(zip_name) / 1e6
-#     print(f"  ✅  Saved {zip_name} ({size_mb:.1f} MB)\n")
-#     return zip_name
-
-# while global_step < MAX_TRAIN_STEPS:
-#     epoch += 1
-#     for batch_idx, batch in enumerate(train_loader):
-#         if global_step >= MAX_TRAIN_STEPS:
-#             break
-
-#         batch = {k: v.to(device) for k, v in batch.items()}
-
-#         # ── Forward with bfloat16 AMP ─────────────────────────────────────
-#         with torch.amp.autocast("cuda", dtype=torch.bfloat16):
-#             outputs = ft_model(
-#                 input_ids=              batch["desc_input_ids"],
-#                 attention_mask=         batch["desc_attention_mask"],
-#                 prompt_input_ids=       batch["input_ids"],
-#                 prompt_attention_mask=  batch["attention_mask"],
-#                 decoder_attention_mask= batch["decoder_attention_mask"],
-#                 labels=                 batch["labels"],
-#             )
-#             loss = outputs.loss / GRAD_ACCUM_STEPS
-
-#         # ── Backward (no scaler needed for bfloat16) ──────────────────────
-#         loss.backward()
-
-#         # ── Gradient accumulation step ────────────────────────────────────
-#         if (batch_idx + 1) % GRAD_ACCUM_STEPS == 0:
-#             torch.nn.utils.clip_grad_norm_(
-#                 [p for p in ft_model.parameters() if p.requires_grad],
-#                 max_norm=1.0
-#             )
-#             optimizer.step()
-#             scheduler.step()
-#             optimizer.zero_grad()
-#             global_step += 1
-#             torch.cuda.empty_cache()
-
-#             actual_loss = loss.item() * GRAD_ACCUM_STEPS
-#             train_losses.append(actual_loss)
-
-#             if global_step % 10 == 0:
-#                 elapsed       = time.time() - start_time
-#                 steps_per_sec = global_step / elapsed
-#                 remaining     = (MAX_TRAIN_STEPS - global_step) / steps_per_sec / 60
-#                 vram_gb       = torch.cuda.memory_allocated() / 1e9
-#                 print(
-#                     f"  Step {global_step:4d}/{MAX_TRAIN_STEPS} | "
-#                     f"Loss: {actual_loss:.4f} | "
-#                     f"LR: {scheduler.get_last_lr()[0]:.2e} | "
-#                     f"VRAM: {vram_gb:.1f}GB | "
-#                     f"ETA: {remaining:.1f}min"
-#                 )
-
-#         # ── Validation + checkpoint ───────────────────────────────────────
-#         if (
-#             global_step % SAVE_STEPS == 0
-#             and global_step > 0
-#             and (batch_idx + 1) % GRAD_ACCUM_STEPS == 0
-#         ):
-#             ft_model.eval()
-#             val_losses = []
-#             with torch.no_grad():
-#                 for val_batch in val_loader:
-#                     val_batch = {k: v.to(device) for k, v in val_batch.items()}
-#                     with torch.amp.autocast("cuda", dtype=torch.bfloat16):
-#                         val_out = ft_model(
-#                             input_ids=              val_batch["desc_input_ids"],
-#                             attention_mask=         val_batch["desc_attention_mask"],
-#                             prompt_input_ids=       val_batch["input_ids"],
-#                             prompt_attention_mask=  val_batch["attention_mask"],
-#                             decoder_attention_mask= val_batch["decoder_attention_mask"],
-#                             labels=                 val_batch["labels"],
-#                         )
-#                         val_losses.append(val_out.loss.item())
-
-#             val_loss = np.mean(val_losses)
-#             print(f"\n  📊 Step {global_step} | Val Loss: {val_loss:.4f}")
-
-#             if val_loss < best_val_loss:
-#                 best_val_loss = val_loss
-#                 ckpt_dir = "./best_checkpoint"
-#                 ft_model.save_pretrained(ckpt_dir)
-#                 ft_tokenizer.save_pretrained(ckpt_dir)
-#                 ft_desc_tokenizer.save_pretrained(ckpt_dir + "/desc_tokenizer")
-#                 print(f"  💾 New best! val_loss={best_val_loss:.4f} → saved to {ckpt_dir}\n")
-
-#             ft_model.train()
-#             torch.cuda.empty_cache()
-
-#         # ── Periodic zip every ZIP_EVERY_STEPS ───────────────────────────
-#         if (
-#             global_step % ZIP_EVERY_STEPS == 0
-#             and global_step > 0
-#             and (batch_idx + 1) % GRAD_ACCUM_STEPS == 0
-#         ):
-#             periodic_ckpt_dir = f"./checkpoint_step_{global_step}"
-#             ft_model.eval()
-#             ft_model.save_pretrained(periodic_ckpt_dir)
-#             ft_tokenizer.save_pretrained(periodic_ckpt_dir)
-#             ft_desc_tokenizer.save_pretrained(periodic_ckpt_dir + "/desc_tokenizer")
-
-#             # Save training state alongside model weights
-#             torch.save({
-#                 "global_step":    global_step,
-#                 "optimizer":      optimizer.state_dict(),
-#                 "scheduler":      scheduler.state_dict(),
-#                 "best_val_loss":  best_val_loss,
-#                 "train_losses":   train_losses,
-#             }, os.path.join(periodic_ckpt_dir, "training_state.pt"))
-
-#             zip_checkpoint(periodic_ckpt_dir, global_step)
-
-#             # Remove unzipped dir to save disk space
-#             shutil.rmtree(periodic_ckpt_dir)
-#             ft_model.train()
-#             torch.cuda.empty_cache()
-
-# print("\n" + "=" * 65)
-# print("🎉 FINETUNING COMPLETE")
-# print(f"   Total steps  : {global_step}")
-# print(f"   Best val loss: {best_val_loss:.4f}")
-# print(f"   Time taken   : {(time.time() - start_time)/60:.1f} min")
-# print("=" * 65)
+wandb.finish()
 
 """## 8. Training Loss Plot"""
 
@@ -1028,9 +911,9 @@ import gc
 from parler_tts import ParlerTTSForConditionalGeneration
 
 print("Loading best checkpoint...")
-best_model = ParlerTTSForConditionalGeneration.from_pretrained("./best_checkpoint")
-best_tok   = AutoTokenizer.from_pretrained("./best_checkpoint")
-best_desc_tok = AutoTokenizer.from_pretrained("./best_checkpoint/desc_tokenizer")
+best_model = ParlerTTSForConditionalGeneration.from_pretrained(f"{ckpt_dir}/best_checkpoint")
+best_tok   = AutoTokenizer.from_pretrained(f"{ckpt_dir}/best_checkpoint")
+best_desc_tok = AutoTokenizer.from_pretrained(f"{ckpt_dir}/best_checkpoint")
 
 print(f"Pushing to: {OUTPUT_REPO}")
 best_model.push_to_hub(OUTPUT_REPO,
@@ -1046,56 +929,90 @@ torch.cuda.empty_cache()
 
 """## 10. Inference Test"""
 
-import soundfile as sf
-import IPython.display as ipd
-import numpy as np
-import torch
+import gc
 from parler_tts import ParlerTTSForConditionalGeneration
-from transformers import AutoTokenizer
 
-print("Loading best checkpoint for inference...")
-infer_model = ParlerTTSForConditionalGeneration.from_pretrained(
-    "./best_checkpoint"
-).to(device).eval()
+best_ckpt = f"{ckpt_dir}/best_checkpoint"
 
-# Load BOTH tokenizers from checkpoint
-infer_prompt_tok = AutoTokenizer.from_pretrained("./best_checkpoint")
-infer_desc_tok   = AutoTokenizer.from_pretrained("./best_checkpoint/desc_tokenizer")
+# ── Model Card ────────────────────────────────────────────────────────────────
+model_card = f"""---
+language:
+- ne
+library_name: parler-tts
+tags:
+- text-to-speech
+- nepali
+- parler-tts
+- finetuned
+---
 
-TEST_TEXTS = [
-    "नेपाल दक्षिण एसियामा अवस्थित एउटा सुन्दर देश हो।",
-    "काठमाडौं नेपालको राजधानी र सबैभन्दा ठूलो सहर हो।",
-    "मलाई नेपाली भाषा मन पर्छ।",
-]
-TEST_DESC = "A female speaker delivers clear Nepali speech at a normal pace. The recording is of very high quality."
+# Nepali Parler-TTS — Finetuned
 
-for i, text in enumerate(TEST_TEXTS):
-    print(f"\n[{i+1}] {text}")
+Nepali finetuned version of Indic Parler-TTS.
 
-    desc_ids   = infer_desc_tok(TEST_DESC, return_tensors="pt").input_ids.to(device)
-    prompt_ids = infer_prompt_tok(text, return_tensors="pt").input_ids.to(device)
+## Training Configuration
 
-    with torch.inference_mode():
-        gen = infer_model.generate(
-            input_ids=desc_ids,
-            prompt_input_ids=prompt_ids,
-            do_sample=True,
-            temperature=1.0,
-            max_new_tokens=500,
-        )
+| Parameter | Value |
+|---|---|
+| Base Model | Indic Parler-TTS |
+| GPU | {GPU} |
+| Epochs | {NUM_EPOCHS} |
+| Batch Size | {BATCH_SIZE} |
+| Gradient Accumulation Steps | {GRAD_ACCUM_STEPS} |
+| Effective Batch Size | {BATCH_SIZE * GRAD_ACCUM_STEPS} |
+| Learning Rate | {LEARNING_RATE} |
+| Warmup Steps | {WARMUP_STEPS} |
+| Max Train Steps | {MAX_TRAIN_STEPS} |
+| Save Steps | {SAVE_STEPS} |
+| Zip Every Steps | {ZIP_EVERY_STEPS} |
+| Max Audio Seconds | {MAX_AUDIO_SEC} |
+| Max Audio Tokens | {MAX_AUDIO_TOKENS} |
+| Precision | bfloat16 |
+| Grad Clip Norm | 1.0 |
 
-    audio = gen.cpu().numpy().squeeze().astype(np.float32)
-    # Normalise to [-1, 1]
-    max_val = np.abs(audio).max()
-    if max_val > 1e-6:
-        audio = audio / max_val
+## Results
 
-    fname = f"test_nepali_{i+1}.wav"
-    sf.write(fname, audio, infer_model.config.sampling_rate)
-    print(f"  💾 Saved: {fname}")
-    ipd.display(ipd.Audio(audio, rate=infer_model.config.sampling_rate))
+| Metric | Value |
+|---|---|
+| Best Validation Loss | {best_val_loss:.4f} |
+| Total Steps Trained | {global_step} |
+| Training Time | {(time.time() - start_time)/60:.1f} min |
 
-print("\n✅ Inference complete!")
+## W&B Run
+[View training run](https://wandb.ai/himalaya-ai-lab/nanochat)
+"""
+
+# Write README into the checkpoint folder so it gets pushed
+with open(f"{best_ckpt}/README.md", "w") as f:
+    f.write(model_card)
+
+print(f"Loading best checkpoint from: {best_ckpt}")
+best_model    = ParlerTTSForConditionalGeneration.from_pretrained(best_ckpt)
+best_tok      = AutoTokenizer.from_pretrained(best_ckpt)
+best_desc_tok = AutoTokenizer.from_pretrained(f"{best_ckpt}/desc_tokenizer")
+
+print(f"Pushing to: {OUTPUT_REPO}")
+best_model.push_to_hub(OUTPUT_REPO,
+    commit_message=f"Nepali finetuned Indic Parler — best val_loss={best_val_loss:.4f}")
+best_tok.push_to_hub(OUTPUT_REPO,
+    commit_message="Prompt tokenizer")
+best_desc_tok.push_to_hub(OUTPUT_REPO,
+    commit_message="Description tokenizer")
+
+# Push the README separately so it shows as the model card on HF
+from huggingface_hub import HfApi
+HfApi().upload_file(
+    path_or_fileobj = f"{best_ckpt}/README.md",
+    path_in_repo    = "README.md",
+    repo_id         = OUTPUT_REPO,
+    commit_message  = "Add model card with training config",
+)
+
+print(f"\n✅ Pushed → https://huggingface.co/{OUTPUT_REPO}")
+
+del best_model
+gc.collect()
+torch.cuda.empty_cache()
 
 
 
