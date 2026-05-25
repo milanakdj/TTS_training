@@ -76,7 +76,12 @@ ZIP_EVERY_STEPS  = 600
 # MAX_STEPS = 1000  # if not set then will train what ever is set to NUM_EPOCHS, this is an override
 GPU =  "DGX"
 
-ckpt_dir = "./checkpoints"
+
+import uuid
+RUN_UUID = uuid.uuid4().hex[:8]  # e.g., "a3f9c2b1"
+print(f"🆔 Run UUID: {RUN_UUID}")
+
+ckpt_dir = "./checkpoints_{RUN_UUID}"
 os.makedirs(ckpt_dir, exist_ok=True)
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -927,6 +932,8 @@ torch.cuda.empty_cache()
 
 import gc
 from parler_tts import ParlerTTSForConditionalGeneration
+
+
 
 best_ckpt = f"{ckpt_dir}/best_checkpoint"
 
