@@ -95,10 +95,6 @@ print(f"Warmup steps : {WARMUP_STEPS}")
 
 import wandb
 
-# ── W&B Init ──────────────────────────────────────────────────────────────────
-from kaggle_secrets import UserSecretsClient
-os.environ["WANDB_API_KEY"] = UserSecretsClient().get_secret("WANDB_API_KEY")
-
 wandb.init(
     project = "tts",
     entity  = "himalaya-ai-lab",
