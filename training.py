@@ -706,7 +706,7 @@ def zip_checkpoint(periodic_ckpt_dir, step):
 torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.allow_tf32 = True
 torch.set_float32_matmul_precision('high')
-ft_model = torch.compile(ft_model, mode="reduce-overhead")
+# ft_model = torch.compile(ft_model, mode="reduce-overhead")
 
 # ── Training state ────────────────────────────────────────────────────────────
 print("=" * 65)
