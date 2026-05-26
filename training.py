@@ -69,7 +69,7 @@ MAX_STEPS = None
 NUM_EPOCHS       = 3
 BATCH_SIZE       = 32      # up from 4 — 128GB handles this easily
 GRAD_ACCUM_STEPS = 2       # eff. batch = 64 (was 16)
-LEARNING_RATE    = 35-5   # old LR setting
+LEARNING_RATE    = 3e-5   # old LR setting
 WARMUP_STEPS     = 100    # recalculate after knowing total steps
 SAVE_STEPS       = 200
 ZIP_EVERY_STEPS  = 600
