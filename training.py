@@ -61,7 +61,7 @@ login(token=hf_token)
 
 # ── Edit these ───────────────────────────────────────────────────────────────
 # HF_USERNAME      = "lilgoose777"
-OUTPUT_REPO      = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v2"
+OUTPUT_REPO      = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v3"
 DATASET_REPO     = "Titung/cc100-nepali-tts"
 FINETUNE_BASE    = "ai4bharat/indic-parler-tts-pretrained"
 
@@ -69,8 +69,8 @@ MAX_STEPS = None
 NUM_EPOCHS       = 3
 BATCH_SIZE       = 32      # up from 4 — 128GB handles this easily
 GRAD_ACCUM_STEPS = 2       # eff. batch = 64 (was 16)
-LEARNING_RATE    = 3e-6   # old LR setting
-WARMUP_STEPS     = 200     # recalculate after knowing total steps
+LEARNING_RATE    = 35-5   # old LR setting
+WARMUP_STEPS     = 100    # recalculate after knowing total steps
 SAVE_STEPS       = 200
 ZIP_EVERY_STEPS  = 600
 # MAX_STEPS = 1000  # if not set then will train what ever is set to NUM_EPOCHS, this is an override
@@ -106,7 +106,7 @@ wandb.init(
     config  = {
         "num_epochs":       NUM_EPOCHS,
         "batch_size":       BATCH_SIZE,
-        "name"    : "indic_tts_gb10-bf16-bs32-lr3e6",   
+        "name"    : "indic_tts_gb10-bf16-bs32-lr5e5",   
         "grad_accum_steps": GRAD_ACCUM_STEPS,
         "learning_rate":    LEARNING_RATE,
         "warmup_steps":     WARMUP_STEPS,
