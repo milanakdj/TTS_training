@@ -61,15 +61,15 @@ login(token=hf_token)
 
 # ── Edit these ───────────────────────────────────────────────────────────────
 # HF_USERNAME      = "lilgoose777"
-OUTPUT_REPO      = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v3"
+OUTPUT_REPO      = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v4"
 DATASET_REPO     = "Titung/cc100-nepali-tts"
 FINETUNE_BASE    = "ai4bharat/indic-parler-tts-pretrained"
 
 MAX_STEPS = None
-NUM_EPOCHS       = 3
+NUM_EPOCHS       = 6
 BATCH_SIZE       = 32      # up from 4 — 128GB handles this easily
 GRAD_ACCUM_STEPS = 2       # eff. batch = 64 (was 16)
-LEARNING_RATE    = 3e-5   # old LR setting
+LEARNING_RATE    = 3e-6   # old LR setting
 WARMUP_STEPS     = 100    # recalculate after knowing total steps
 SAVE_STEPS       = 200
 ZIP_EVERY_STEPS  = 600
@@ -84,7 +84,6 @@ print(f"🆔 Run UUID: {RUN_UUID}")
 ckpt_dir = f"./checkpoints_{RUN_UUID}"
 os.makedirs(ckpt_dir, exist_ok=True)
 
-# ─────────────────────────────────────────────────────────────────────────
 
 MAX_AUDIO_SEC    = 12     # keep
 MAX_AUDIO_TOKENS = 550    # keep
@@ -106,7 +105,7 @@ wandb.init(
     config  = {
         "num_epochs":       NUM_EPOCHS,
         "batch_size":       BATCH_SIZE,
-        "name"    : "indic_tts_gb10-bf16-bs32-lr5e5",   
+        "name"    : "indic_tts_gb10-bf16-bs32-lr3e6",   
         "grad_accum_steps": GRAD_ACCUM_STEPS,
         "learning_rate":    LEARNING_RATE,
         "warmup_steps":     WARMUP_STEPS,
