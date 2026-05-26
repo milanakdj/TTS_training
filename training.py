@@ -81,7 +81,7 @@ import uuid
 RUN_UUID = uuid.uuid4().hex[:8]  # e.g., "a3f9c2b1"
 print(f"🆔 Run UUID: {RUN_UUID}")
 
-ckpt_dir = "./checkpoints_{RUN_UUID}"
+ckpt_dir = f"./checkpoints_{RUN_UUID}"
 os.makedirs(ckpt_dir, exist_ok=True)
 
 # ─────────────────────────────────────────────────────────────────────────
