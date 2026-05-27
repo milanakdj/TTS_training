@@ -58,10 +58,10 @@ RESUME_STATE_PATH = None
 # ─────────────────────────────────────────────────────────────────────────────
 
 MAX_STEPS        = None
-NUM_EPOCHS       = 6
+NUM_EPOCHS       = 2
 BATCH_SIZE       = 32
 GRAD_ACCUM_STEPS = 2        # eff. batch = 64
-LEARNING_RATE    = 3e-6
+LEARNING_RATE    = 5e-6
 WARMUP_STEPS     = 100
 SAVE_STEPS       = 200
 ZIP_EVERY_STEPS  = 600
@@ -90,7 +90,7 @@ import wandb
 wandb.init(
     project = "tts",
     entity  = "himalaya-ai-lab",
-    name    = f"resume-gb10-bf16-bs32-lr3e6-{RUN_UUID}" if RESUME_FROM_HF else f"fresh-gb10-bf16-bs32-lr3e6-{RUN_UUID}",
+    name    = f"resume-gb10-bf16-bs32-lr5e6-{RUN_UUID}" if RESUME_FROM_HF else f"fresh-gb10-bf16-bs32-lr3e6-{RUN_UUID}",
     config  = { 
     }
 )
@@ -397,7 +397,7 @@ ft_model.train()
 # ## 6. Optimizer & Scheduler
 # =============================================================================
 
-from transformers import get_linear_schedule_with_warmup
+from transformers import get_linear_schedule_with_warmup, get_cosine_schedule_with_warmup
 try:
     import bitsandbytes as bnb
 except ImportError:
