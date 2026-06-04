@@ -42,8 +42,8 @@ login(token=hf_token)
 # ## 1. Config
 # =============================================================================
 
-OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v5"
-DATASET_REPO  = "Titung/cc100-nepali-tts"
+OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v6-cosine"
+DATASET_REPO  = "Titung/nepali-tts-tagged"
 FINETUNE_BASE = "ai4bharat/indic-parler-tts-pretrained"
 
 # ── RESUME CONFIG ─────────────────────────────────────────────────────────────
@@ -416,7 +416,7 @@ steps_per_epoch = len(train_loader) // GRAD_ACCUM_STEPS
 MAX_TRAIN_STEPS = NUM_EPOCHS * steps_per_epoch
 MAX_TRAIN_STEPS = MAX_STEPS if MAX_STEPS is not None else MAX_TRAIN_STEPS
 
-scheduler = get_linear_schedule_with_warmup(
+scheduler = get_cosine_schedule_with_warmup(
     optimizer,
     num_warmup_steps=WARMUP_STEPS,
     num_training_steps=MAX_TRAIN_STEPS,
@@ -454,7 +454,7 @@ if RESUME_STATE_PATH is not None and os.path.exists(RESUME_STATE_PATH):
         print(f"  ⚠️  global_step ({global_step}) >= MAX_TRAIN_STEPS ({MAX_TRAIN_STEPS})")
         print(f"      Extending MAX_TRAIN_STEPS by {NUM_EPOCHS * steps_per_epoch} steps")
         MAX_TRAIN_STEPS = global_step + NUM_EPOCHS * steps_per_epoch
-        scheduler = get_linear_schedule_with_warmup(
+        scheduler = get_cosine_schedule_with_warmup(
             optimizer,
             num_warmup_steps=0,                  # no warmup for resumed run
             num_training_steps=MAX_TRAIN_STEPS,
