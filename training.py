@@ -42,7 +42,7 @@ login(token=hf_token)
 # ## 1. Config
 # =============================================================================
 
-OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v6-cosine"
+OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v7-cosine"
 DATASET_REPO  = "Titung/nepali-tts-tagged-combined"
 FINETUNE_BASE = "ai4bharat/indic-parler-tts-pretrained"
 
@@ -58,11 +58,11 @@ RESUME_STATE_PATH = None
 # ─────────────────────────────────────────────────────────────────────────────
 
 MAX_STEPS        = None
-NUM_EPOCHS       = 2
+NUM_EPOCHS       = 4
 BATCH_SIZE       = 32
 GRAD_ACCUM_STEPS = 2        # eff. batch = 64
-LEARNING_RATE    = 5e-6
-WARMUP_STEPS     = 100
+LEARNING_RATE    = 3e-6
+WARMUP_STEPS     = 300
 SAVE_STEPS       = 200
 ZIP_EVERY_STEPS  = 600
 GPU              = "DGX"
