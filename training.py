@@ -43,7 +43,7 @@ login(token=hf_token)
 # =============================================================================
 
 OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v6-cosine"
-DATASET_REPO  = "Titung/nepali-tts-tagged"
+DATASET_REPO  = "Titung/nepali-tts-tagged-combined"
 FINETUNE_BASE = "ai4bharat/indic-parler-tts-pretrained"
 
 # ── RESUME CONFIG ─────────────────────────────────────────────────────────────
