@@ -71,7 +71,7 @@ NUM_EPOCHS       = 2
 BATCH_SIZE       = 32
 GRAD_ACCUM_STEPS = 2          # effective batch = 64
 LEARNING_RATE    = 3e-6
-WARMUP_STEPS     = 300
+WARMUP_STEPS     = 30
 SAVE_STEPS       = 200        # validate + save best
 ZIP_EVERY_STEPS  = 600        # periodic checkpoint zip
 MAX_STEPS        = None       # override total steps (None = auto from epochs)
