@@ -67,11 +67,11 @@ RESUME_FROM_HF = False
 # Set to None to start from step 0 (even if RESUME_FROM_HF=True).
 RESUME_STATE_PATH = None
 
-NUM_EPOCHS       = 2
+NUM_EPOCHS       = 6
 BATCH_SIZE       = 32
 GRAD_ACCUM_STEPS = 2          # effective batch = 64
 LEARNING_RATE    = 3e-6
-WARMUP_STEPS     = 30
+WARMUP_STEPS     = 60
 SAVE_STEPS       = 200        # validate + save best
 ZIP_EVERY_STEPS  = 600        # periodic checkpoint zip
 MAX_STEPS        = None       # override total steps (None = auto from epochs)
