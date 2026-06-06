@@ -1,0 +1,8 @@
+Hello dai, I updated the Qwen3-TTS 1.7B Nepali fine-tuning package with the new processed dataset: Titung/nepali-tts-tagged-combined.
+
+Plan:
+processed/tagged Nepali dataset -> Qwen 1.7B Base -> 24kHz clean audio -> codec tokenization check -> small training run -> fixed test sentence comparison vs Indic -> scale only if it is close/better.
+
+The package includes dataset prep, speaker inspection, codec/padding check, training config, test sentences, and a GPU runner script. Can you either run it on the GPU you are using, or give me GPU access and I will run it?
+
+First target is not full final training yet. First target is to prove Qwen can train without codec/padding issues and generate usable Nepali samples for comparison.
