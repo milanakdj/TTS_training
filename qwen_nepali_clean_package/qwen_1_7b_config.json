@@ -1,5 +1,5 @@
 {
-  "goal": "Qwen3-TTS Nepali single-speaker fine-tuning experiment",
+  "goal": "Qwen3-TTS Nepali fine-tuning experiment",
   "init_model_path": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
   "tokenizer_model_path": "Qwen/Qwen3-TTS-Tokenizer-12Hz",
   "primary_dataset": "Titung/nepali-tts-tagged-combined",
@@ -10,12 +10,12 @@
   "speaker_name": "nepali_speaker",
   "target_sample_rate": 24000,
   "min_audio_seconds": 1.0,
-  "max_audio_seconds": 12.0,
+  "max_audio_seconds": 20.0,
+  "preferred_reference_audio_seconds": "3-12 seconds preferred, not a hard dataset filter",
   "learning_rate": "2e-6",
   "num_epochs_first_run": 3,
   "batch_size_first_run": 2,
   "fallback_batch_size_if_oom": 1,
   "recommended_gpu": "24GB VRAM or higher",
-  "minimum_gpu": "16GB VRAM with small batch size",
-  "data_rule": "Use Titung/nepali-tts-tagged-combined first. It is already processed/tagged for fine-tuning. Use one clean speaker/ref_audio if possible."
+  "minimum_gpu": "16GB VRAM with batch size 1"
 }
