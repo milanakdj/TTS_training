@@ -6,10 +6,12 @@ import random
 import re
 import subprocess
 import sys
+import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
 
 
+RUNNER_VERSION = "qwen-nepali-streamlined-v2-audio-fix-2026-06-09"
 DEVANAGARI_RE = re.compile(r"[\u0900-\u097F]")
 
 
@@ -51,20 +53,54 @@ def read_audio(audio):
     import numpy as np
     import soundfile as sf
 
+    def from_bytes(data):
+        raw = bytes(data)
+        try:
+            array, sr = sf.read(io.BytesIO(raw), dtype="float32", always_2d=False)
+            return np.asarray(array, dtype=np.float32), int(sr)
+        except Exception:
+            import librosa
+
+            with tempfile.NamedTemporaryFile(suffix=".audio", delete=True) as tmp:
+                tmp.write(raw)
+                tmp.flush()
+                array, sr = librosa.load(tmp.name, sr=None, mono=False)
+            return np.asarray(array, dtype=np.float32), int(sr)
+
+    if isinstance(audio, (bytes, bytearray, memoryview)):
+        return from_bytes(audio)
+
     if isinstance(audio, dict):
+        if "audio" in audio and audio["audio"] is not audio:
+            return read_audio(audio["audio"])
         if "array" in audio and audio["array"] is not None:
             sr = int(audio.get("sampling_rate") or 0)
             return np.asarray(audio["array"], dtype=np.float32), sr
-        if audio.get("bytes"):
-            array, sr = sf.read(io.BytesIO(audio["bytes"]), dtype="float32", always_2d=False)
-            return np.asarray(array, dtype=np.float32), int(sr)
+        if audio.get("bytes") is not None:
+            return from_bytes(audio["bytes"])
         if audio.get("path"):
-            array, sr = sf.read(audio["path"], dtype="float32", always_2d=False)
+            audio_path = Path(str(audio["path"]))
+            if not audio_path.exists():
+                raise ValueError(f"Audio path does not exist locally: {audio['path']}")
+            array, sr = sf.read(str(audio_path), dtype="float32", always_2d=False)
             return np.asarray(array, dtype=np.float32), int(sr)
 
     if isinstance(audio, str) and audio:
-        array, sr = sf.read(audio, dtype="float32", always_2d=False)
+        audio_path = Path(audio)
+        if not audio_path.exists():
+            raise ValueError(f"Audio path does not exist locally: {audio}")
+        array, sr = sf.read(str(audio_path), dtype="float32", always_2d=False)
         return np.asarray(array, dtype=np.float32), int(sr)
+
+    if isinstance(audio, (list, tuple, np.ndarray)):
+        return np.asarray(audio, dtype=np.float32), 0
+
+    if hasattr(audio, "get_all_samples"):
+        samples = audio.get_all_samples()
+        data = samples.data
+        if hasattr(data, "detach"):
+            data = data.detach().cpu().numpy()
+        return np.asarray(data, dtype=np.float32), int(samples.sample_rate)
 
     raise ValueError("Audio column is not decoded or readable.")
 
@@ -77,7 +113,13 @@ def normalize_audio(audio, target_sr):
     array = np.asarray(array, dtype=np.float32)
 
     if array.ndim == 2:
-        array = array.mean(axis=1)
+        if array.shape[0] <= 8 and array.shape[1] > array.shape[0]:
+            array = array.mean(axis=0)
+        else:
+            array = array.mean(axis=1)
+
+    if sr <= 0:
+        sr = target_sr
 
     if sr != target_sr:
         array = librosa.resample(array, orig_sr=sr, target_sr=target_sr)
@@ -95,11 +137,15 @@ def iter_dataset(repo, split, seed, streaming):
     token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
     ds = load_dataset(repo, split=split, token=token, streaming=streaming)
 
+    try:
+        features = getattr(ds, "features", None)
+        if features and "audio" in features:
+            ds = ds.cast_column("audio", Audio(decode=False))
+    except Exception as exc:
+        print(f"Audio cast skipped: {exc}")
+
     if streaming:
         return ds.shuffle(seed=seed, buffer_size=1000)
-
-    if "audio" in ds.column_names:
-        ds = ds.cast_column("audio", Audio(decode=True))
 
     indices = list(range(len(ds)))
     random.Random(seed).shuffle(indices)
@@ -149,7 +195,7 @@ def choose_reference(records, single_ref_audio, global_ref_audio, preferred_min_
 
 
 def cmd_inspect(args):
-    ds_iter = iter_dataset(args.dataset, args.split, args.seed, streaming=True)
+    ds_iter = iter_dataset(args.dataset, args.split, args.seed, streaming=args.streaming)
     audio_col = text_col = speaker_col = None
     speaker_counts = Counter()
     speaker_seconds = defaultdict(float)
@@ -227,7 +273,7 @@ def cmd_prepare(args):
         }
 
         audio_col = text_col = speaker_col = None
-        dataset_iter = iter_dataset(repo, args.split, args.seed, streaming=not args.no_streaming)
+        dataset_iter = iter_dataset(repo, args.split, args.seed, streaming=args.streaming)
 
         for sample_index, sample in enumerate(dataset_iter):
             if counts["accepted"] >= args.max_samples_per_dataset:
@@ -315,47 +361,62 @@ def cmd_codec_check(args):
     input_path = Path(args.input_jsonl)
     output_path = Path(args.output_jsonl) if args.output_jsonl else input_path.with_name(input_path.stem + "_filtered.jsonl")
     rows = []
-    codebook_counts = Counter()
-    length_counts = Counter()
+    timestep_counts = Counter()
+    channel_counts = Counter()
     invalid = 0
+    transposed = 0
+
+    def normalize_code_shape(codes):
+        if (
+            not isinstance(codes, list)
+            or not codes
+            or not isinstance(codes[0], list)
+            or not codes[0]
+        ):
+            return None
+
+        if all(isinstance(step, list) and len(step) == 16 for step in codes):
+            return codes
+
+        if len(codes) == 16 and all(isinstance(channel, list) for channel in codes):
+            lengths = {len(channel) for channel in codes}
+            if len(lengths) == 1 and next(iter(lengths)) > 0:
+                return [list(step) for step in zip(*codes)]
+
+        return None
 
     with input_path.open("r", encoding="utf-8") as f:
         for line in f:
             row = json.loads(line)
-            codes = row.get("audio_codes")
-            if (
-                not isinstance(codes, list)
-                or not codes
-                or not isinstance(codes[0], list)
-                or not codes[0]
-            ):
+            original_codes = row.get("audio_codes")
+            codes = normalize_code_shape(original_codes)
+            if codes is None:
                 invalid += 1
                 continue
-            codebook_count = len(codes)
-            token_length = len(codes[0])
-            codebook_counts[codebook_count] += 1
-            length_counts[token_length] += 1
-            rows.append((row, codebook_count, token_length))
+            if codes is not original_codes:
+                transposed += 1
+                row["audio_codes"] = codes
+            timestep_counts[len(codes)] += 1
+            channel_counts[len(codes[0])] += 1
+            rows.append(row)
 
     if not rows:
         raise RuntimeError("No valid codec rows found.")
 
-    expected_codebooks = codebook_counts.most_common(1)[0][0]
-    kept = [row for row, codebooks, _ in rows if codebooks == expected_codebooks]
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with output_path.open("w", encoding="utf-8") as f:
-        for row in kept:
+        for row in rows:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-    lengths = [length for _, codebooks, length in rows if codebooks == expected_codebooks]
+    lengths = list(timestep_counts.keys())
     print(f"Input rows: {len(rows) + invalid}")
     print(f"Valid rows: {len(rows)}")
     print(f"Invalid rows: {invalid}")
-    print(f"Codebook distribution: {dict(codebook_counts)}")
-    print(f"Expected codebooks: {expected_codebooks}")
-    print(f"Kept rows: {len(kept)}")
-    print(f"Token length min/max: {min(lengths)} / {max(lengths)}")
+    print(f"Transposed rows: {transposed}")
+    print(f"Codec channels distribution: {dict(channel_counts)}")
+    print(f"Time steps min/max: {min(lengths)} / {max(lengths)}")
+    print("Variable time length is expected; Qwen training pads batches dynamically.")
     print(f"Filtered JSONL: {output_path}")
 
 
@@ -490,7 +551,7 @@ def cmd_all(args):
             preferred_ref_min_sec=args.preferred_ref_min_sec,
             preferred_ref_max_sec=args.preferred_ref_max_sec,
             seed=args.seed,
-            no_streaming=args.no_streaming,
+            streaming=args.streaming,
             allow_non_devanagari=args.allow_non_devanagari,
             speaker_id=args.speaker_id,
             single_ref_audio=True,
@@ -527,7 +588,9 @@ def add_common_data_args(parser):
     parser.add_argument("--preferred-ref-min-sec", type=float, default=3.0)
     parser.add_argument("--preferred-ref-max-sec", type=float, default=12.0)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--no-streaming", action="store_true")
+    parser.set_defaults(streaming=True)
+    parser.add_argument("--streaming", dest="streaming", action="store_true", help="Use Hugging Face streaming mode. This is the default.")
+    parser.add_argument("--no-streaming", dest="streaming", action="store_false", help="Disable streaming and cache-load the dataset normally.")
     parser.add_argument("--allow-non-devanagari", action="store_true")
     parser.add_argument("--speaker-id", default="")
 
@@ -608,6 +671,7 @@ def build_parser():
 
 def main():
     args = build_parser().parse_args()
+    print(f"Runner: {RUNNER_VERSION}")
     args.func(args)
 
 
