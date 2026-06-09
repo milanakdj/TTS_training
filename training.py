@@ -67,7 +67,7 @@ RESUME_FROM_HF = False
 # Set to None to start from step 0 (even if RESUME_FROM_HF=True).
 RESUME_STATE_PATH = None
 
-NUM_EPOCHS       = 6
+NUM_EPOCHS       = 3
 BATCH_SIZE       = 32
 GRAD_ACCUM_STEPS = 2          # effective batch = 64
 LEARNING_RATE    = 3e-6
