@@ -4,14 +4,16 @@ import json
 import os
 import random
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
 from collections import Counter, defaultdict
+from importlib import metadata as importlib_metadata
 from pathlib import Path
 
 
-RUNNER_VERSION = "qwen-nepali-streamlined-v4-threadclose-cleanexit-2026-06-09"
+RUNNER_VERSION = "qwen-nepali-streamlined-v8-no-flash-local-model-2026-06-09"
 DEVANAGARI_RE = re.compile(r"[\u0900-\u097F]")
 
 
@@ -458,14 +460,146 @@ def qwen_paths(args, config):
         "filtered_jsonl": data_dir / "train_with_codes_filtered.jsonl",
         "tokenizer": args.tokenizer_model or config["tokenizer_model_path"],
         "base_model": args.base_model or config["init_model_path"],
+        "model_cache_dir": Path(args.model_cache_dir),
     }
+
+
+def require_qwen_repo(paths):
+    repo = paths["qwen_repo"]
+    missing = []
+    if not repo.exists():
+        missing.append(str(repo))
+    for rel_path in ["finetuning/prepare_data.py", "finetuning/sft_12hz.py"]:
+        path = repo / rel_path
+        if not path.exists():
+            missing.append(str(path))
+    if missing:
+        raise RuntimeError(
+            "Qwen3-TTS repo path is not valid. "
+            f"Received --qwen-repo {repo}. "
+            "Set --qwen-repo to the actual Qwen3-TTS folder. "
+            f"Missing: {', '.join(missing)}"
+        )
+
+
+def safe_name(value):
+    return re.sub(r"[^A-Za-z0-9_.-]+", "_", str(value)).strip("_")
+
+
+def resolve_base_model_path(paths):
+    base_model = str(paths["base_model"])
+    base_path = Path(base_model)
+    if base_path.exists():
+        return str(base_path)
+
+    from huggingface_hub import snapshot_download
+
+    target = paths["model_cache_dir"] / safe_name(base_model)
+    if not (target / "config.json").exists():
+        print(f"Downloading base model to: {target}")
+        snapshot_download(repo_id=base_model, local_dir=str(target))
+    else:
+        print(f"Using cached base model: {target}")
+    return str(target)
+
+
+def qwen_train_script(paths, attn):
+    source = paths["qwen_repo"] / "finetuning" / "sft_12hz.py"
+    if attn == "flash_attention_2":
+        try:
+            importlib_metadata.version("flash_attn")
+            return source
+        except importlib_metadata.PackageNotFoundError as exc:
+            raise RuntimeError(
+                "flash_attn is not installed. Use --attn sdpa, or install flash-attn first."
+            ) from exc
+
+    patched = paths["qwen_repo"] / "finetuning" / f"sft_12hz_runner_{safe_name(attn)}.py"
+    text = source.read_text(encoding="utf-8")
+    if 'attn_implementation="flash_attention_2"' not in text:
+        raise RuntimeError("Could not patch Qwen train script attention implementation.")
+    text = text.replace('attn_implementation="flash_attention_2"', f'attn_implementation="{attn}"')
+    patched.write_text(text, encoding="utf-8")
+    print(f"Training attention: {attn}")
+    print(f"Training script: {patched}")
+    return patched
+
+
+def cmd_preflight(args):
+    config = load_config(args.config)
+    paths = qwen_paths(args, config)
+
+    print(f"Python: {sys.version.split()[0]}")
+    print(f"CWD: {Path.cwd()}")
+    print(f"Qwen repo: {paths['qwen_repo']}")
+    require_qwen_repo(paths)
+    print("Qwen repo check: OK")
+    print(f"Base model: {paths['base_model']}")
+    print(f"Tokenizer model: {paths['tokenizer']}")
+    print(f"Model cache: {paths['model_cache_dir']}")
+
+    sox_path = shutil.which("sox")
+    if not sox_path:
+        raise RuntimeError(
+            "System SoX binary is missing. Install it first: "
+            "sudo apt-get update && sudo apt-get install -y sox libsox-fmt-all"
+        )
+    print(f"SoX: {sox_path}")
+
+    pinned_versions = {
+        "qwen-tts": "0.1.1",
+        "transformers": "4.57.3",
+        "accelerate": "1.12.0",
+    }
+    for dist_name, expected_version in pinned_versions.items():
+        actual_version = importlib_metadata.version(dist_name)
+        if actual_version != expected_version:
+            raise RuntimeError(
+                f"{dist_name} version mismatch: expected {expected_version}, got {actual_version}."
+            )
+        print(f"{dist_name}: {actual_version}")
+
+    protobuf_version = importlib_metadata.version("protobuf")
+    protobuf_major = int(protobuf_version.split(".", 1)[0])
+    if protobuf_major >= 7:
+        raise RuntimeError(f"protobuf must be <7 for this environment, got {protobuf_version}.")
+    print(f"protobuf: {protobuf_version}")
+
+    required_packages = ["datasets", "soundfile", "librosa", "numpy", "torch", "qwen_tts"]
+    for package in required_packages:
+        __import__(package)
+        print(f"Package {package}: OK")
+
+    import torch
+
+    cuda_ok = torch.cuda.is_available()
+    print(f"CUDA available: {cuda_ok}")
+    if not cuda_ok:
+        raise RuntimeError("CUDA is not available in torch. Check GPU driver, CUDA, and torch install.")
+
+    device_index = 0
+    if args.device.startswith("cuda:"):
+        try:
+            device_index = int(args.device.split(":", 1)[1])
+        except ValueError:
+            device_index = 0
+
+    props = torch.cuda.get_device_properties(device_index)
+    total_gb = props.total_memory / 1024**3
+    print(f"GPU device: {torch.cuda.get_device_name(device_index)}")
+    print(f"GPU memory GB: {total_gb:.2f}")
+    if total_gb < args.min_vram_gb:
+        raise RuntimeError(
+            f"GPU memory is {total_gb:.2f} GB, below requested minimum {args.min_vram_gb:.1f} GB."
+        )
+
+    print("PREFLIGHT PASSED")
 
 
 def cmd_tokenize(args):
     config = load_config(args.config)
     paths = qwen_paths(args, config)
-    if not paths["qwen_repo"].exists():
-        raise RuntimeError(f"Missing Qwen repo: {paths['qwen_repo']}")
+    require_qwen_repo(paths)
     run(
         [
             sys.executable,
@@ -491,14 +625,15 @@ def cmd_tokenize(args):
 def cmd_train(args):
     config = load_config(args.config)
     paths = qwen_paths(args, config)
-    if not paths["qwen_repo"].exists():
-        raise RuntimeError(f"Missing Qwen repo: {paths['qwen_repo']}")
+    require_qwen_repo(paths)
+    train_script = qwen_train_script(paths, args.attn)
+    base_model_path = resolve_base_model_path(paths)
     run(
         [
             sys.executable,
-            paths["qwen_repo"] / "finetuning" / "sft_12hz.py",
+            train_script,
             "--init_model_path",
-            paths["base_model"],
+            base_model_path,
             "--output_model_path",
             paths["output_dir"],
             "--train_jsonl",
@@ -558,6 +693,7 @@ def latest_checkpoint(output_dir):
 def cmd_all(args):
     config = load_config(args.config)
     paths = qwen_paths(args, config)
+    require_qwen_repo(paths)
     datasets = args.datasets or [config["primary_dataset"]]
     cmd_prepare(
         argparse.Namespace(
@@ -620,6 +756,7 @@ def add_qwen_args(parser):
     parser.add_argument("--qwen-repo", default="Qwen3-TTS")
     parser.add_argument("--data-dir", default="data/tagged_300")
     parser.add_argument("--output-dir", default="outputs/qwen_1_7b_nepali_smoke")
+    parser.add_argument("--model-cache-dir", default="models")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--tokenizer-model", default="")
     parser.add_argument("--base-model", default="")
@@ -639,6 +776,11 @@ def build_parser():
     inspect_p.add_argument("--top", type=int, default=20)
     add_common_data_args(inspect_p)
     inspect_p.set_defaults(func=cmd_inspect)
+
+    preflight_p = sub.add_parser("preflight", help="Check Qwen repo, Python packages, CUDA, and GPU memory.")
+    add_qwen_args(preflight_p)
+    preflight_p.add_argument("--min-vram-gb", type=float, default=16.0)
+    preflight_p.set_defaults(func=cmd_preflight)
 
     prepare_p = sub.add_parser("prepare", help="Create 24 kHz WAV files and train_raw.jsonl.")
     prepare_p.add_argument("--datasets", nargs="+", default=["Titung/nepali-tts-tagged-combined"])
@@ -660,6 +802,7 @@ def build_parser():
 
     train_p = sub.add_parser("train", help="Run Qwen sft_12hz.py.")
     add_qwen_args(train_p)
+    train_p.add_argument("--attn", default="sdpa")
     train_p.set_defaults(func=cmd_train)
 
     gen_p = sub.add_parser("generate", help="Generate samples from a trained checkpoint.")
@@ -669,7 +812,7 @@ def build_parser():
     gen_p.add_argument("--sample-output-dir", default="outputs/qwen_test_samples")
     gen_p.add_argument("--device", default="cuda:0")
     gen_p.add_argument("--dtype", choices=["float16", "bfloat16"], default="bfloat16")
-    gen_p.add_argument("--attn", default="flash_attention_2")
+    gen_p.add_argument("--attn", default="sdpa")
     gen_p.add_argument("--max-new-tokens", type=int, default=1000)
     gen_p.set_defaults(func=cmd_generate)
 
@@ -680,7 +823,7 @@ def build_parser():
     all_p.add_argument("--sentences", default="test_sentences_nepali.txt")
     all_p.add_argument("--sample-output-dir", default="outputs/qwen_test_samples")
     all_p.add_argument("--dtype", choices=["float16", "bfloat16"], default="bfloat16")
-    all_p.add_argument("--attn", default="flash_attention_2")
+    all_p.add_argument("--attn", default="sdpa")
     all_p.add_argument("--max-new-tokens", type=int, default=1000)
     add_common_data_args(all_p)
     add_qwen_args(all_p)
@@ -693,11 +836,19 @@ def main():
     os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
     args = build_parser().parse_args()
     print(f"Runner: {RUNNER_VERSION}")
-    args.func(args)
-    sys.stdout.flush()
-    sys.stderr.flush()
-    if os.environ.get("QWEN_RUNNER_NORMAL_EXIT", "").lower() not in {"1", "true", "yes"}:
-        os._exit(0)
+    exit_code = 0
+    try:
+        args.func(args)
+    except Exception as exc:
+        exit_code = 1
+        print(f"ERROR: {exc}", file=sys.stderr)
+    finally:
+        sys.stdout.flush()
+        sys.stderr.flush()
+        if os.environ.get("QWEN_RUNNER_NORMAL_EXIT", "").lower() not in {"1", "true", "yes"}:
+            os._exit(exit_code)
+    if exit_code:
+        sys.exit(exit_code)
 
 
 if __name__ == "__main__":
