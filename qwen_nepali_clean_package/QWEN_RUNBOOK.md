@@ -13,6 +13,8 @@ This package is for a clean Qwen3-TTS 1.7B Nepali fine-tuning smoke run.
 - Streaming is the default, so the smoke run does not need to download/cache the full dataset first.
 - Default attention is `sdpa`, so training does not require `flash-attn`.
 - The runner downloads the base model into a local cache before training so checkpoint saving works.
+- The patched training script disables TensorBoard logging, so Accelerate does not require a separate logging directory.
+- Optional Hugging Face Hub upload uses `HF_TOKEN` or `HUGGING_FACE_HUB_TOKEN` from the environment.
 
 ## Files
 
@@ -59,7 +61,7 @@ python qwen_nepali_runner.py prepare \
   --single-ref-audio
 ```
 
-The command should print `Runner: qwen-nepali-streamlined-v8-no-flash-local-model-2026-06-09`.
+The command should print `Runner: qwen-nepali-streamlined-v10-hub-upload-2026-06-09`.
 
 If that shows `accepted=5`, run the full pipeline smoke test:
 
@@ -76,17 +78,53 @@ python qwen_nepali_runner.py all \
   --attn sdpa
 ```
 
+To push the trained checkpoint folder to Hugging Face Hub after training, set a token first:
+
+```bash
+export HF_TOKEN=hf_xxx
+```
+
+Then add these flags to the training command:
+
+```bash
+  --push-to-hub \
+  --hub-repo-id username/qwen-nepali-tts \
+  --hub-private
+```
+
+The model still trains to `--output-dir` first, then that checkpoint folder is uploaded to the Hub.
+
+Example 1000-sample run with Hub upload:
+
+```bash
+HF_TOKEN=hf_xxx python qwen_nepali_runner.py all \
+  --qwen-repo ./Qwen3-TTS \
+  --datasets Titung/nepali-tts-tagged-combined \
+  --max-samples 1000 \
+  --data-dir data/train_1000 \
+  --output-dir outputs/qwen_nepali_1000 \
+  --batch-size 1 \
+  --epochs 2 \
+  --lr 2e-6 \
+  --attn sdpa \
+  --push-to-hub \
+  --hub-repo-id username/qwen-nepali-tts \
+  --hub-private
+```
+
+The runner checks the Hub repo before training, so missing `HF_TOKEN` or missing `--hub-repo-id` fails early.
+
 If the 20-sample full pipeline test passes, run the first real training pass:
 
 ```bash
 python qwen_nepali_runner.py all \
   --qwen-repo ../Qwen3-TTS \
   --datasets Titung/nepali-tts-tagged-combined \
-  --max-samples 300 \
-  --data-dir data/tagged_300 \
-  --output-dir outputs/qwen_nepali_300 \
+  --max-samples 1000 \
+  --data-dir data/train_1000 \
+  --output-dir outputs/qwen_nepali_1000 \
   --batch-size 1 \
-  --epochs 3 \
+  --epochs 2 \
   --lr 2e-6 \
   --attn sdpa
 ```

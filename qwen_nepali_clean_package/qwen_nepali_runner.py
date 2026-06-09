@@ -13,7 +13,7 @@ from importlib import metadata as importlib_metadata
 from pathlib import Path
 
 
-RUNNER_VERSION = "qwen-nepali-streamlined-v8-no-flash-local-model-2026-06-09"
+RUNNER_VERSION = "qwen-nepali-streamlined-v10-hub-upload-2026-06-09"
 DEVANAGARI_RE = re.compile(r"[\u0900-\u097F]")
 
 
@@ -519,6 +519,17 @@ def qwen_train_script(paths, attn):
     if 'attn_implementation="flash_attention_2"' not in text:
         raise RuntimeError("Could not patch Qwen train script attention implementation.")
     text = text.replace('attn_implementation="flash_attention_2"', f'attn_implementation="{attn}"')
+
+    tensorboard_accelerator = (
+        'Accelerator(gradient_accumulation_steps=4, mixed_precision="bf16", log_with="tensorboard")'
+    )
+    plain_accelerator = 'Accelerator(gradient_accumulation_steps=4, mixed_precision="bf16")'
+    if tensorboard_accelerator in text:
+        text = text.replace(tensorboard_accelerator, plain_accelerator)
+    text = re.sub(r',\s*log_with=["\']tensorboard["\']', "", text)
+    text = re.sub(r'log_with=["\']tensorboard["\']\s*,\s*', "", text)
+    text = re.sub(r'log_with=["\']tensorboard["\']', "", text)
+
     patched.write_text(text, encoding="utf-8")
     print(f"Training attention: {attn}")
     print(f"Training script: {patched}")
@@ -565,7 +576,15 @@ def cmd_preflight(args):
         raise RuntimeError(f"protobuf must be <7 for this environment, got {protobuf_version}.")
     print(f"protobuf: {protobuf_version}")
 
-    required_packages = ["datasets", "soundfile", "librosa", "numpy", "torch", "qwen_tts"]
+    required_packages = [
+        "datasets",
+        "huggingface_hub",
+        "soundfile",
+        "librosa",
+        "numpy",
+        "torch",
+        "qwen_tts",
+    ]
     for package in required_packages:
         __import__(package)
         print(f"Package {package}: OK")
@@ -626,6 +645,9 @@ def cmd_train(args):
     config = load_config(args.config)
     paths = qwen_paths(args, config)
     require_qwen_repo(paths)
+    if getattr(args, "push_to_hub", False) and not getattr(args, "_hub_repo_checked", False):
+        ensure_hub_repo(args)
+        args._hub_repo_checked = True
     train_script = qwen_train_script(paths, args.attn)
     base_model_path = resolve_base_model_path(paths)
     run(
@@ -648,6 +670,8 @@ def cmd_train(args):
             args.speaker_name,
         ]
     )
+    if getattr(args, "push_to_hub", False) and not getattr(args, "_defer_hub_upload", False):
+        upload_to_hub(paths["output_dir"], args)
 
 
 def load_sentences(path):
@@ -690,10 +714,67 @@ def latest_checkpoint(output_dir):
     return checkpoints[-1]
 
 
+def upload_to_hub(folder_path, args):
+    from huggingface_hub import HfApi
+
+    repo_id, token = hub_settings(args)
+
+    folder = Path(folder_path)
+    if not folder.exists():
+        raise RuntimeError(f"Hub upload folder does not exist: {folder}")
+
+    api = HfApi(token=token)
+    api.create_repo(
+        repo_id=repo_id,
+        repo_type="model",
+        private=getattr(args, "hub_private", False),
+        exist_ok=True,
+    )
+    api.upload_folder(
+        repo_id=repo_id,
+        repo_type="model",
+        folder_path=str(folder),
+        path_in_repo=".",
+        commit_message=getattr(args, "hub_commit_message", "Upload Qwen Nepali checkpoint"),
+    )
+    print(f"Pushed checkpoint folder to Hugging Face Hub: {repo_id}")
+
+
+def hub_settings(args):
+    repo_id = getattr(args, "hub_repo_id", "")
+    if not repo_id:
+        raise RuntimeError("Set --hub-repo-id when using --push-to-hub.")
+
+    token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    if not token:
+        raise RuntimeError(
+            "HF token missing. Set HF_TOKEN or HUGGING_FACE_HUB_TOKEN in the environment."
+        )
+
+    return repo_id, token
+
+
+def ensure_hub_repo(args):
+    from huggingface_hub import HfApi
+
+    repo_id, token = hub_settings(args)
+    api = HfApi(token=token)
+    api.create_repo(
+        repo_id=repo_id,
+        repo_type="model",
+        private=getattr(args, "hub_private", False),
+        exist_ok=True,
+    )
+    print(f"Hub repo ready: {repo_id}")
+
+
 def cmd_all(args):
     config = load_config(args.config)
     paths = qwen_paths(args, config)
     require_qwen_repo(paths)
+    if getattr(args, "push_to_hub", False):
+        ensure_hub_repo(args)
+        args._hub_repo_checked = True
     datasets = args.datasets or [config["primary_dataset"]]
     cmd_prepare(
         argparse.Namespace(
@@ -715,7 +796,9 @@ def cmd_all(args):
         )
     )
     cmd_tokenize(args)
+    args._defer_hub_upload = True
     cmd_train(args)
+    args._defer_hub_upload = False
     checkpoint = latest_checkpoint(paths["output_dir"])
     cmd_generate(
         argparse.Namespace(
@@ -729,6 +812,8 @@ def cmd_all(args):
             max_new_tokens=args.max_new_tokens,
         )
     )
+    if getattr(args, "push_to_hub", False):
+        upload_to_hub(paths["output_dir"], args)
 
 
 def add_common_data_args(parser):
@@ -764,6 +849,13 @@ def add_qwen_args(parser):
     parser.add_argument("--lr", default="2e-6")
     parser.add_argument("--epochs", default="3")
     parser.add_argument("--speaker-name", default="nepali_speaker")
+
+
+def add_hub_args(parser):
+    parser.add_argument("--push-to-hub", action="store_true")
+    parser.add_argument("--hub-repo-id", default="")
+    parser.add_argument("--hub-private", action="store_true")
+    parser.add_argument("--hub-commit-message", default="Upload Qwen Nepali checkpoint")
 
 
 def build_parser():
@@ -802,6 +894,7 @@ def build_parser():
 
     train_p = sub.add_parser("train", help="Run Qwen sft_12hz.py.")
     add_qwen_args(train_p)
+    add_hub_args(train_p)
     train_p.add_argument("--attn", default="sdpa")
     train_p.set_defaults(func=cmd_train)
 
@@ -827,6 +920,7 @@ def build_parser():
     all_p.add_argument("--max-new-tokens", type=int, default=1000)
     add_common_data_args(all_p)
     add_qwen_args(all_p)
+    add_hub_args(all_p)
     all_p.set_defaults(func=cmd_all)
 
     return parser
