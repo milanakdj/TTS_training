@@ -11,6 +11,8 @@ This package is for a clean Qwen3-TTS 1.7B Nepali fine-tuning smoke run.
 - Primary dataset is `Titung/nepali-tts-tagged-combined`.
 - Audio loading now uses Hugging Face audio bytes directly, so it does not depend on auto-decoded audio rows.
 - Streaming is the default, so the smoke run does not need to download/cache the full dataset first.
+- Default attention is `sdpa`, so training does not require `flash-attn`.
+- The runner downloads the base model into a local cache before training so checkpoint saving works.
 
 ## Files
 
@@ -28,12 +30,24 @@ git clone https://github.com/QwenLM/Qwen3-TTS.git
 python -m venv .venv
 source .venv/bin/activate
 pip install -U pip
-pip install -r Qwen3-TTS/requirements.txt
-pip install datasets soundfile librosa
+sudo apt-get update && sudo apt-get install -y sox libsox-fmt-all
+pip install "qwen-tts==0.1.1" "transformers==4.57.3" "accelerate==1.12.0" "huggingface_hub==0.36.2" "protobuf<7,>=5"
+pip install -e Qwen3-TTS
+pip install datasets soundfile librosa numpy pyarrow
 huggingface-cli login
 ```
 
 Put this package folder beside `Qwen3-TTS/`, then run from inside the package folder:
+
+First verify server setup:
+
+```bash
+python qwen_nepali_runner.py preflight \
+  --qwen-repo ../Qwen3-TTS \
+  --min-vram-gb 16
+```
+
+If `../Qwen3-TTS` is not the correct repo location, replace it with the actual Qwen3-TTS folder path.
 
 First run this 5-sample data smoke test:
 
@@ -45,28 +59,36 @@ python qwen_nepali_runner.py prepare \
   --single-ref-audio
 ```
 
-The command should print `Runner: qwen-nepali-streamlined-v4-threadclose-cleanexit-2026-06-09`.
+The command should print `Runner: qwen-nepali-streamlined-v8-no-flash-local-model-2026-06-09`.
 
-If that shows `accepted=5`, run the training smoke run:
+If that shows `accepted=5`, run the full pipeline smoke test:
 
 ```bash
 python qwen_nepali_runner.py all \
   --qwen-repo ../Qwen3-TTS \
-  --max-samples 300 \
-  --batch-size 2 \
-  --epochs 3 \
-  --lr 2e-6
+  --datasets Titung/nepali-tts-tagged-combined \
+  --max-samples 20 \
+  --data-dir data/smoke_20 \
+  --output-dir outputs/qwen_smoke_20 \
+  --batch-size 1 \
+  --epochs 1 \
+  --lr 2e-6 \
+  --attn sdpa
 ```
 
-If GPU memory fails:
+If the 20-sample full pipeline test passes, run the first real training pass:
 
 ```bash
 python qwen_nepali_runner.py all \
   --qwen-repo ../Qwen3-TTS \
+  --datasets Titung/nepali-tts-tagged-combined \
   --max-samples 300 \
+  --data-dir data/tagged_300 \
+  --output-dir outputs/qwen_nepali_300 \
   --batch-size 1 \
   --epochs 3 \
-  --lr 2e-6
+  --lr 2e-6 \
+  --attn sdpa
 ```
 
 ## Optional Dataset Commands
