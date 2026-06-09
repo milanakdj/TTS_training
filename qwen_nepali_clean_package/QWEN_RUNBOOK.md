@@ -9,6 +9,8 @@ This package is for a clean Qwen3-TTS 1.7B Nepali fine-tuning smoke run.
 - Dataset duration filtering is configurable.
 - `3-12 sec` is only preferred for choosing reference audio, not a hard dataset filter.
 - Primary dataset is `Titung/nepali-tts-tagged-combined`.
+- Audio loading now uses Hugging Face audio bytes directly, so it does not depend on auto-decoded audio rows.
+- Streaming is the default, so the smoke run does not need to download/cache the full dataset first.
 
 ## Files
 
@@ -32,6 +34,20 @@ huggingface-cli login
 ```
 
 Put this package folder beside `Qwen3-TTS/`, then run from inside the package folder:
+
+First run this 5-sample data smoke test:
+
+```bash
+python qwen_nepali_runner.py prepare \
+  --datasets Titung/nepali-tts-tagged-combined \
+  --max-samples-per-dataset 5 \
+  --output-dir data/smoke_5 \
+  --single-ref-audio
+```
+
+The command should print `Runner: qwen-nepali-streamlined-v2-audio-fix-2026-06-09`.
+
+If that shows `accepted=5`, run the training smoke run:
 
 ```bash
 python qwen_nepali_runner.py all \
@@ -86,6 +102,8 @@ python qwen_nepali_runner.py prepare \
 ```
 
 Set `--max-sec 0` to disable max duration filtering.
+
+Use `--no-streaming` only if you specifically want to cache-load the dataset normally.
 
 ## First Result To Share
 
