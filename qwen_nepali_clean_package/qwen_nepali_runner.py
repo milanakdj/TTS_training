@@ -11,7 +11,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 
-RUNNER_VERSION = "qwen-nepali-streamlined-v2-audio-fix-2026-06-09"
+RUNNER_VERSION = "qwen-nepali-streamlined-v4-threadclose-cleanexit-2026-06-09"
 DEVANAGARI_RE = re.compile(r"[\u0900-\u097F]")
 
 
@@ -149,7 +149,24 @@ def iter_dataset(repo, split, seed, streaming):
 
     indices = list(range(len(ds)))
     random.Random(seed).shuffle(indices)
-    return (ds[idx] for idx in indices)
+    return [ds[idx] for idx in indices]
+
+
+def close_dataset_iter(dataset_iter):
+    candidates = [
+        dataset_iter,
+        getattr(dataset_iter, "_ex_iterable", None),
+        getattr(dataset_iter, "ex_iterable", None),
+    ]
+    for candidate in candidates:
+        if candidate is None:
+            continue
+        close = getattr(candidate, "close", None)
+        if callable(close):
+            try:
+                close()
+            except Exception:
+                pass
 
 
 def duration_allowed(duration, min_sec, max_sec):
@@ -275,62 +292,65 @@ def cmd_prepare(args):
         audio_col = text_col = speaker_col = None
         dataset_iter = iter_dataset(repo, args.split, args.seed, streaming=args.streaming)
 
-        for sample_index, sample in enumerate(dataset_iter):
-            if counts["accepted"] >= args.max_samples_per_dataset:
-                break
+        try:
+            for sample_index, sample in enumerate(dataset_iter):
+                if counts["accepted"] >= args.max_samples_per_dataset:
+                    break
 
-            try:
-                if audio_col is None:
-                    audio_col, text_col, speaker_col = detect_columns(sample)
-                    print(f"  audio_col={audio_col} text_col={text_col} speaker_col={speaker_col}")
+                try:
+                    if audio_col is None:
+                        audio_col, text_col, speaker_col = detect_columns(sample)
+                        print(f"  audio_col={audio_col} text_col={text_col} speaker_col={speaker_col}")
 
-                text = str(sample.get(text_col, "")).strip()
-                if not text or len(text) < 2:
-                    counts["skipped_text"] += 1
-                    continue
-                if not args.allow_non_devanagari and not has_devanagari(text):
-                    counts["skipped_text"] += 1
-                    continue
+                    text = str(sample.get(text_col, "")).strip()
+                    if not text or len(text) < 2:
+                        counts["skipped_text"] += 1
+                        continue
+                    if not args.allow_non_devanagari and not has_devanagari(text):
+                        counts["skipped_text"] += 1
+                        continue
 
-                speaker_id = sample.get(speaker_col) if speaker_col else ""
-                if args.speaker_id and str(speaker_id) != args.speaker_id:
-                    counts["skipped_speaker"] += 1
-                    continue
+                    speaker_id = sample.get(speaker_col) if speaker_col else ""
+                    if args.speaker_id and str(speaker_id) != args.speaker_id:
+                        counts["skipped_speaker"] += 1
+                        continue
 
-                array = normalize_audio(sample[audio_col], args.target_sr)
-                duration = len(array) / args.target_sr
-                if not duration_allowed(duration, args.min_sec, args.max_sec):
-                    counts["skipped_duration"] += 1
-                    continue
+                    array = normalize_audio(sample[audio_col], args.target_sr)
+                    duration = len(array) / args.target_sr
+                    if not duration_allowed(duration, args.min_sec, args.max_sec):
+                        counts["skipped_duration"] += 1
+                        continue
 
-                record_id = f"{repo_key}_{sample_index:07d}"
-                wav_path = repo_wav_dir / f"{record_id}.wav"
-                sf.write(wav_path, array, args.target_sr, subtype="PCM_16")
+                    record_id = f"{repo_key}_{sample_index:07d}"
+                    wav_path = repo_wav_dir / f"{record_id}.wav"
+                    sf.write(wav_path, array, args.target_sr, subtype="PCM_16")
 
-                all_records.append(
-                    {
-                        "id": record_id,
-                        "source_dataset": repo,
-                        "audio": str(wav_path),
-                        "ref_audio": "",
-                        "text": text,
-                        "speaker_id": str(speaker_id) if speaker_id is not None else "",
-                        "duration": round(duration, 3),
-                        "text_description": str(sample.get("text_description", "")).strip(),
-                        "phonemes": str(sample.get("phonemes", "")).strip(),
-                        "snr": sample.get("snr"),
-                        "pesq": sample.get("pesq"),
-                        "noise": sample.get("noise"),
-                        "reverberation": sample.get("reverberation"),
-                        "speech_monotony": sample.get("speech_monotony"),
-                    }
-                )
-                counts["accepted"] += 1
+                    all_records.append(
+                        {
+                            "id": record_id,
+                            "source_dataset": repo,
+                            "audio": str(wav_path),
+                            "ref_audio": "",
+                            "text": text,
+                            "speaker_id": str(speaker_id) if speaker_id is not None else "",
+                            "duration": round(duration, 3),
+                            "text_description": str(sample.get("text_description", "")).strip(),
+                            "phonemes": str(sample.get("phonemes", "")).strip(),
+                            "snr": sample.get("snr"),
+                            "pesq": sample.get("pesq"),
+                            "noise": sample.get("noise"),
+                            "reverberation": sample.get("reverberation"),
+                            "speech_monotony": sample.get("speech_monotony"),
+                        }
+                    )
+                    counts["accepted"] += 1
 
-            except Exception as exc:
-                counts["skipped_error"] += 1
-                if counts["skipped_error"] <= 3:
-                    print(f"  skipped error: {exc}")
+                except Exception as exc:
+                    counts["skipped_error"] += 1
+                    if counts["skipped_error"] <= 3:
+                        print(f"  skipped error: {exc}")
+        finally:
+            close_dataset_iter(dataset_iter)
 
         report["datasets"][repo] = counts
         print(f"  accepted={counts['accepted']} skipped={counts}")
@@ -670,9 +690,14 @@ def build_parser():
 
 
 def main():
+    os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
     args = build_parser().parse_args()
     print(f"Runner: {RUNNER_VERSION}")
     args.func(args)
+    sys.stdout.flush()
+    sys.stderr.flush()
+    if os.environ.get("QWEN_RUNNER_NORMAL_EXIT", "").lower() not in {"1", "true", "yes"}:
+        os._exit(0)
 
 
 if __name__ == "__main__":

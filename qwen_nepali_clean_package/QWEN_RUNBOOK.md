@@ -5,7 +5,7 @@ This package is for a clean Qwen3-TTS 1.7B Nepali fine-tuning smoke run.
 ## What Changed
 
 - One main Python file: `qwen_nepali_runner.py`
-- No extra draft message files.
+- Only runtime/config/test files are included.
 - Dataset duration filtering is configurable.
 - `3-12 sec` is only preferred for choosing reference audio, not a hard dataset filter.
 - Primary dataset is `Titung/nepali-tts-tagged-combined`.
@@ -45,7 +45,7 @@ python qwen_nepali_runner.py prepare \
   --single-ref-audio
 ```
 
-The command should print `Runner: qwen-nepali-streamlined-v2-audio-fix-2026-06-09`.
+The command should print `Runner: qwen-nepali-streamlined-v4-threadclose-cleanexit-2026-06-09`.
 
 If that shows `accepted=5`, run the training smoke run:
 
@@ -105,9 +105,9 @@ Set `--max-sec 0` to disable max duration filtering.
 
 Use `--no-streaming` only if you specifically want to cache-load the dataset normally.
 
-## First Result To Share
+## First Result Artifacts
 
-After training, share:
+After training, collect:
 
 - training log
 - `data/tagged_300/dataset_report.json`
