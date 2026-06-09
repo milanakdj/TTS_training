@@ -55,8 +55,8 @@ login(token=hf_token)
 # 2. Config
 # =============================================================================
 
-OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v12-cosine"
-DATASET_REPO  = "Titung/nepali-tts-tagged-combined"
+OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v2.0-cosine"
+DATASET_REPO  = "lilgoose777/cc100-nepali-tts-shristi-v2"
 FINETUNE_BASE = "ai4bharat/indic-parler-tts-pretrained"
 
 # Set True to load model weights from OUTPUT_REPO and continue training.
