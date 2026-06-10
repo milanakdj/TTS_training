@@ -1,6 +1,6 @@
 # Qwen3-TTS Nepali Runbook
 
-This package is for a clean Qwen3-TTS 1.7B Nepali fine-tuning smoke run.
+This package is for a clean Qwen3-TTS 1.7B Nepali fine-tuning run.
 
 ## What Changed
 
@@ -15,10 +15,13 @@ This package is for a clean Qwen3-TTS 1.7B Nepali fine-tuning smoke run.
 - The runner downloads the base model into a local cache before training so checkpoint saving works.
 - The patched training script disables TensorBoard logging, so Accelerate does not require a separate logging directory.
 - Optional Hugging Face Hub upload uses `HF_TOKEN` or `HUGGING_FACE_HUB_TOKEN` from the environment.
+- The `all` command does not run inference by default. It only prepares data, tokenizes, trains, and optionally uploads.
+- Training now creates a validation split and saves only the best checkpoint by lowest validation loss.
+- Hub upload pushes the selected inference checkpoint contents, not the parent folder containing many checkpoints.
 
 ## Files
 
-- `qwen_nepali_runner.py`: data prep, speaker inspect, codec check, training runner, sample generation
+- `qwen_nepali_runner.py`: data prep, speaker inspect, codec check, training runner, optional sample generation
 - `qwen_1_7b_config.json`: base model, tokenizer, dataset, and first-run settings
 - `test_sentences_nepali.txt`: fixed comparison sentences
 - `QWEN_RUNBOOK.md`: this guide
@@ -61,9 +64,9 @@ python qwen_nepali_runner.py prepare \
   --single-ref-audio
 ```
 
-The command should print `Runner: qwen-nepali-streamlined-v10-hub-upload-2026-06-09`.
+The command should print `Runner: qwen-nepali-streamlined-v12-best-val-checkpoint-2026-06-09`.
 
-If that shows `accepted=5`, run the full pipeline smoke test:
+If that shows `accepted=5`, run the train-only smoke test:
 
 ```bash
 python qwen_nepali_runner.py all \
@@ -93,6 +96,7 @@ Then add these flags to the training command:
 ```
 
 The model still trains to `--output-dir` first, then that checkpoint folder is uploaded to the Hub.
+With validation enabled, the selected checkpoint is `best_checkpoint`.
 
 Example 1000-sample run with Hub upload:
 
@@ -107,6 +111,8 @@ HF_TOKEN=hf_xxx python qwen_nepali_runner.py all \
   --epochs 2 \
   --lr 2e-6 \
   --attn sdpa \
+  --validation-split 0.05 \
+  --eval-every-steps 100 \
   --push-to-hub \
   --hub-repo-id username/qwen-nepali-tts \
   --hub-private
@@ -114,7 +120,7 @@ HF_TOKEN=hf_xxx python qwen_nepali_runner.py all \
 
 The runner checks the Hub repo before training, so missing `HF_TOKEN` or missing `--hub-repo-id` fails early.
 
-If the 20-sample full pipeline test passes, run the first real training pass:
+If the 20-sample train-only test passes, run the first real training pass:
 
 ```bash
 python qwen_nepali_runner.py all \
@@ -126,8 +132,18 @@ python qwen_nepali_runner.py all \
   --batch-size 1 \
   --epochs 2 \
   --lr 2e-6 \
-  --attn sdpa
+  --attn sdpa \
+  --validation-split 0.05 \
+  --eval-every-steps 100
 ```
+
+This saves the best local model at:
+
+```text
+outputs/qwen_nepali_1000/best_checkpoint
+```
+
+If `--push-to-hub` is used, that checkpoint is uploaded to the Hub repo root so it can be loaded directly for inference.
 
 ## Optional Dataset Commands
 
@@ -172,7 +188,8 @@ After training, collect:
 - training log
 - `data/tagged_300/dataset_report.json`
 - codec check output
-- checkpoint folder or Hugging Face model link
-- generated WAV samples from `outputs/qwen_test_samples`
+- `outputs/.../best_checkpoint`
+- `outputs/.../best_metrics.json`
+- Hugging Face model link, if upload was enabled
 
-Compare those samples with the same Indic sentences before scaling.
+For manual sample generation after training, run the `generate` command separately, or add `--generate-samples` to `all`.
