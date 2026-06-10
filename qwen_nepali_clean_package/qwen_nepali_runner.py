@@ -8,12 +8,13 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 from collections import Counter, defaultdict
 from importlib import metadata as importlib_metadata
 from pathlib import Path
 
 
-RUNNER_VERSION = "qwen-nepali-streamlined-v10-hub-upload-2026-06-09"
+RUNNER_VERSION = "qwen-nepali-streamlined-v12-best-val-checkpoint-2026-06-09"
 DEVANAGARI_RE = re.compile(r"[\u0900-\u097F]")
 
 
@@ -458,6 +459,8 @@ def qwen_paths(args, config):
         "raw_jsonl": data_dir / "train_raw.jsonl",
         "coded_jsonl": data_dir / "train_with_codes.jsonl",
         "filtered_jsonl": data_dir / "train_with_codes_filtered.jsonl",
+        "train_split_jsonl": data_dir / "train_with_codes_train.jsonl",
+        "eval_split_jsonl": data_dir / "train_with_codes_eval.jsonl",
         "tokenizer": args.tokenizer_model or config["tokenizer_model_path"],
         "base_model": args.base_model or config["init_model_path"],
         "model_cache_dir": Path(args.model_cache_dir),
@@ -508,28 +511,324 @@ def qwen_train_script(paths, attn):
     if attn == "flash_attention_2":
         try:
             importlib_metadata.version("flash_attn")
-            return source
         except importlib_metadata.PackageNotFoundError as exc:
             raise RuntimeError(
                 "flash_attn is not installed. Use --attn sdpa, or install flash-attn first."
             ) from exc
 
     patched = paths["qwen_repo"] / "finetuning" / f"sft_12hz_runner_{safe_name(attn)}.py"
-    text = source.read_text(encoding="utf-8")
-    if 'attn_implementation="flash_attention_2"' not in text:
-        raise RuntimeError("Could not patch Qwen train script attention implementation.")
-    text = text.replace('attn_implementation="flash_attention_2"', f'attn_implementation="{attn}"')
+    if not source.exists():
+        raise RuntimeError(f"Qwen training script not found: {source}")
 
-    tensorboard_accelerator = (
-        'Accelerator(gradient_accumulation_steps=4, mixed_precision="bf16", log_with="tensorboard")'
+    text = r'''
+import argparse
+import json
+import math
+import os
+import shutil
+
+import torch
+from accelerate import Accelerator
+from dataset import TTSDataset
+from qwen_tts.inference.qwen3_tts_model import Qwen3TTSModel
+from safetensors.torch import save_file
+from torch.optim import AdamW
+from torch.utils.data import DataLoader
+from transformers import AutoConfig
+
+
+target_speaker_embedding = None
+
+
+def read_jsonl(path):
+    with open(path, "r", encoding="utf-8") as handle:
+        return [json.loads(line) for line in handle if line.strip()]
+
+
+def compute_loss(model, batch, update_target_embedding):
+    global target_speaker_embedding
+
+    input_ids = batch["input_ids"]
+    codec_ids = batch["codec_ids"]
+    ref_mels = batch["ref_mels"]
+    text_embedding_mask = batch["text_embedding_mask"]
+    codec_embedding_mask = batch["codec_embedding_mask"]
+    attention_mask = batch["attention_mask"]
+    codec_0_labels = batch["codec_0_labels"]
+    codec_mask = batch["codec_mask"]
+
+    speaker_embedding = model.speaker_encoder(ref_mels.to(model.device).to(model.dtype)).detach()
+    if update_target_embedding and target_speaker_embedding is None:
+        target_speaker_embedding = speaker_embedding
+
+    input_text_ids = input_ids[:, :, 0]
+    input_codec_ids = input_ids[:, :, 1]
+
+    input_text_embedding = model.talker.model.text_embedding(input_text_ids) * text_embedding_mask
+    input_codec_embedding = model.talker.model.codec_embedding(input_codec_ids) * codec_embedding_mask
+    input_codec_embedding[:, 6, :] = speaker_embedding
+    input_embeddings = input_text_embedding + input_codec_embedding
+
+    for i in range(1, 16):
+        codec_i_embedding = model.talker.code_predictor.get_input_embeddings()[i - 1](codec_ids[:, :, i])
+        codec_i_embedding = codec_i_embedding * codec_mask.unsqueeze(-1)
+        input_embeddings = input_embeddings + codec_i_embedding
+
+    outputs = model.talker(
+        inputs_embeds=input_embeddings[:, :-1, :],
+        attention_mask=attention_mask[:, :-1],
+        labels=codec_0_labels[:, 1:],
+        output_hidden_states=True,
     )
-    plain_accelerator = 'Accelerator(gradient_accumulation_steps=4, mixed_precision="bf16")'
-    if tensorboard_accelerator in text:
-        text = text.replace(tensorboard_accelerator, plain_accelerator)
-    text = re.sub(r',\s*log_with=["\']tensorboard["\']', "", text)
-    text = re.sub(r'log_with=["\']tensorboard["\']\s*,\s*', "", text)
-    text = re.sub(r'log_with=["\']tensorboard["\']', "", text)
 
+    hidden_states = outputs.hidden_states[0][-1]
+    talker_hidden_states = hidden_states[codec_mask[:, :-1]]
+    talker_codec_ids = codec_ids[codec_mask]
+    _, sub_talker_loss = model.talker.forward_sub_talker_finetune(
+        talker_codec_ids, talker_hidden_states
+    )
+
+    return outputs.loss + 0.3 * sub_talker_loss
+
+
+def evaluate(model, dataloader, accelerator):
+    if dataloader is None:
+        return None
+
+    was_training = model.training
+    model.eval()
+    total_loss = 0.0
+    total_count = 0
+
+    with torch.no_grad():
+        for batch in dataloader:
+            loss = compute_loss(model, batch, update_target_embedding=False)
+            gathered = accelerator.gather_for_metrics(loss.detach().float().reshape(1))
+            total_loss += gathered.sum().item()
+            total_count += gathered.numel()
+
+    if was_training:
+        model.train()
+
+    if total_count == 0:
+        return None
+    return total_loss / total_count
+
+
+def write_checkpoint(model, accelerator, model_path, output_dir, speaker_name, checkpoint_name):
+    global target_speaker_embedding
+
+    if not accelerator.is_main_process:
+        return
+    if target_speaker_embedding is None:
+        raise RuntimeError("Cannot save checkpoint before speaker embedding is initialized.")
+
+    final_dir = os.path.join(output_dir, checkpoint_name)
+    tmp_dir = final_dir + ".tmp"
+    if os.path.exists(tmp_dir):
+        shutil.rmtree(tmp_dir)
+
+    shutil.copytree(model_path, tmp_dir, dirs_exist_ok=True)
+
+    config_file = os.path.join(tmp_dir, "config.json")
+    with open(config_file, "r", encoding="utf-8") as handle:
+        config_dict = json.load(handle)
+    config_dict["tts_model_type"] = "custom_voice"
+    talker_config = config_dict.get("talker_config", {})
+    talker_config["spk_id"] = {speaker_name: 3000}
+    talker_config["spk_is_dialect"] = {speaker_name: False}
+    config_dict["talker_config"] = talker_config
+    with open(config_file, "w", encoding="utf-8") as handle:
+        json.dump(config_dict, handle, indent=2, ensure_ascii=False)
+
+    unwrapped_model = accelerator.unwrap_model(model)
+    state_dict = {k: v.detach().to("cpu") for k, v in unwrapped_model.state_dict().items()}
+
+    keys_to_drop = [k for k in state_dict.keys() if k.startswith("speaker_encoder")]
+    for key in keys_to_drop:
+        del state_dict[key]
+
+    weight = state_dict["talker.model.codec_embedding.weight"]
+    state_dict["talker.model.codec_embedding.weight"][3000] = (
+        target_speaker_embedding[0].detach().to(weight.device).to(weight.dtype)
+    )
+    save_file(state_dict, os.path.join(tmp_dir, "model.safetensors"))
+
+    if os.path.exists(final_dir):
+        shutil.rmtree(final_dir)
+    os.rename(tmp_dir, final_dir)
+    accelerator.print(f"Saved checkpoint: {final_dir}")
+
+
+def write_metrics(output_dir, metrics):
+    os.makedirs(output_dir, exist_ok=True)
+    path = os.path.join(output_dir, "best_metrics.json")
+    with open(path, "w", encoding="utf-8") as handle:
+        json.dump(metrics, handle, indent=2)
+
+
+def train():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--init_model_path", type=str, default="Qwen/Qwen3-TTS-12Hz-1.7B-Base")
+    parser.add_argument("--output_model_path", type=str, default="output")
+    parser.add_argument("--train_jsonl", type=str, required=True)
+    parser.add_argument("--eval_jsonl", type=str, default="")
+    parser.add_argument("--batch_size", type=int, default=2)
+    parser.add_argument("--lr", type=float, default=2e-5)
+    parser.add_argument("--num_epochs", type=int, default=3)
+    parser.add_argument("--speaker_name", type=str, default="speaker_test")
+    parser.add_argument("--eval_every_steps", type=int, default=100)
+    parser.add_argument("--best_checkpoint_name", type=str, default="best_checkpoint")
+    parser.add_argument("--final_checkpoint_name", type=str, default="final_checkpoint")
+    args = parser.parse_args()
+
+    accelerator = Accelerator(gradient_accumulation_steps=4, mixed_precision="bf16")
+    model_path = args.init_model_path
+
+    qwen3tts = Qwen3TTSModel.from_pretrained(
+        model_path,
+        torch_dtype=torch.bfloat16,
+        attn_implementation="__ATTN__",
+    )
+    config = AutoConfig.from_pretrained(model_path)
+
+    train_data = read_jsonl(args.train_jsonl)
+    train_dataset = TTSDataset(train_data, qwen3tts.processor, config)
+    train_dataloader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        collate_fn=train_dataset.collate_fn,
+    )
+
+    eval_dataloader = None
+    if args.eval_jsonl:
+        eval_data = read_jsonl(args.eval_jsonl)
+        if eval_data:
+            eval_dataset = TTSDataset(eval_data, qwen3tts.processor, config)
+            eval_dataloader = DataLoader(
+                eval_dataset,
+                batch_size=args.batch_size,
+                shuffle=False,
+                collate_fn=eval_dataset.collate_fn,
+            )
+
+    optimizer = AdamW(qwen3tts.model.parameters(), lr=args.lr, weight_decay=0.01)
+
+    if eval_dataloader is not None:
+        model, optimizer, train_dataloader, eval_dataloader = accelerator.prepare(
+            qwen3tts.model, optimizer, train_dataloader, eval_dataloader
+        )
+    else:
+        model, optimizer, train_dataloader = accelerator.prepare(
+            qwen3tts.model, optimizer, train_dataloader
+        )
+
+    num_epochs = args.num_epochs
+    model.train()
+    global_step = 0
+    best_eval_loss = math.inf
+    best_metrics = {
+        "best_eval_loss": None,
+        "best_epoch": None,
+        "best_step": None,
+        "checkpoint": args.best_checkpoint_name if eval_dataloader is not None else args.final_checkpoint_name,
+    }
+
+    for epoch in range(num_epochs):
+        for step, batch in enumerate(train_dataloader):
+            with accelerator.accumulate(model):
+                loss = compute_loss(model, batch, update_target_embedding=True)
+                accelerator.backward(loss)
+
+                if accelerator.sync_gradients:
+                    accelerator.clip_grad_norm_(model.parameters(), 1.0)
+
+                optimizer.step()
+                optimizer.zero_grad()
+
+            global_step += 1
+
+            if step % 10 == 0:
+                accelerator.print(
+                    f"Epoch {epoch} | Step {step} | Global {global_step} | Train loss: {loss.item():.4f}"
+                )
+
+            if (
+                eval_dataloader is not None
+                and args.eval_every_steps > 0
+                and global_step % args.eval_every_steps == 0
+            ):
+                eval_loss = evaluate(model, eval_dataloader, accelerator)
+                accelerator.print(
+                    f"Epoch {epoch} | Global {global_step} | Validation loss: {eval_loss:.4f}"
+                )
+                if eval_loss < best_eval_loss:
+                    best_eval_loss = eval_loss
+                    best_metrics.update(
+                        {
+                            "best_eval_loss": best_eval_loss,
+                            "best_epoch": epoch,
+                            "best_step": global_step,
+                        }
+                    )
+                    write_checkpoint(
+                        model,
+                        accelerator,
+                        model_path,
+                        args.output_model_path,
+                        args.speaker_name,
+                        args.best_checkpoint_name,
+                    )
+                    if accelerator.is_main_process:
+                        write_metrics(args.output_model_path, best_metrics)
+
+        if eval_dataloader is not None:
+            eval_loss = evaluate(model, eval_dataloader, accelerator)
+            accelerator.print(f"Epoch {epoch} | End validation loss: {eval_loss:.4f}")
+            if eval_loss < best_eval_loss:
+                best_eval_loss = eval_loss
+                best_metrics.update(
+                    {
+                        "best_eval_loss": best_eval_loss,
+                        "best_epoch": epoch,
+                        "best_step": global_step,
+                    }
+                )
+                write_checkpoint(
+                    model,
+                    accelerator,
+                    model_path,
+                    args.output_model_path,
+                    args.speaker_name,
+                    args.best_checkpoint_name,
+                )
+                if accelerator.is_main_process:
+                    write_metrics(args.output_model_path, best_metrics)
+        else:
+            write_checkpoint(
+                model,
+                accelerator,
+                model_path,
+                args.output_model_path,
+                args.speaker_name,
+                args.final_checkpoint_name,
+            )
+
+    accelerator.wait_for_everyone()
+    if accelerator.is_main_process:
+        if eval_dataloader is not None:
+            print(f"Best validation loss: {best_eval_loss:.4f}")
+            print(f"Best checkpoint: {os.path.join(args.output_model_path, args.best_checkpoint_name)}")
+        else:
+            print(f"Final checkpoint: {os.path.join(args.output_model_path, args.final_checkpoint_name)}")
+
+
+if __name__ == "__main__":
+    train()
+'''
+    text = textwrap.dedent(text).strip() + "\n"
+    text = text.replace("__ATTN__", attn)
     patched.write_text(text, encoding="utf-8")
     print(f"Training attention: {attn}")
     print(f"Training script: {patched}")
@@ -641,6 +940,34 @@ def cmd_tokenize(args):
     )
 
 
+def split_train_eval_jsonl(input_jsonl, train_jsonl, eval_jsonl, validation_split, min_eval_samples, seed):
+    input_path = Path(input_jsonl)
+    rows = [line for line in input_path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    if len(rows) < 2 or validation_split <= 0:
+        print("Validation split disabled; training will save final_checkpoint.")
+        return input_path, None
+
+    eval_count = int(round(len(rows) * validation_split))
+    eval_count = max(int(min_eval_samples), eval_count)
+    eval_count = min(eval_count, len(rows) - 1)
+
+    indices = list(range(len(rows)))
+    random.Random(seed).shuffle(indices)
+    eval_indices = set(indices[:eval_count])
+
+    train_rows = [row for index, row in enumerate(rows) if index not in eval_indices]
+    eval_rows = [row for index, row in enumerate(rows) if index in eval_indices]
+
+    train_path = Path(train_jsonl)
+    eval_path = Path(eval_jsonl)
+    train_path.write_text("\n".join(train_rows) + "\n", encoding="utf-8")
+    eval_path.write_text("\n".join(eval_rows) + "\n", encoding="utf-8")
+
+    print(f"Train rows: {len(train_rows)} -> {train_path}")
+    print(f"Validation rows: {len(eval_rows)} -> {eval_path}")
+    return train_path, eval_path
+
+
 def cmd_train(args):
     config = load_config(args.config)
     paths = qwen_paths(args, config)
@@ -650,28 +977,45 @@ def cmd_train(args):
         args._hub_repo_checked = True
     train_script = qwen_train_script(paths, args.attn)
     base_model_path = resolve_base_model_path(paths)
+    train_jsonl, eval_jsonl = split_train_eval_jsonl(
+        paths["filtered_jsonl"],
+        paths["train_split_jsonl"],
+        paths["eval_split_jsonl"],
+        args.validation_split,
+        args.min_eval_samples,
+        getattr(args, "seed", 42),
+    )
+    cmd = [
+        sys.executable,
+        train_script,
+        "--init_model_path",
+        base_model_path,
+        "--output_model_path",
+        paths["output_dir"],
+        "--train_jsonl",
+        train_jsonl,
+        "--batch_size",
+        args.batch_size,
+        "--lr",
+        args.lr,
+        "--num_epochs",
+        args.epochs,
+        "--speaker_name",
+        args.speaker_name,
+        "--eval_every_steps",
+        args.eval_every_steps,
+        "--best_checkpoint_name",
+        args.best_checkpoint_name,
+        "--final_checkpoint_name",
+        args.final_checkpoint_name,
+    ]
+    if eval_jsonl is not None:
+        cmd.extend(["--eval_jsonl", eval_jsonl])
     run(
-        [
-            sys.executable,
-            train_script,
-            "--init_model_path",
-            base_model_path,
-            "--output_model_path",
-            paths["output_dir"],
-            "--train_jsonl",
-            paths["filtered_jsonl"],
-            "--batch_size",
-            args.batch_size,
-            "--lr",
-            args.lr,
-            "--num_epochs",
-            args.epochs,
-            "--speaker_name",
-            args.speaker_name,
-        ]
+        cmd
     )
     if getattr(args, "push_to_hub", False) and not getattr(args, "_defer_hub_upload", False):
-        upload_to_hub(paths["output_dir"], args)
+        upload_to_hub(checkpoint_for_inference(paths["output_dir"], args), args)
 
 
 def load_sentences(path):
@@ -708,10 +1052,30 @@ def cmd_generate(args):
 
 def latest_checkpoint(output_dir):
     output = Path(output_dir)
+    best = output / "best_checkpoint"
+    if best.exists():
+        return best
+    final = output / "final_checkpoint"
+    if final.exists():
+        return final
     checkpoints = sorted(output.glob("checkpoint-epoch-*"))
     if not checkpoints:
         return output
     return checkpoints[-1]
+
+
+def checkpoint_for_inference(output_dir, args):
+    output = Path(output_dir)
+    best = output / getattr(args, "best_checkpoint_name", "best_checkpoint")
+    if best.exists():
+        return best
+    final = output / getattr(args, "final_checkpoint_name", "final_checkpoint")
+    if final.exists():
+        return final
+    latest = latest_checkpoint(output)
+    if latest.exists():
+        return latest
+    raise RuntimeError(f"No checkpoint found under: {output}")
 
 
 def upload_to_hub(folder_path, args):
@@ -799,21 +1163,22 @@ def cmd_all(args):
     args._defer_hub_upload = True
     cmd_train(args)
     args._defer_hub_upload = False
-    checkpoint = latest_checkpoint(paths["output_dir"])
-    cmd_generate(
-        argparse.Namespace(
-            checkpoint=str(checkpoint),
-            speaker_name=args.speaker_name,
-            sentences=args.sentences,
-            sample_output_dir=args.sample_output_dir,
-            device=args.device,
-            dtype=args.dtype,
-            attn=args.attn,
-            max_new_tokens=args.max_new_tokens,
+    if getattr(args, "generate_samples", False):
+        checkpoint = checkpoint_for_inference(paths["output_dir"], args)
+        cmd_generate(
+            argparse.Namespace(
+                checkpoint=str(checkpoint),
+                speaker_name=args.speaker_name,
+                sentences=args.sentences,
+                sample_output_dir=args.sample_output_dir,
+                device=args.device,
+                dtype=args.dtype,
+                attn=args.attn,
+                max_new_tokens=args.max_new_tokens,
+            )
         )
-    )
     if getattr(args, "push_to_hub", False):
-        upload_to_hub(paths["output_dir"], args)
+        upload_to_hub(checkpoint_for_inference(paths["output_dir"], args), args)
 
 
 def add_common_data_args(parser):
@@ -849,6 +1214,11 @@ def add_qwen_args(parser):
     parser.add_argument("--lr", default="2e-6")
     parser.add_argument("--epochs", default="3")
     parser.add_argument("--speaker-name", default="nepali_speaker")
+    parser.add_argument("--validation-split", type=float, default=0.05)
+    parser.add_argument("--min-eval-samples", type=int, default=1)
+    parser.add_argument("--eval-every-steps", type=int, default=100)
+    parser.add_argument("--best-checkpoint-name", default="best_checkpoint")
+    parser.add_argument("--final-checkpoint-name", default="final_checkpoint")
 
 
 def add_hub_args(parser):
@@ -909,7 +1279,7 @@ def build_parser():
     gen_p.add_argument("--max-new-tokens", type=int, default=1000)
     gen_p.set_defaults(func=cmd_generate)
 
-    all_p = sub.add_parser("all", help="Prepare data, tokenize, train, and generate samples.")
+    all_p = sub.add_parser("all", help="Prepare data, tokenize, train, and optionally generate samples.")
     all_p.add_argument("--datasets", nargs="+", default=[])
     all_p.add_argument("--max-samples", type=int, default=300)
     all_p.add_argument("--global-ref-audio", default="")
@@ -918,6 +1288,7 @@ def build_parser():
     all_p.add_argument("--dtype", choices=["float16", "bfloat16"], default="bfloat16")
     all_p.add_argument("--attn", default="sdpa")
     all_p.add_argument("--max-new-tokens", type=int, default=1000)
+    all_p.add_argument("--generate-samples", action="store_true")
     add_common_data_args(all_p)
     add_qwen_args(all_p)
     add_hub_args(all_p)
