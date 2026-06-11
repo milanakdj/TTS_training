@@ -1,3 +1,22 @@
+# Run the code
+HF_TOKEN=hf_xxx WANDB_API_KEY=wandb_xxx python qwen_nepali_runner.py all \
+  --qwen-repo ./Qwen3-TTS \
+  --datasets Titung/nepali-tts-tagged-combined \
+  --max-samples 30000 \
+  --data-dir data/train_1000 \
+  --output-dir outputs/qwen_nepali_1000 \
+  --batch-size 32 \
+  --epochs 20 \
+  --lr 3e-6 \
+  --attn sdpa \
+  --validation-split 0.05 \
+  --eval-every-steps 100 \
+  --wandb-project tts \
+  --wandb-entity himalaya-ai-lab \
+  --wandb-run-name qwen-nepali-1000-v13 \
+  --push-to-hub \
+  --hub-milanakdj/qwen-nepali-tts-v2
+
 # Qwen3-TTS Nepali Runbook
 
 This package is for a clean Qwen3-TTS 1.7B Nepali fine-tuning run.
@@ -18,6 +37,8 @@ This package is for a clean Qwen3-TTS 1.7B Nepali fine-tuning run.
 - The `all` command does not run inference by default. It only prepares data, tokenizes, trains, and optionally uploads.
 - Training now creates a validation split and saves only the best checkpoint by lowest validation loss.
 - Hub upload pushes the selected inference checkpoint contents, not the parent folder containing many checkpoints.
+- Training prints live progress with estimated time left.
+- Optional W&B loss logging uses `WANDB_API_KEY` from the environment and accepts project/entity/run name from CLI.
 
 ## Files
 
@@ -36,7 +57,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -U pip
 sudo apt-get update && sudo apt-get install -y sox libsox-fmt-all
-pip install "qwen-tts==0.1.1" "transformers==4.57.3" "accelerate==1.12.0" "huggingface_hub==0.36.2" "protobuf<7,>=5"
+pip install "qwen-tts==0.1.1" "transformers==4.57.3" "accelerate==1.12.0" "huggingface_hub==0.36.2" "protobuf<7,>=5" wandb
 pip install -e Qwen3-TTS
 pip install datasets soundfile librosa numpy pyarrow
 huggingface-cli login
@@ -64,7 +85,7 @@ python qwen_nepali_runner.py prepare \
   --single-ref-audio
 ```
 
-The command should print `Runner: qwen-nepali-streamlined-v12-best-val-checkpoint-2026-06-09`.
+The command should print `Runner: qwen-nepali-streamlined-v13-eta-wandb-2026-06-10`.
 
 If that shows `accepted=5`, run the train-only smoke test:
 
@@ -101,7 +122,7 @@ With validation enabled, the selected checkpoint is `best_checkpoint`.
 Example 1000-sample run with Hub upload:
 
 ```bash
-HF_TOKEN=hf_xxx python qwen_nepali_runner.py all \
+HF_TOKEN=hf_xxx WANDB_API_KEY=wandb_xxx python qwen_nepali_runner.py all \
   --qwen-repo ./Qwen3-TTS \
   --datasets Titung/nepali-tts-tagged-combined \
   --max-samples 1000 \
@@ -113,17 +134,21 @@ HF_TOKEN=hf_xxx python qwen_nepali_runner.py all \
   --attn sdpa \
   --validation-split 0.05 \
   --eval-every-steps 100 \
+  --wandb-project qwen-nepali-tts \
+  --wandb-entity your_wandb_entity \
+  --wandb-run-name qwen-nepali-1000-v13 \
   --push-to-hub \
   --hub-repo-id username/qwen-nepali-tts \
   --hub-private
 ```
 
 The runner checks the Hub repo before training, so missing `HF_TOKEN` or missing `--hub-repo-id` fails early.
+If W&B flags are used, missing `WANDB_API_KEY` fails early with a clear error. Without W&B flags/key, training still runs normally.
 
 If the 20-sample train-only test passes, run the first real training pass:
 
 ```bash
-python qwen_nepali_runner.py all \
+WANDB_API_KEY=wandb_xxx python qwen_nepali_runner.py all \
   --qwen-repo ../Qwen3-TTS \
   --datasets Titung/nepali-tts-tagged-combined \
   --max-samples 1000 \
@@ -134,7 +159,9 @@ python qwen_nepali_runner.py all \
   --lr 2e-6 \
   --attn sdpa \
   --validation-split 0.05 \
-  --eval-every-steps 100
+  --eval-every-steps 100 \
+  --wandb-project qwen-nepali-tts \
+  --wandb-run-name qwen-nepali-1000-v13
 ```
 
 This saves the best local model at:
