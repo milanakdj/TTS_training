@@ -14,7 +14,7 @@ from importlib import metadata as importlib_metadata
 from pathlib import Path
 
 
-RUNNER_VERSION = "qwen-nepali-streamlined-v12-best-val-checkpoint-2026-06-09"
+RUNNER_VERSION = "qwen-nepali-streamlined-v13-eta-wandb-2026-06-10"
 DEVANAGARI_RE = re.compile(r"[\u0900-\u097F]")
 
 
@@ -526,6 +526,7 @@ import json
 import math
 import os
 import shutil
+import time
 
 import torch
 from accelerate import Accelerator
@@ -667,6 +668,85 @@ def write_metrics(output_dir, metrics):
         json.dump(metrics, handle, indent=2)
 
 
+def format_duration(seconds):
+    seconds = max(0, int(seconds))
+    hours, rem = divmod(seconds, 3600)
+    minutes, secs = divmod(rem, 60)
+    if hours:
+        return f"{hours}h {minutes}m {secs}s"
+    if minutes:
+        return f"{minutes}m {secs}s"
+    return f"{secs}s"
+
+
+def eta_status(start_time, current_step, total_steps):
+    if current_step <= 0 or total_steps <= 0:
+        return "ETA calculating"
+    elapsed = time.time() - start_time
+    avg_step = elapsed / current_step
+    remaining = max(total_steps - current_step, 0) * avg_step
+    return f"ETA {format_duration(remaining)} | elapsed {format_duration(elapsed)}"
+
+
+def setup_wandb(args, accelerator, train_rows, eval_rows, total_steps):
+    if args.disable_wandb:
+        return None
+
+    requested = bool(
+        os.environ.get("WANDB_API_KEY")
+        or args.wandb_project
+        or args.wandb_entity
+        or args.wandb_run_name
+    )
+    if not requested:
+        return None
+
+    api_key = os.environ.get("WANDB_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "WANDB_API_KEY missing. Set WANDB_API_KEY in the environment or use --disable_wandb."
+        )
+
+    try:
+        import wandb
+    except ImportError as exc:
+        raise RuntimeError("wandb is not installed. Install it with: pip install wandb") from exc
+
+    if not accelerator.is_main_process:
+        return None
+
+    wandb.login(key=api_key, relogin=True)
+    run = wandb.init(
+        project=args.wandb_project or "qwen-nepali-tts",
+        entity=args.wandb_entity or None,
+        name=args.wandb_run_name or None,
+        config={
+            "init_model_path": args.init_model_path,
+            "output_model_path": args.output_model_path,
+            "train_jsonl": args.train_jsonl,
+            "eval_jsonl": args.eval_jsonl,
+            "batch_size": args.batch_size,
+            "learning_rate": args.lr,
+            "num_epochs": args.num_epochs,
+            "speaker_name": args.speaker_name,
+            "eval_every_steps": args.eval_every_steps,
+            "train_rows": train_rows,
+            "eval_rows": eval_rows,
+            "total_steps": total_steps,
+        },
+    )
+    accelerator.print(
+        f"W&B logging enabled: project={args.wandb_project or 'qwen-nepali-tts'} "
+        f"entity={args.wandb_entity or '(default)'}"
+    )
+    return run
+
+
+def wandb_log(run, metrics, step):
+    if run is not None:
+        run.log(metrics, step=step)
+
+
 def train():
     parser = argparse.ArgumentParser()
     parser.add_argument("--init_model_path", type=str, default="Qwen/Qwen3-TTS-12Hz-1.7B-Base")
@@ -680,6 +760,11 @@ def train():
     parser.add_argument("--eval_every_steps", type=int, default=100)
     parser.add_argument("--best_checkpoint_name", type=str, default="best_checkpoint")
     parser.add_argument("--final_checkpoint_name", type=str, default="final_checkpoint")
+    parser.add_argument("--wandb_project", type=str, default="")
+    parser.add_argument("--wandb_entity", type=str, default="")
+    parser.add_argument("--wandb_run_name", type=str, default="")
+    parser.add_argument("--wandb_log_every_steps", type=int, default=10)
+    parser.add_argument("--disable_wandb", action="store_true")
     args = parser.parse_args()
 
     accelerator = Accelerator(gradient_accumulation_steps=4, mixed_precision="bf16")
@@ -701,6 +786,7 @@ def train():
         collate_fn=train_dataset.collate_fn,
     )
 
+    eval_data = []
     eval_dataloader = None
     if args.eval_jsonl:
         eval_data = read_jsonl(args.eval_jsonl)
@@ -725,6 +811,19 @@ def train():
         )
 
     num_epochs = args.num_epochs
+    steps_per_epoch = len(train_dataloader)
+    total_steps = steps_per_epoch * num_epochs
+    train_start_time = time.time()
+    wandb_run = setup_wandb(
+        args,
+        accelerator,
+        train_rows=len(train_data),
+        eval_rows=len(eval_data),
+        total_steps=total_steps,
+    )
+    accelerator.print(
+        f"Training steps: {total_steps} total | {steps_per_epoch} per epoch | epochs: {num_epochs}"
+    )
     model.train()
     global_step = 0
     best_eval_loss = math.inf
@@ -748,10 +847,27 @@ def train():
                 optimizer.zero_grad()
 
             global_step += 1
+            loss_value = float(loss.detach().float().item())
+            eta_text = eta_status(train_start_time, global_step, total_steps)
 
-            if step % 10 == 0:
+            if step % 10 == 0 or global_step == 1:
                 accelerator.print(
-                    f"Epoch {epoch} | Step {step} | Global {global_step} | Train loss: {loss.item():.4f}"
+                    f"Epoch {epoch} | Step {step}/{steps_per_epoch} | "
+                    f"Global {global_step}/{total_steps} | Train loss: {loss_value:.4f} | {eta_text}"
+                )
+
+            if args.wandb_log_every_steps > 0 and global_step % args.wandb_log_every_steps == 0:
+                wandb_log(
+                    wandb_run,
+                    {
+                        "train/loss": loss_value,
+                        "train/epoch": epoch,
+                        "train/step_in_epoch": step,
+                        "train/global_step": global_step,
+                        "train/learning_rate": optimizer.param_groups[0]["lr"],
+                        "time/elapsed_seconds": time.time() - train_start_time,
+                    },
+                    step=global_step,
                 )
 
             if (
@@ -762,6 +878,15 @@ def train():
                 eval_loss = evaluate(model, eval_dataloader, accelerator)
                 accelerator.print(
                     f"Epoch {epoch} | Global {global_step} | Validation loss: {eval_loss:.4f}"
+                )
+                wandb_log(
+                    wandb_run,
+                    {
+                        "eval/loss": eval_loss,
+                        "eval/epoch": epoch,
+                        "eval/global_step": global_step,
+                    },
+                    step=global_step,
                 )
                 if eval_loss < best_eval_loss:
                     best_eval_loss = eval_loss
@@ -782,10 +907,28 @@ def train():
                     )
                     if accelerator.is_main_process:
                         write_metrics(args.output_model_path, best_metrics)
+                    wandb_log(
+                        wandb_run,
+                        {
+                            "eval/best_loss": best_eval_loss,
+                            "eval/best_epoch": epoch,
+                            "eval/best_step": global_step,
+                        },
+                        step=global_step,
+                    )
 
         if eval_dataloader is not None:
             eval_loss = evaluate(model, eval_dataloader, accelerator)
             accelerator.print(f"Epoch {epoch} | End validation loss: {eval_loss:.4f}")
+            wandb_log(
+                wandb_run,
+                {
+                    "eval/end_epoch_loss": eval_loss,
+                    "eval/epoch": epoch,
+                    "eval/global_step": global_step,
+                },
+                step=global_step,
+            )
             if eval_loss < best_eval_loss:
                 best_eval_loss = eval_loss
                 best_metrics.update(
@@ -805,6 +948,15 @@ def train():
                 )
                 if accelerator.is_main_process:
                     write_metrics(args.output_model_path, best_metrics)
+                wandb_log(
+                    wandb_run,
+                    {
+                        "eval/best_loss": best_eval_loss,
+                        "eval/best_epoch": epoch,
+                        "eval/best_step": global_step,
+                    },
+                    step=global_step,
+                )
         else:
             write_checkpoint(
                 model,
@@ -822,6 +974,8 @@ def train():
             print(f"Best checkpoint: {os.path.join(args.output_model_path, args.best_checkpoint_name)}")
         else:
             print(f"Final checkpoint: {os.path.join(args.output_model_path, args.final_checkpoint_name)}")
+        if wandb_run is not None:
+            wandb_run.finish()
 
 
 if __name__ == "__main__":
@@ -883,6 +1037,7 @@ def cmd_preflight(args):
         "numpy",
         "torch",
         "qwen_tts",
+        "wandb",
     ]
     for package in required_packages:
         __import__(package)
@@ -1008,7 +1163,17 @@ def cmd_train(args):
         args.best_checkpoint_name,
         "--final_checkpoint_name",
         args.final_checkpoint_name,
+        "--wandb_project",
+        args.wandb_project,
+        "--wandb_entity",
+        args.wandb_entity,
+        "--wandb_run_name",
+        args.wandb_run_name,
+        "--wandb_log_every_steps",
+        str(args.wandb_log_every_steps),
     ]
+    if getattr(args, "disable_wandb", False):
+        cmd.append("--disable_wandb")
     if eval_jsonl is not None:
         cmd.extend(["--eval_jsonl", eval_jsonl])
     run(
@@ -1228,6 +1393,14 @@ def add_hub_args(parser):
     parser.add_argument("--hub-commit-message", default="Upload Qwen Nepali checkpoint")
 
 
+def add_wandb_args(parser):
+    parser.add_argument("--wandb-project", default="")
+    parser.add_argument("--wandb-entity", default="")
+    parser.add_argument("--wandb-run-name", default="")
+    parser.add_argument("--wandb-log-every-steps", type=int, default=10)
+    parser.add_argument("--disable-wandb", action="store_true")
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="Single runner for Qwen3-TTS Nepali data prep, codec check, training, and samples.")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -1265,6 +1438,7 @@ def build_parser():
     train_p = sub.add_parser("train", help="Run Qwen sft_12hz.py.")
     add_qwen_args(train_p)
     add_hub_args(train_p)
+    add_wandb_args(train_p)
     train_p.add_argument("--attn", default="sdpa")
     train_p.set_defaults(func=cmd_train)
 
@@ -1292,6 +1466,7 @@ def build_parser():
     add_common_data_args(all_p)
     add_qwen_args(all_p)
     add_hub_args(all_p)
+    add_wandb_args(all_p)
     all_p.set_defaults(func=cmd_all)
 
     return parser
