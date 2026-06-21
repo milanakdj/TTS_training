@@ -10,12 +10,12 @@ HF_TOKEN=hf_xxx WANDB_API_KEY=wandb_xxx python qwen_nepali_runner.py all \
   --lr 3e-6 \
   --attn sdpa \
   --validation-split 0.05 \
-  --eval-every-steps 100 \
+  --eval-every-steps 500 \
   --wandb-project tts \
   --wandb-entity himalaya-ai-lab \
   --wandb-run-name qwen-nepali-1000-v13 \
   --push-to-hub \
-  --hub-milanakdj/qwen-nepali-tts-v2
+  --hub-repo-id milanakdj/qwen-nepali-tts-v2
 
 # Qwen3-TTS Nepali Runbook
 
