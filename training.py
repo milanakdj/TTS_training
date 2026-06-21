@@ -77,7 +77,7 @@ NUM_EPOCHS       = 3
 BATCH_SIZE       = 32
 GRAD_ACCUM_STEPS = 2          # effective batch = 64
 LEARNING_RATE    = 3e-6
-WARMUP_STEPS     = 60
+WARMUP_STEPS     = None # defaults to total_steps / 10
 SAVE_STEPS       = 200        # validate + save best
 ZIP_EVERY_STEPS  = 600        # periodic checkpoint zip
 MAX_STEPS        = None       # override total steps (None = auto from epochs)
@@ -331,7 +331,7 @@ optimizer = bnb.optim.AdamW8bit(
 
 steps_per_epoch = len(train_loader) // GRAD_ACCUM_STEPS
 total_steps     = MAX_STEPS if MAX_STEPS is not None else NUM_EPOCHS * steps_per_epoch
-
+warmup_steps = WARMUP_STEPS if WARMUP_STEPS is not None else total_steps/ 10
 scheduler = get_cosine_schedule_with_warmup(
     optimizer,
     num_warmup_steps=WARMUP_STEPS,
