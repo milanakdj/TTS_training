@@ -36,6 +36,12 @@ from transformers import (
     get_cosine_schedule_with_warmup,
 )
 from parler_tts import ParlerTTSForConditionalGeneration
+from parler_tts.configuration_parler_tts import ParlerTTSConfig
+
+# ParlerTTSConfig requires text_encoder/audio_encoder/decoder sub-configs at init,
+# so it can't be no-arg instantiated. This flag tells transformers' to_diff_dict()
+# to skip the default-instance comparison that would otherwise crash on repr/logging.
+ParlerTTSConfig.has_no_defaults_at_init = True
 
 try:
     import bitsandbytes as bnb
