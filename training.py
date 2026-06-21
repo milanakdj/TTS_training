@@ -334,12 +334,12 @@ total_steps     = MAX_STEPS if MAX_STEPS is not None else NUM_EPOCHS * steps_per
 warmup_steps = WARMUP_STEPS if WARMUP_STEPS is not None else total_steps/ 10
 scheduler = get_cosine_schedule_with_warmup(
     optimizer,
-    num_warmup_steps=WARMUP_STEPS,
+    num_warmup_steps=warmup_steps,
     num_training_steps=total_steps,
 )
 
 print(f"\nLR           : {LEARNING_RATE:.1e}")
-print(f"Warmup steps : {WARMUP_STEPS}")
+print(f"Warmup steps : {warmup_steps}")
 print(f"Total steps  : {total_steps}")
 
 # =============================================================================
@@ -394,7 +394,7 @@ wandb.init(
         batch_size=BATCH_SIZE,
         grad_accum=GRAD_ACCUM_STEPS,
         lr=LEARNING_RATE,
-        warmup_steps=WARMUP_STEPS,
+        warmup_steps=warmup_steps,
         total_steps=total_steps,
         max_audio_tokens=MAX_AUDIO_TOKENS,
     ),
@@ -597,7 +597,7 @@ Nepali finetuned version of [Indic Parler-TTS]({FINETUNE_BASE}).
 | Effective batch size | {BATCH_SIZE * GRAD_ACCUM_STEPS} |
 | Learning rate | {LEARNING_RATE} |
 | LR schedule | cosine with warmup |
-| Warmup steps | {WARMUP_STEPS} |
+| Warmup steps | {warmup_steps} |
 | Total steps | {total_steps} |
 | Max audio tokens | {MAX_AUDIO_TOKENS} |
 | Precision | bfloat16 |
