@@ -63,7 +63,7 @@ login(token=hf_token)
 
 OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v2.2-cosine-oov"
 DATASET_REPO  = "Titung/nepali-oov-targeted-tts"
-FINETUNE_BASE = "ai4bharat/indic-parler-tts-pretrained"
+FINETUNE_BASE = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v2.0-cosine"
 
 # Set True to load model weights from OUTPUT_REPO and continue training.
 # Set False to start fresh from FINETUNE_BASE.
