@@ -61,9 +61,9 @@ login(token=hf_token)
 # 2. Config
 # =============================================================================
 
-OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v2.2-cosine-oov"
+OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v2.4-cosine-oov"
 DATASET_REPO  = "Titung/nepali-oov-targeted-tts"
-FINETUNE_BASE = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v2.0-cosine"
+FINETUNE_BASE = "ai4bharat/indic-parler-tts-pretrained"
 
 # Set True to load model weights from OUTPUT_REPO and continue training.
 # Set False to start fresh from FINETUNE_BASE.
@@ -73,7 +73,7 @@ RESUME_FROM_HF = False
 # Set to None to start from step 0 (even if RESUME_FROM_HF=True).
 RESUME_STATE_PATH = None
 
-NUM_EPOCHS       = 4
+NUM_EPOCHS       = 2
 BATCH_SIZE       = 32
 GRAD_ACCUM_STEPS = 2          # effective batch = 64
 LEARNING_RATE    = 3e-6
