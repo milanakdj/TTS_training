@@ -74,14 +74,17 @@ RESUME_FROM_HF = False
 RESUME_STATE_PATH = None
 
 NUM_EPOCHS       = 2
-BATCH_SIZE       = 32
-GRAD_ACCUM_STEPS = 2          # effective batch = 64
+BATCH_SIZE       = 8   # before it was 32 but to fit in 80GB DGX A100 we reduce to 8 and use gradient accumulation 
+# also as we had increased the MAX_AUDIO_TOKENS to 1856 which is around 21.5s of audio and this increases the memory footprint of the model.
+GRAD_ACCUM_STEPS = 8          # effective batch = 64  similar to before but now we have reduced the batch size to 8 and increased the gradient accumulation steps to 8 to fit in 80GB DGX A100 GPU memory.
 LEARNING_RATE    = 3e-6
 WARMUP_STEPS     = None # defaults to total_steps / 10
 SAVE_STEPS       = 200        # validate + save best
 ZIP_EVERY_STEPS  = 600        # periodic checkpoint zip
 MAX_STEPS        = None       # override total steps (None = auto from epochs)
-MAX_AUDIO_TOKENS = 550
+FRAME_RATE_HZ = 86.13  # DAC 44.1kHz, hop_length=512 i.e 86.13 = 44100 Hz ÷ 512 hop length = 86.1328125 frames per second 
+MAX_AUDIO_TOKENS = 1856  # was 550 before now this covers p90 (~21.5s) of Titung/himalaya-nepali-tts-amrita-extended 
+# before it was covering only around 6sec resulting in only learning from the first 6sec of each sample. This is now increased to cover p90 of the dataset.
 TARGET_SR        = 44100      # DAC model sample rate
 GPU_TAG          = "DGX"
 
@@ -202,8 +205,6 @@ class NepaliTTSDataset(Dataset):
             max_length=128, truncation=True, padding="max_length",
         )
 
-        # Always use the fixed speaker description -- see SPEAKER_DESCRIPTION above.
-        # Per-sample description columns in the dataset are intentionally ignored.
         desc_enc = desc_tokenizer(
             SPEAKER_DESCRIPTION, return_tensors="pt",
             max_length=256, truncation=True, padding="max_length",
@@ -213,9 +214,15 @@ class NepaliTTSDataset(Dataset):
         codes       = encode_audio(audio_info["array"], audio_info["sampling_rate"])
         # [NUM_CODEBOOKS, T]
 
-        # Truncate and append EOS (token 1024)
-        max_t   = MAX_AUDIO_TOKENS - 1
-        codes   = codes[:, :max_t]
+        # Append EOS (token 1024). No truncation here - the dataset-loading
+        # step already filters out any clip longer than MAX_AUDIO_TOKENS, so
+        # every sample reaching this point is a genuine, complete utterance
+        # and EOS is placed exactly where the speech actually ends.
+        max_t = MAX_AUDIO_TOKENS - 1
+        assert codes.shape[1] <= max_t, (
+            f"Sample exceeds MAX_AUDIO_TOKENS ({codes.shape[1]} > {max_t}) -- "
+            f"filtering step should have removed this. Check the filter step above."
+        )
         eos_col = torch.full((codes.shape[0], 1), 1024, dtype=codes.dtype)
         codes   = torch.cat([codes, eos_col], dim=1)[:NUM_CODEBOOKS, :]
 
@@ -276,6 +283,29 @@ print(f"Text col  : {TEXT_COL}")
 print(f"Audio col : {AUDIO_COL}")
 
 raw_ds = raw_ds.cast_column(AUDIO_COL, Audio(sampling_rate=SAMPLE_RATE))
+
+# Drop clips that exceed MAX_AUDIO_TOKENS instead of truncating + fake-EOS ---
+# The old code silently chopped any clip longer than MAX_AUDIO_TOKENS and glued
+# an EOS token onto the cutoff point, regardless of whether the sentence had
+# actually finished. Since duration analysis showed 100% of this dataset exceeds
+# the old 6.4s cap, that corrupted virtually every training example's EOS
+# supervision. We filter instead of truncate, so every remaining example has a
+# genuine, complete utterance with EOS placed where the speech actually ends.
+SAFETY_MARGIN_SEC = 1.0  # buffer for DAC framing rounding vs raw-duration estimate for filtering and safety. 
+# The DAC encoder may produce one extra frame for a given audio clip, so we subtract a second from the max duration to avoid accidentally filtering out valid clips.
+MAX_AUDIO_SECONDS = (MAX_AUDIO_TOKENS - 1) / FRAME_RATE_HZ - SAFETY_MARGIN_SEC
+print(f"\nFiltering clips longer than {MAX_AUDIO_SECONDS:.1f}s (MAX_AUDIO_TOKENS={MAX_AUDIO_TOKENS})...")
+before_n = len(raw_ds)
+
+def _under_cap(example):
+    audio = example[AUDIO_COL]
+    duration = len(audio["array"]) / audio["sampling_rate"]
+    return duration <= MAX_AUDIO_SECONDS
+
+raw_ds = raw_ds.filter(_under_cap, num_proc=4)
+after_n = len(raw_ds)
+print(f"Kept {after_n}/{before_n} samples ({after_n/before_n*100:.1f}%) "
+      f"after dropping clips over {MAX_AUDIO_SECONDS:.1f}s")
 
 split    = raw_ds.train_test_split(test_size=0.05, seed=42)
 train_ds = split["train"]
