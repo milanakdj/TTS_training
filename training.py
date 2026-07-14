@@ -61,7 +61,7 @@ login(token=hf_token)
 # 2. Config
 # =============================================================================
 
-OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v2.6-cosine-oov"
+OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v3-cosine-oov"
 DATASET_REPO  = "Titung/himalaya-nepali-tts-amrita-extended"
 FINETUNE_BASE = "ai4bharat/indic-parler-tts-pretrained"
 
