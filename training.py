@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ # -*- coding: utf-8 -*-
 """
 Indic Parler TTS — Nepali Finetuning
 Supports resuming from a HuggingFace repo checkpoint.
@@ -61,8 +61,8 @@ login(token=hf_token)
 # 2. Config
 # =============================================================================
 
-OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v3-cosine-oov"
-DATASET_REPO  = "Titung/himalaya-nepali-tts-amrita-extended"
+OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v4-slr"
+DATASET_REPO  = "lilgoose7777/slr-combined-nepali-tts2"
 FINETUNE_BASE = "ai4bharat/indic-parler-tts-pretrained"
 
 # Set True to load model weights from OUTPUT_REPO and continue training.
