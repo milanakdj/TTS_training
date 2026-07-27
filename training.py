@@ -61,7 +61,7 @@ login(token=hf_token)
 # 2. Config
 # =============================================================================
 
-OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v4-slr"
+OUTPUT_REPO   = "milanakdj/indic-parler-tts-nepali-finetuned-dgx-v4.1-slr"
 DATASET_REPO  = "lilgoose7777/slr-combined-nepali-tts2"
 FINETUNE_BASE = "ai4bharat/indic-parler-tts-pretrained"
 
@@ -77,7 +77,7 @@ NUM_EPOCHS       = 2
 BATCH_SIZE       = 8   # before it was 32 but to fit in 80GB DGX A100 we reduce to 8 and use gradient accumulation 
 # also as we had increased the MAX_AUDIO_TOKENS to 1856 which is around 21.5s of audio and this increases the memory footprint of the model.
 GRAD_ACCUM_STEPS = 8          # effective batch = 64  similar to before but now we have reduced the batch size to 8 and increased the gradient accumulation steps to 8 to fit in 80GB DGX A100 GPU memory.
-LEARNING_RATE    = 3e-6
+LEARNING_RATE    = 1e-5
 WARMUP_STEPS     = None # defaults to total_steps / 10
 SAVE_STEPS       = 200        # validate + save best
 ZIP_EVERY_STEPS  = 600        # periodic checkpoint zip
