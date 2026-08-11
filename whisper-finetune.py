@@ -5,7 +5,7 @@
 #
 # Data source: HuggingFace Hub dataset `lilgoose7777/slr-combined-nepali-tts2`
 # (177k rows, single "train" split, columns: audio, text, text_description).
-# This script pulls a 20,000-row subset from it and splits 80:10:10 locally.
+# This script pulls NUM_ROWS rows from it and splits 80:10:10 locally.
 #
 # NOTE: this dataset looks like single-speaker studio TTS audio (clean, one female
 # voice, described via `text_description` captions), not noisy multi-speaker podcast
@@ -13,15 +13,15 @@
 # only on this will likely underperform on messy real-world audio (background noise,
 # multiple speakers, accents). Good for a first proof-of-concept run.
 #
-# Matches the configuration:
-#   Model variants     : whisper-tiny / base / small / medium (set MODEL_VARIANT below)
+# Configuration (all of it lives in cell 3 -- nothing is configured anywhere else):
+#   Model variants      : whisper-tiny / base / small / medium / large-v3
+#                         (set MODEL_VARIANT; repo names derive from it)
 #   Epochs              : 3
-#   Learning rate       : 1e-5 (see LR_OVERRIDES note for tiny/base)
-#   Batch size          : 7   (grad accumulation 2 -> effective batch 14)
-#                         NOTE: automatically drops to 2/accum-7 for "medium" to
-#                         avoid OOM on a T4's ~15GB VRAM -- same effective batch.
-#   Split               : 80 / 10 / 10 (train/val/test), taken from a 20k-row subset
-#   GPU                 : RTX 4090 / Kaggle GPU (fp16 enabled)
+#   Learning rate       : per-variant via LR_OVERRIDES, default 1e-5
+#   Batch size          : 7 x accum 2 (= 14), auto-raised per variant on big GPUs:
+#                         16 x 1 for medium, 8 x 2 for large-v3 (= 16 effective).
+#   Split               : 80 / 10 / 10 (train/val/test)
+#   Precision           : bf16 where supported, fp16 fallback
 #   Metrics             : WER, CER
 #
 # DISK SAFETY
@@ -41,8 +41,11 @@
 # 1. Turn each "# %%" block into its own Kaggle notebook cell (or just run the whole
 #    file top to bottom as one cell -- it works either way).
 # 2. Enable GPU: Settings -> Accelerator -> GPU T4 x2 / P100 / etc.
-# 3. If the dataset is gated/private, add your HF token as a Kaggle Secret and set
-#    HF_TOKEN below. If it is public, leave HF_TOKEN as None.
+# 3. Export a WRITE-scoped HF token in the environment before running:
+#       export HF_TOKEN=hf_...
+#    (on Kaggle: store it as a Secret and os.environ["HF_TOKEN"] = <secret> in cell 1).
+#    The script reads it from os.environ and calls login() -- it is required, since
+#    checkpoints and the final model are pushed to the Hub.
 # 4. Run. No manifest CSV needed -- it streams/downloads directly from the Hub.
 #
 # CHECKPOINT RESUME + HF BACKUP (added)
@@ -54,8 +57,9 @@
 # - On (re)start, cell 11 looks for a checkpoint locally first; if none is
 #   found (e.g. fresh Kaggle session), it downloads the latest one from the
 #   HF checkpoints repo and resumes training from there automatically.
-# - IMPORTANT: rotate HF_TOKEN below before sharing/re-uploading this file --
-#   a live token pasted in plain text should be treated as compromised.
+# - Cell 14 pushes the final model plus a generated model card recording every
+#   setting this run used (hyperparameters, data splits, metrics), so the Hub
+#   repo documents itself. Cell 16 does the same for a promoted checkpoint.
 #
 
 # %% Cell 1
@@ -89,14 +93,21 @@ pip_install(
 )
 
 # %% Cell 2
+import gc
 import os
-import numpy as np
-import pandas as pd
+import shutil
+import time
+from dataclasses import dataclass
+from typing import Any, Dict, List, Union
+
 import torch
 import evaluate
+import datasets as hf_datasets_module
 
-from datasets import Dataset, Audio, DatasetDict
+from datasets import Audio, DatasetDict, load_dataset
+from huggingface_hub import HfApi, login, snapshot_download
 from transformers import (
+    TrainerCallback,
     WhisperFeatureExtractor,
     WhisperTokenizer,
     WhisperProcessor,
@@ -104,15 +115,17 @@ from transformers import (
     Seq2SeqTrainingArguments,
     Seq2SeqTrainer,
 )
-from dataclasses import dataclass
-from typing import Any, Dict, List, Union
+from transformers.trainer_utils import get_last_checkpoint
 
 # %% Cell 3
 HF_DATASET_ID = "lilgoose7777/slr-combined-nepali-tts2"
 HF_SPLIT = "train"  # this dataset only has one split; we carve our own below
-HF_TOKEN = None  # set to a string (or use Kaggle Secrets) if the dataset is gated
-# (must be None, not "", when unset -- an empty string
-# gets sent as a literal "Bearer " auth header and errors out)
+
+# Token comes from the environment (same as training.py) -- never hardcode it here.
+# Needs WRITE access: checkpoints and the final model are pushed to the Hub.
+#   export HF_TOKEN=hf_...        (or set it as a Kaggle Secret / env var)
+HF_TOKEN = os.environ["HF_TOKEN"]
+login(token=HF_TOKEN)
 NUM_ROWS = 177000  # full dataset (was 20000 subset for the Kaggle run)
 OUTPUT_DIR = os.path.join(
     os.path.expanduser("~"), "whisper-output"
@@ -172,14 +185,23 @@ elif MODEL_VARIANT == "large-v3":
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
 MODEL_NAME = f"openai/whisper-{MODEL_VARIANT}"
+
+# --- HF repos: derived from one user + one run name, so switching MODEL_VARIANT
+# or account is a single edit and the checkpoints/final repos can never drift
+# apart. Both are created on first push if they don't exist.
+HF_USER = "milanakdj"
+RUN_NAME = f"whisper-{MODEL_VARIANT}-nepali"
+CKPT_REPO_ID = f"{HF_USER}/{RUN_NAME}-checkpoints"  # per-epoch backups (cell 10/11)
+FINAL_REPO_ID = f"{HF_USER}/{RUN_NAME}-final"  # trained model + model card (cell 14)
+CKPT_PRIVATE = True  # in-progress checkpoints stay private...
+FINAL_PRIVATE = False  # ...the final model's visibility is set separately
 # -------------------------------------------------------------------------
 
 print(
     f"Fine-tuning {MODEL_NAME} | task={TASK} | lr={LEARNING_RATE} | "
     f"effective_batch={PER_DEVICE_TRAIN_BATCH_SIZE * GRADIENT_ACCUMULATION_STEPS}"
 )
-
-import shutil
+print(f"Checkpoints -> {CKPT_REPO_ID} | Final -> {FINAL_REPO_ID}")
 
 
 def print_disk_usage(label=""):
@@ -198,18 +220,7 @@ def print_disk_usage(label=""):
 
 print_disk_usage("at start")
 
-# --- Checkpoint backup/resume settings (added) ---
-CKPT_REPO_ID = "lilgoose7777/whisper-medium-nepali-checkpoints"  # <-- set to your OWN HF repo id; must not be ""
-# (if a friend is running this independently, they should
-# just set this to their own repo id -- new checkpoints
-# get pushed here, and resuming after a restart also
-# reads from here, so it's fully self-contained per person)
-CKPT_PRIVATE = True  # keep in-progress checkpoints private; flip the FINAL model's visibility separately in cell 14
-
-
 # %% Cell 4
-from datasets import load_dataset
-
 print(f"Loading {NUM_ROWS} rows from {HF_DATASET_ID} ({HF_SPLIT} split)...")
 
 # Slice syntax pulls only the requested rows instead of downloading the full 177k-row
@@ -268,15 +279,12 @@ processor = WhisperProcessor.from_pretrained(MODEL_NAME, language=LANGUAGE, task
 # This matters a lot more now: 177k examples single-process would take a very
 # long time on this dataset, vs. minutes with real parallelism on 20 CPU cores.
 IS_NOTEBOOK = "ipykernel" in sys.modules
-PREPROCESS_NUM_PROC = 1 if IS_NOTEBOOK else max(1, (os.cpu_count() or 1) - 2)
+PREPROCESS_NUM_PROC = 5 #1 if IS_NOTEBOOK else max(1, (os.cpu_count() or 1) - 2)
 print(
     f"[preprocess] environment={'notebook' if IS_NOTEBOOK else 'script'} -- "
     f"using num_proc={PREPROCESS_NUM_PROC}",
     flush=True,
 )
-
-import time
-import datasets as hf_datasets_module
 
 # Kaggle's "Save Version" (background) log capture doesn't render tqdm bars, so we
 # force plain-text logging and print explicit milestones with flush=True instead.
@@ -348,8 +356,6 @@ print_disk_usage("after preprocessing")
 print("[cleanup] removing raw audio dataset cache (no longer needed)...", flush=True)
 raw_datasets.cleanup_cache_files()
 del raw_datasets, full_dataset
-import gc
-
 gc.collect()
 print_disk_usage("after cleanup")
 
@@ -414,10 +420,6 @@ def compute_metrics(pred):
 
 
 # %% Cell 10
-from transformers import TrainerCallback
-from huggingface_hub import HfApi
-
-
 class PrintProgressCallback(TrainerCallback):
     """Prints plain flushed text on every log/eval/epoch event so progress is
     visible in Kaggle's 'Save Version' background logs, which don't render
@@ -525,9 +527,6 @@ trainer = Seq2SeqTrainer(
 )
 
 # %% Cell 11
-from transformers.trainer_utils import get_last_checkpoint
-from huggingface_hub import HfApi, snapshot_download
-
 # 1. Look for a checkpoint already sitting in this session's OUTPUT_DIR
 resume_checkpoint = None
 if os.path.isdir(OUTPUT_DIR):
@@ -598,21 +597,132 @@ print(f"Saved fine-tuned model to: {final_dir}")
 print_disk_usage("after saving final model")
 
 # %% Cell 14
-from huggingface_hub import login
+def build_model_card(repo_id, wer=None, cer=None, steps=None, best_wer=None):
+    """Model card recording every setting this run actually used, so a repo on the
+    Hub is self-documenting -- you can tell months later exactly what produced it
+    without digging for the script version. Values are read from the live config,
+    never retyped."""
+    eff_batch = PER_DEVICE_TRAIN_BATCH_SIZE * GRADIENT_ACCUMULATION_STEPS
+    precision = "bf16" if training_args.bf16 else ("fp16" if training_args.fp16 else "fp32")
+    fmt = lambda v: "n/a" if v is None else f"{v:.2f}"
 
-HF_REPO_ID = (
-    "lilgoose7777/whisper-medium-nepali-final"  # will be created if it doesn't exist
+    return f"""---
+language:
+- ne
+license: apache-2.0
+library_name: transformers
+pipeline_tag: automatic-speech-recognition
+tags:
+- whisper
+- nepali
+- asr
+- speech-recognition
+- finetuned
+base_model: {MODEL_NAME}
+datasets:
+- {HF_DATASET_ID}
+metrics:
+- wer
+- cer
+---
+
+# Whisper {MODEL_VARIANT} -- Nepali ASR (fine-tuned)
+
+Nepali fine-tune of [`{MODEL_NAME}`](https://huggingface.co/{MODEL_NAME}) for `{TASK}`.
+
+## Results
+
+| Metric | Value |
+|---|---|
+| Test WER | {fmt(wer)}% |
+| Test CER | {fmt(cer)}% |
+| Best eval WER | {fmt(best_wer)}% |
+| Steps trained | {steps if steps is not None else "n/a"} |
+
+## Training configuration
+
+| Parameter | Value |
+|---|---|
+| Base model | `{MODEL_NAME}` |
+| Language / task | `{LANGUAGE}` / `{TASK}` |
+| Epochs | {NUM_EPOCHS} |
+| Learning rate | {LEARNING_RATE:.0e} |
+| LR schedule | linear with {training_args.warmup_ratio:.0%} warmup ratio |
+| Per-device train batch | {PER_DEVICE_TRAIN_BATCH_SIZE} |
+| Grad accumulation steps | {GRADIENT_ACCUMULATION_STEPS} |
+| Effective batch size | {eff_batch} |
+| Per-device eval batch | {PER_DEVICE_EVAL_BATCH_SIZE} |
+| Precision | {precision} |
+| Gradient checkpointing | {training_args.gradient_checkpointing} |
+| Optimizer | {training_args.optim} |
+| Weight decay | {training_args.weight_decay} |
+| Max grad norm | {training_args.max_grad_norm} |
+| Max label length | {MAX_LABEL_LENGTH} tokens |
+| Generation max length | {training_args.generation_max_length} |
+| Eval / save strategy | per epoch (best model by WER kept) |
+| Seed | {SEED} |
+
+## Data
+
+| Parameter | Value |
+|---|---|
+| Dataset | [`{HF_DATASET_ID}`](https://huggingface.co/datasets/{HF_DATASET_ID}) |
+| Rows requested | {NUM_ROWS} |
+| Split | {TRAIN_VAL_TEST_SPLIT[0]:.0%} / {TRAIN_VAL_TEST_SPLIT[1]:.0%} / {TRAIN_VAL_TEST_SPLIT[2]:.0%} (train/val/test) |
+| Train / val / test examples | {len(vectorized_datasets["train"])} / {len(vectorized_datasets["validation"])} / {len(vectorized_datasets["test"])} |
+| Audio sampling rate | 16 kHz mono |
+| Checkpoint backups | `{CKPT_REPO_ID}` |
+
+The training corpus is clean single-speaker studio audio, so expect degraded accuracy
+on noisy real-world recordings with background noise, multiple speakers, or strong accents.
+
+## Usage
+
+```python
+import torch
+from transformers import WhisperForConditionalGeneration, WhisperProcessor
+
+model_id = "{repo_id}"
+device   = "cuda" if torch.cuda.is_available() else "cpu"
+
+processor = WhisperProcessor.from_pretrained(model_id, language="{LANGUAGE}", task="{TASK}")
+model     = WhisperForConditionalGeneration.from_pretrained(model_id).to(device)
+
+# audio: 1-D float32 numpy array at 16kHz
+inputs = processor(audio, sampling_rate=16000, return_tensors="pt").to(device)
+with torch.inference_mode():
+    ids = model.generate(inputs.input_features, max_new_tokens=225)
+
+print(processor.batch_decode(ids, skip_special_tokens=True)[0])
+```
+"""
+
+
+api = HfApi(token=HF_TOKEN)
+api.create_repo(FINAL_REPO_ID, repo_type="model", exist_ok=True, private=FINAL_PRIVATE)
+
+card = build_model_card(
+    FINAL_REPO_ID,
+    wer=test_metrics["test_wer"],
+    cer=test_metrics["test_cer"],
+    steps=trainer.state.global_step,
+    best_wer=trainer.state.best_metric,
 )
-HF_PRIVATE = False  # set True to keep the repo private
+card_path = os.path.join(final_dir, "README.md")
+with open(card_path, "w", encoding="utf-8") as f:
+    f.write(card)
 
-# Reuses HF_TOKEN from the config cell -- make sure that token has WRITE access,
-# not just read (read-only tokens will fail here with a 403).
-login(token=HF_TOKEN)
+model.push_to_hub(FINAL_REPO_ID, private=FINAL_PRIVATE)
+processor.push_to_hub(FINAL_REPO_ID, private=FINAL_PRIVATE)
+# Pushed after the model: push_to_hub writes its own stub card, so ours has to land last.
+api.upload_file(
+    path_or_fileobj=card_path,
+    path_in_repo="README.md",
+    repo_id=FINAL_REPO_ID,
+    commit_message=f"Model card -- test WER {test_metrics['test_wer']:.2f}%",
+)
 
-model.push_to_hub(HF_REPO_ID, private=HF_PRIVATE)
-processor.push_to_hub(HF_REPO_ID, private=HF_PRIVATE)
-
-print(f"Pushed to https://huggingface.co/{HF_REPO_ID}")
+print(f"Pushed to https://huggingface.co/{FINAL_REPO_ID}")
 
 # %% Cell 15
 sample = vectorized_datasets["test"].select(
@@ -634,22 +744,11 @@ for i, (p, r) in enumerate(zip(preds, refs)):
     print(f"[{i}] PRED: {p}")
 
 # %% Cell 16
-from huggingface_hub import snapshot_download
-from transformers import WhisperForConditionalGeneration, WhisperProcessor
-
-CKPT_REPO_ID = "lilgoose7777/whisper-medium-nepali-checkpoints"
+# Standalone utility -- promote one specific backed-up checkpoint into the final
+# repo. Use this when a session died after a good epoch and you never reached
+# cell 14. Repo ids come from cell 3; only pick which checkpoint you want.
 CHECKPOINT = "checkpoint-3429"
-FINAL_REPO_ID = (
-    "lilgoose7777/whisper-medium-nepali-final"  # new repo, created if missing
-)
-FINAL_PRIVATE = False
-HF_TOKEN = None  # <-- SECURITY: a live token was hardcoded here in the original
-# notebook. It has been removed. Set this via an environment
-# variable or Kaggle Secret instead -- never hardcode a real
-# token in a file you might share or upload. Rotate/revoke
-# the original token immediately if you haven't already.
 
-# Download just this one checkpoint folder
 print(f"Downloading {CHECKPOINT} from {CKPT_REPO_ID}...")
 local_dir = snapshot_download(
     repo_id=CKPT_REPO_ID,
@@ -657,7 +756,7 @@ local_dir = snapshot_download(
     allow_patterns=[f"{CHECKPOINT}/*"],
     local_dir=os.path.join(os.path.expanduser("~"), "final_checkpoint_download"),
 )
-checkpoint_path = f"{local_dir}/{CHECKPOINT}"
+checkpoint_path = os.path.join(local_dir, CHECKPOINT)
 print(f"Downloaded to: {checkpoint_path}")
 
 # Load model + processor straight from the checkpoint -- everything needed
@@ -665,9 +764,20 @@ print(f"Downloaded to: {checkpoint_path}")
 model = WhisperForConditionalGeneration.from_pretrained(checkpoint_path)
 processor = WhisperProcessor.from_pretrained(checkpoint_path)
 
-# Push both to the new, clean "final" repo
 print(f"Pushing to {FINAL_REPO_ID}...")
 model.push_to_hub(FINAL_REPO_ID, private=FINAL_PRIVATE, token=HF_TOKEN)
 processor.push_to_hub(FINAL_REPO_ID, private=FINAL_PRIVATE, token=HF_TOKEN)
+
+# Same card as cell 14, minus the test metrics (no eval was run on this path) --
+# the step count comes from the checkpoint name.
+card_path = os.path.join(checkpoint_path, "README.md")
+with open(card_path, "w", encoding="utf-8") as f:
+    f.write(build_model_card(FINAL_REPO_ID, steps=int(CHECKPOINT.split("-")[1])))
+HfApi(token=HF_TOKEN).upload_file(
+    path_or_fileobj=card_path,
+    path_in_repo="README.md",
+    repo_id=FINAL_REPO_ID,
+    commit_message=f"Model card -- promoted {CHECKPOINT}",
+)
 
 print(f"Done: https://huggingface.co/{FINAL_REPO_ID}")
