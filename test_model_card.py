@@ -44,6 +44,7 @@ def load_build_model_card():
         "NUM_ROWS": 177000,
         "TRAIN_VAL_TEST_SPLIT": (0.80, 0.10, 0.10),
         "SEED": 42,
+        "EVAL_SUBSET": 2000,
         "training_args": _Args(),
         "vectorized_datasets": {
             "train": [0] * 141600,

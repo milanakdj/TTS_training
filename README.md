@@ -12,6 +12,7 @@ Everything runs from a single Python file per model — no framework, no config 
 | `whisper-finetune.py` | Whisper Nepali ASR fine-tune. HF `Seq2SeqTrainer`, WER/CER, per-epoch checkpoint backup to HF + auto-resume. |
 | `push_checkpoint_to_hub.py` | One-off: upload a local `best_checkpoint` folder to a HF model repo. |
 | `test_model_card.py` | Renders `whisper-finetune.py`'s model card against stub state. Run it after editing the card. |
+| `test_vram_fit.py` | Runs a few training steps on synthetic batches to check the config fits in free VRAM. ~1 min vs ~25 min for a real attempt. |
 | `qwen_nepali_clean_package/` | Qwen3-TTS 1.7B Nepali package — see its own `QWEN_RUNBOOK.md`. |
 | `inference_indic_tts_new.ipynb` | Colab inference for the fine-tuned Parler-TTS model (batch generation over test sentences). |
 | `inference_test_collab.ipynb` | Older/scratch inference notebook. |
@@ -139,7 +140,12 @@ Config lives in Cell 3:
 | `MODEL_VARIANT` | `medium` | `tiny` / `base` / `small` / `medium` / `large-v3`. |
 | `NUM_ROWS` | `177000` | Full dataset. Lower it for a quick run — it slices at download time. |
 | `LEARNING_RATE` | per-variant | `LR_OVERRIDES` maps variant → LR (5e-5 tiny … 5e-6 large-v3). Set `LR_OVERRIDES = {}` to force 1e-5 everywhere. |
-| batch size | 16 (medium), 8×2 (large-v3), else 7×2 | Effective batch stays 14–16 across variants. |
+| batch size | 4×4 (medium), 2×8 (large-v3), else 7×2 | Effective batch stays 14–16 across variants. Sized for a ~20GB slice of the shared GPU. |
+| `OPTIM` | `adamw_bnb_8bit` | AdamW's two fp32 moments are ~6.2 GB for whisper-medium. 8-bit states cut that to ~1.5 GB with identical optimizer behaviour. `adafactor` saves ~6 GB with no dependency but is not Adam — retune the LR if you use it. |
+| `GRADIENT_CHECKPOINTING` | `False` | ~half the activation memory for ~25–30% slower steps, but it errors on this transformers/torch build. `gradient_checkpointing_kwargs={"use_reentrant": False}` is already set for when you re-enable it. |
+| `EVAL_SUBSET` | `2000` | Per-epoch validation size. The test split is still evaluated in full. |
+| `VRAM_BUDGET_GB` | `20` | Only drives the startup warning. Set it to what you actually expect to get. |
+| `CLEANUP_RAW_CACHE` | `False` | See the cache note below. |
 | `NUM_EPOCHS` | `3` | `eval_strategy` and `save_strategy` are both `"epoch"`. |
 | `HF_USER` | `milanakdj` | **Set this to your own account.** Both repo ids derive from it. |
 | `OUTPUT_DIR` | `~/whisper-output` | Local checkpoints; `save_total_limit=2`. |
@@ -164,9 +170,26 @@ Details worth knowing:
 - **Resume is automatic.** On start it looks for a local checkpoint in `OUTPUT_DIR`; if there is none it
   lists `CKPT_REPO_ID`, downloads the highest-numbered `checkpoint-*`, and resumes from it. No checkpoint
   anywhere → fresh start.
+- **The GPU is shared** with a vLLM server holding ~99 GB of the 122 GB card, leaving ~21 GB. A `[gpu]`
+  line at startup prints free vs total VRAM and warns below `VRAM_BUDGET_GB`. Preprocessing runs ~25 minutes
+  before the first training step, so without that check an already-full GPU costs half an hour to discover.
+  `torch.cuda.mem_get_info()` reports memory across all processes, so another user's job shows up as
+  missing VRAM.
+- **On a small slice, the optimizer is the biggest lever.** For whisper-medium, fp32 weights + grads +
+  AdamW moments are ~12.4 GB static before a single activation; the moments alone are ~6.2 GB of that.
+  `OPTIM = "adamw_bnb_8bit"` cuts them to ~1.5 GB without changing what the optimizer does — a larger
+  saving than gradient checkpointing, and it composes with it.
+- **Per-epoch validation runs on `EVAL_SUBSET` examples, not all 17.7k.** `predict_with_generate` decodes
+  autoregressively, so the full split would be hours per epoch for a number used only to rank checkpoints.
+  The split is pre-shuffled and `select()` is deterministic, so epochs stay comparable. Cell 12 still
+  evaluates the full test split — that runs once and is the number you report.
 - **Disk usage is printed at every milestone** (`[disk] ...`). A full disk causes silent stalls, not clean
-  errors — this is how you see it coming. The raw decoded-audio cache is deleted right after preprocessing,
-  since only log-mel features and token ids are needed from then on; that cache was the original culprit.
+  errors — this is how you see it coming.
+- **`CLEANUP_RAW_CACHE` is off by default.** `cleanup_cache_files()` deletes every `cache-*.arrow` in the
+  dataset's cache directory except the ones `raw_datasets` is using — and the `map()` output backing
+  `vectorized_datasets` lives in that same directory. The current run is unaffected (the files stay open
+  until the process exits), but the next run redoes all ~25 minutes of preprocessing. Turn it on only when
+  disk is actually tight, as it was on Kaggle's quota.
 - **bf16 where supported**, fp16 fallback otherwise. tqdm is disabled and progress printed as flushed plain
   text, because background log capture (Kaggle "Save Version") doesn't render progress bars.
 - Labels longer than 448 tokens (Whisper's decoder limit) are filtered out.
@@ -182,6 +205,21 @@ into the final repo, model card included. Set `CHECKPOINT` to the one you want; 
 
 After editing the card, `python test_model_card.py` renders it against stub state (no GPU, no dataset) and
 checks the placeholders resolve — otherwise a typo in a 90-line f-string surfaces only at the end of a run.
+
+### Checking a config fits before running it
+
+Preprocessing takes ~25 minutes before the first training step, so a batch size that doesn't fit is
+expensive to discover. `test_vram_fit.py` reads the real config out of `whisper-finetune.py` (no duplicated
+numbers), builds the model, and runs a few steps on synthetic batches. Whisper's encoder input is a fixed
+3000 frames, so a fake batch has the same memory profile as a real one.
+
+```bash
+python test_vram_fit.py              # the config as written
+python test_vram_fit.py --batch 8    # try bigger
+```
+
+It reports peak VRAM against what's free, tells you whether to step up or down, and fails clearly if
+`adamw_bnb_8bit` doesn't load on this machine.
 
 ## Qwen3-TTS
 
@@ -210,5 +248,6 @@ background noise, multiple speakers, and varied accents.
 | Preprocessing hangs at 0% CPU, no error | CUDA initialised before a forking `map()`. Don't move the model load earlier. |
 | Silent stall mid-training | Disk full. Check the `[disk]` lines. |
 | OOM in `training.py` | Lower `BATCH_SIZE`, raise `GRAD_ACCUM_STEPS` by the same factor to keep the effective batch. |
-| OOM in `whisper-finetune.py` | Same trade in the per-variant block in Cell 3. |
+| OOM in `whisper-finetune.py` | Read the OOM text: if it says another process holds most of the card, you're sharing it — check `nvidia-smi`. Otherwise set `GRADIENT_CHECKPOINTING = True` and make the same batch/accum trade in the per-variant block in Cell 3. |
+| `num_proc` and OOM | Unrelated. `PREPROCESS_NUM_PROC` is CPU-side and only affects preprocessing, which has already finished by the time training allocates VRAM. |
 | Generated speech cuts off mid-sentence | `MAX_AUDIO_TOKENS` too low for the corpus — clips are being filtered, or an older run truncated them. |

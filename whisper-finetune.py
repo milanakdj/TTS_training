@@ -18,11 +18,20 @@
 #                         (set MODEL_VARIANT; repo names derive from it)
 #   Epochs              : 3
 #   Learning rate       : per-variant via LR_OVERRIDES, default 1e-5
-#   Batch size          : 7 x accum 2 (= 14), auto-raised per variant on big GPUs:
-#                         16 x 1 for medium, 8 x 2 for large-v3 (= 16 effective).
+#   Batch size          : 7 x accum 2 (= 14), retuned per variant for a ~20GB
+#                         VRAM slice: 4 x 4 for medium, 2 x 8 for large-v3
+#                         (= 16 effective in both cases).
 #   Split               : 80 / 10 / 10 (train/val/test)
 #   Precision           : bf16 where supported, fp16 fallback
 #   Metrics             : WER, CER
+#
+# SHARED GPU
+# ----------
+# This box's GPU is shared with a vLLM server holding ~99GB of the 122GB card, so
+# this run gets ~21GB. A startup check ([gpu] ... line) prints free vs total VRAM
+# and warns below VRAM_BUDGET_GB, because preprocessing runs ~25 minutes before
+# the first training step -- without it, a full GPU costs half an hour to find out
+# about. Batch sizes and OPTIM in cell 3 are both sized for that slice.
 #
 # DISK SAFETY
 # -----------
@@ -93,8 +102,13 @@ pip_install(
 )
 
 # %% Cell 2
-import gc
 import os
+
+# Must be set before torch initialises its CUDA allocator. Reduces fragmentation,
+# which matters most when the GPU is shared and you only get a slice of it.
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
+import gc
 import shutil
 import time
 from dataclasses import dataclass
@@ -137,6 +151,7 @@ TASK = "transcribe"  # "transcribe" (ne->ne) or "translate" (ne audio -> en text
 
 TRAIN_VAL_TEST_SPLIT = (0.80, 0.10, 0.10)
 SEED = 42
+EVAL_SUBSET = 2000  # per-epoch validation size; see the note above the Trainer
 
 # --- Hyperparameters from your table ---
 NUM_EPOCHS = 3
@@ -155,34 +170,50 @@ LR_OVERRIDES = {
 }
 LEARNING_RATE = LR_OVERRIDES.get(MODEL_VARIANT, BASE_LEARNING_RATE)
 
+# The GPU is shared: a vLLM server (PID 735719) holds ~99GB of the 122GB card,
+# leaving this run ~21GB. Everything below is sized for that slice, not the full
+# card. If you get the whole GPU back, raise PER_DEVICE_TRAIN_BATCH_SIZE and lower
+# GRADIENT_ACCUMULATION_STEPS by the same factor -- the effective batch (and
+# therefore the result) is unchanged.
+# VRAM_BUDGET_GB only drives the startup check, which fails fast instead of 25
+# minutes into preprocessing.
+VRAM_BUDGET_GB = 20
+
+# Recomputes activations in the backward pass instead of storing them: ~half the
+# activation memory for ~25-30% slower steps. Left OFF because it errors on this
+# transformers/torch build -- OPTIM below buys more memory anyway. If you turn it
+# back on, use_reentrant=False (set in training_args) is the non-deprecated path
+# and fixes most of the ways it breaks.
+GRADIENT_CHECKPOINTING = False
+
+# The optimizer is the biggest lever on a small VRAM slice. For whisper-medium's
+# 769M params, AdamW keeps two fp32 moments = ~6.2GB of the ~12.4GB static
+# footprint, before a single activation is stored.
+#   "adamw_torch"     -- baseline, ~6.2GB of states
+#   "adamw_bnb_8bit"  -- same Adam behaviour, states quantized to ~1.5GB (saves
+#                        ~4.7GB). Needs bitsandbytes; training.py already uses it.
+#   "adafactor"       -- factored second moment, states are megabytes (saves
+#                        ~6GB), no extra dependency, but it is NOT Adam -- the
+#                        1e-5 LR was tuned for AdamW, so expect to retune.
+# Try adamw_bnb_8bit first: it is the only option that saves memory without
+# changing what the optimizer does.
+OPTIM = "adamw_bnb_8bit"
+
 PER_DEVICE_TRAIN_BATCH_SIZE = 7
 GRADIENT_ACCUMULATION_STEPS = 2  # effective batch size = 7 * 2 = 14
 PER_DEVICE_EVAL_BATCH_SIZE = 7
 
-# The batch-size logic below was tuned for Kaggle's dual T4s (~15GB VRAM each,
-# where even batch size 2 OOM'd on Medium, and DataParallel's gradient-gather
-# added real overhead). DGX Spark is a different machine: ONE Blackwell GPU
-# with 128GB unified memory shared between CPU and GPU -- no second GPU to
-# restrict away, and far more headroom, so bumping batch size up and dropping
-# the CUDA_VISIBLE_DEVICES restriction (there's only one GPU anyway).
 if MODEL_VARIANT == "medium":
-    PER_DEVICE_TRAIN_BATCH_SIZE = 16
-    GRADIENT_ACCUMULATION_STEPS = 1  # 16 * 1 = 16 effective batch
-    PER_DEVICE_EVAL_BATCH_SIZE = 16
-    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"  # still
-    # cheap insurance against fragmentation
-    # If you hit an OOM anyway (unlikely with 128GB, but audio batches vary in
-    # length), just lower PER_DEVICE_TRAIN_BATCH_SIZE and raise
-    # GRADIENT_ACCUMULATION_STEPS to keep the same effective batch of 16.
+    # ~769M params. fp32 weights + grads + Adam states alone are ~12GB before a
+    # single activation, so batch 16 needs the whole card. 4 x 4 fits a ~20GB slice.
+    PER_DEVICE_TRAIN_BATCH_SIZE = 4
+    GRADIENT_ACCUMULATION_STEPS = 4  # 4 * 4 = 16 effective batch
+    PER_DEVICE_EVAL_BATCH_SIZE = 4  # eval has no grads, but keep headroom for generate()
 elif MODEL_VARIANT == "large-v3":
-    # ~1.5B params -- roughly 2x Medium's ~769M, so a smaller per-device batch,
-    # made up for with gradient accumulation to keep the same effective batch
-    # of 16. Still comfortably fits your 128GB unified memory with room to spare;
-    # lower this further only if you actually hit an OOM.
-    PER_DEVICE_TRAIN_BATCH_SIZE = 8
-    GRADIENT_ACCUMULATION_STEPS = 2  # 8 * 2 = 16 effective batch
-    PER_DEVICE_EVAL_BATCH_SIZE = 8
-    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+    # ~1.5B params -- roughly 2x medium, so halve the per-device batch again.
+    PER_DEVICE_TRAIN_BATCH_SIZE = 2
+    GRADIENT_ACCUMULATION_STEPS = 8  # 2 * 8 = 16 effective batch
+    PER_DEVICE_EVAL_BATCH_SIZE = 2
 
 MODEL_NAME = f"openai/whisper-{MODEL_VARIANT}"
 
@@ -202,6 +233,39 @@ print(
     f"effective_batch={PER_DEVICE_TRAIN_BATCH_SIZE * GRADIENT_ACCUMULATION_STEPS}"
 )
 print(f"Checkpoints -> {CKPT_REPO_ID} | Final -> {FINAL_REPO_ID}")
+
+
+def check_gpu_budget():
+    """Preprocessing takes ~25 minutes before a single training step runs, so a
+    GPU that is already full costs half an hour to discover. Check it now.
+
+    This is a shared machine -- torch reports free memory across ALL processes,
+    so another user's job shows up here as missing VRAM."""
+    if not torch.cuda.is_available():
+        print("[gpu] no CUDA device -- training will be unusably slow on CPU")
+        return
+    free_b, total_b = torch.cuda.mem_get_info()
+    free_gb, total_gb = free_b / 1e9, total_b / 1e9
+    print(
+        f"[gpu] {torch.cuda.get_device_name(0)}: "
+        f"{free_gb:.1f}GB free / {total_gb:.1f}GB total "
+        f"({total_gb - free_gb:.1f}GB held by other processes)",
+        flush=True,
+    )
+    if free_gb < VRAM_BUDGET_GB:
+        print(
+            f"\n  WARNING: only {free_gb:.1f}GB free, config is sized for "
+            f"{VRAM_BUDGET_GB}GB.\n"
+            f"  Either wait for the other job, or lower PER_DEVICE_TRAIN_BATCH_SIZE\n"
+            f"  (currently {PER_DEVICE_TRAIN_BATCH_SIZE}) and raise "
+            f"GRADIENT_ACCUMULATION_STEPS by the same\n"
+            f"  factor to keep the effective batch at "
+            f"{PER_DEVICE_TRAIN_BATCH_SIZE * GRADIENT_ACCUMULATION_STEPS}.\n",
+            flush=True,
+        )
+
+
+check_gpu_budget()
 
 
 def print_disk_usage(label=""):
@@ -349,12 +413,27 @@ for split_name in list(vectorized_datasets.keys()):
 print(f"[preprocess] filtering done in {time.time() - _t0:.1f}s", flush=True)
 print_disk_usage("after preprocessing")
 
-# Free disk space: the raw decoded-audio cache is no longer needed now that
-# everything is converted into vectorized_datasets (log-mel features + token
-# ids). This is what was filling up disk earlier -- clean it up before loading
-# the model, so training doesn't risk hitting the quota mid-run.
-print("[cleanup] removing raw audio dataset cache (no longer needed)...", flush=True)
-raw_datasets.cleanup_cache_files()
+# Frees the raw decoded-audio cache, which is no longer needed once everything is
+# log-mel features + token ids. This was essential on Kaggle's ~20GB quota.
+#
+# It is OFF by default here because it is blunter than it looks:
+# cleanup_cache_files() deletes every cache-*.arrow in the dataset's cache
+# directory except the ones raw_datasets itself is using -- and the map() output
+# backing vectorized_datasets sits in that same directory. Deleting it costs
+# nothing this run (the files stay open until the process exits) but throws away
+# the ~25 minutes of preprocessing, so the next run redoes all of it from scratch.
+# Leave it False on a machine with disk to spare and restarts get cheap.
+CLEANUP_RAW_CACHE = False
+
+if CLEANUP_RAW_CACHE:
+    print("[cleanup] removing raw audio dataset cache...", flush=True)
+    raw_datasets.cleanup_cache_files()
+else:
+    print(
+        "[cleanup] skipped (CLEANUP_RAW_CACHE=False) -- keeps the preprocessing "
+        "cache so a restart doesn't redo it",
+        flush=True,
+    )
 del raw_datasets, full_dataset
 gc.collect()
 print_disk_usage("after cleanup")
@@ -490,7 +569,11 @@ training_args = Seq2SeqTrainingArguments(
     learning_rate=LEARNING_RATE,
     num_train_epochs=NUM_EPOCHS,
     warmup_ratio=0.05,
-    gradient_checkpointing=True,
+    optim=OPTIM,
+    gradient_checkpointing=GRADIENT_CHECKPOINTING,
+    # Reentrant checkpointing is deprecated in torch and is what breaks on most
+    # recent builds; this kwarg is ignored when checkpointing is off.
+    gradient_checkpointing_kwargs={"use_reentrant": False},
     bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),  # Blackwell
     # supports bf16 natively -- more numerically stable than fp16
     # (no loss-scaling needed) and just as fast on this hardware.
@@ -512,11 +595,22 @@ training_args = Seq2SeqTrainingArguments(
     push_to_hub=False,
 )
 
+# predict_with_generate runs autoregressive decoding, so per-epoch eval on the
+# full 17.7k validation split means ~17.7k generate() calls -- hours per epoch,
+# for a number only used to rank checkpoints. A fixed subset gives the same
+# ranking far cheaper. The split was already shuffled, so the first N are random,
+# and select() is deterministic so epochs stay comparable. The test set in cell 12
+# is still evaluated in full -- that runs once and is the number you report.
+eval_subset = vectorized_datasets["validation"].select(
+    range(min(EVAL_SUBSET, len(vectorized_datasets["validation"])))
+)
+print(f"[eval] validating on {len(eval_subset)} of {len(vectorized_datasets['validation'])} examples per epoch")
+
 trainer = Seq2SeqTrainer(
     args=training_args,
     model=model,
     train_dataset=vectorized_datasets["train"],
-    eval_dataset=vectorized_datasets["validation"],
+    eval_dataset=eval_subset,
     data_collator=data_collator,
     compute_metrics=compute_metrics,
     processing_class=processor,
@@ -670,6 +764,7 @@ Nepali fine-tune of [`{MODEL_NAME}`](https://huggingface.co/{MODEL_NAME}) for `{
 | Rows requested | {NUM_ROWS} |
 | Split | {TRAIN_VAL_TEST_SPLIT[0]:.0%} / {TRAIN_VAL_TEST_SPLIT[1]:.0%} / {TRAIN_VAL_TEST_SPLIT[2]:.0%} (train/val/test) |
 | Train / val / test examples | {len(vectorized_datasets["train"])} / {len(vectorized_datasets["validation"])} / {len(vectorized_datasets["test"])} |
+| Per-epoch validation subset | {min(EVAL_SUBSET, len(vectorized_datasets["validation"]))} (test metrics use the full test split) |
 | Audio sampling rate | 16 kHz mono |
 | Checkpoint backups | `{CKPT_REPO_ID}` |
 
