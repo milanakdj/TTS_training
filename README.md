@@ -166,7 +166,13 @@ Details worth knowing:
 - **The model is loaded *after* preprocessing** (Cell 7, not Cell 5). Loading it earlier initialises a CUDA
   context, and `datasets.map(num_proc>1)` forks after that — workers then hang at 0% CPU forever with no error.
 - **Every epoch checkpoint is pushed to `CKPT_REPO_ID`** as it is written (`PushCheckpointToHubCallback`),
-  so a checkpoint survives a session dying mid-run.
+  so a checkpoint survives a session dying mid-run. The upload is wrapped in a `try/except` — a backup
+  must never kill the run it is backing up. An HF storage quota did exactly that once, throwing away a
+  finished epoch at the moment of success. The local checkpoint is written before the callback fires, so
+  training continues and the failure is just logged.
+- **The checkpoints repo is public.** Free accounts have a small *private* storage quota and whisper-medium
+  checkpoints are several GB each, so `CKPT_PRIVATE = True` fails partway through training with
+  `403 Private repository storage limit reached`.
 - **Resume is automatic.** On start it looks for a local checkpoint in `OUTPUT_DIR`; if there is none it
   lists `CKPT_REPO_ID`, downloads the highest-numbered `checkpoint-*`, and resumes from it. No checkpoint
   anywhere → fresh start.
@@ -245,6 +251,7 @@ background noise, multiple speakers, and varied accents.
 |---|---|
 | `KeyError: 'HF_TOKEN'` at startup | Token not exported. This is intentional — fail at second 0, not after training. |
 | 403 on push, training already done | Token is read-only. Needs write scope. |
+| `403 Private repository storage limit reached` | Private storage quota exhausted. Set `CKPT_PRIVATE = False`, or delete old checkpoint repos. |
 | Preprocessing hangs at 0% CPU, no error | CUDA initialised before a forking `map()`. Don't move the model load earlier. |
 | Silent stall mid-training | Disk full. Check the `[disk]` lines. |
 | OOM in `training.py` | Lower `BATCH_SIZE`, raise `GRAD_ACCUM_STEPS` by the same factor to keep the effective batch. |

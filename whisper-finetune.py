@@ -224,8 +224,11 @@ HF_USER = "milanakdj"
 RUN_NAME = f"whisper-{MODEL_VARIANT}-nepali"
 CKPT_REPO_ID = f"{HF_USER}/{RUN_NAME}-checkpoints"  # per-epoch backups (cell 10/11)
 FINAL_REPO_ID = f"{HF_USER}/{RUN_NAME}-final"  # trained model + model card (cell 14)
-CKPT_PRIVATE = True  # in-progress checkpoints stay private...
-FINAL_PRIVATE = False  # ...the final model's visibility is set separately
+# Public: free accounts have a small PRIVATE storage quota, and whisper-medium
+# checkpoints are several GB each. A private checkpoints repo hits
+# "403 Private repository storage limit reached" partway through training.
+CKPT_PRIVATE = False
+FINAL_PRIVATE = False
 # -------------------------------------------------------------------------
 
 print(
@@ -547,18 +550,31 @@ class PushCheckpointToHubCallback(TrainerCallback):
 
     def on_save(self, args, state, control, **kwargs):
         ckpt_dir = os.path.join(args.output_dir, f"checkpoint-{state.global_step}")
-        if os.path.isdir(ckpt_dir):
-            print(f"[hf-backup] uploading {ckpt_dir} to {self.repo_id} ...", flush=True)
+        if not os.path.isdir(ckpt_dir):
+            return
+        print(f"[hf-backup] uploading {ckpt_dir} to {self.repo_id} ...", flush=True)
+        try:
             self.api.upload_folder(
                 folder_path=ckpt_dir,
                 path_in_repo=f"checkpoint-{state.global_step}",
                 repo_id=self.repo_id,
                 repo_type="model",
             )
+        except Exception as e:
+            # NEVER let a backup failure kill the run it is backing up. An HF
+            # storage quota once destroyed a completed epoch this way. The local
+            # checkpoint is already on disk (the Trainer writes it before this
+            # callback fires), so training can safely continue and resume later.
             print(
-                f"[hf-backup] done: https://huggingface.co/{self.repo_id}/tree/main/checkpoint-{state.global_step}",
+                f"\n[hf-backup] FAILED, continuing anyway: {type(e).__name__}: {e}\n"
+                f"[hf-backup] local checkpoint is intact at {ckpt_dir}\n",
                 flush=True,
             )
+            return
+        print(
+            f"[hf-backup] done: https://huggingface.co/{self.repo_id}/tree/main/checkpoint-{state.global_step}",
+            flush=True,
+        )
 
 
 training_args = Seq2SeqTrainingArguments(
