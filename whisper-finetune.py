@@ -547,6 +547,15 @@ class PushCheckpointToHubCallback(TrainerCallback):
         self.repo_id = repo_id
         self.api = HfApi(token=token)
         self.api.create_repo(repo_id, repo_type="model", exist_ok=True, private=private)
+        # create_repo(exist_ok=True) does NOT change the settings of a repo that
+        # already exists, so a repo created private by an earlier run stays
+        # private and keeps hitting the private-storage quota. Force it.
+        try:
+            self.api.update_repo_settings(repo_id=repo_id, private=private)
+        except AttributeError:  # huggingface_hub < 0.26
+            self.api.update_repo_visibility(repo_id=repo_id, private=private)
+        except Exception as e:
+            print(f"[hf-backup] could not set visibility: {e}", flush=True)
 
     def on_save(self, args, state, control, **kwargs):
         ckpt_dir = os.path.join(args.output_dir, f"checkpoint-{state.global_step}")
@@ -858,7 +867,10 @@ for i, (p, r) in enumerate(zip(preds, refs)):
 # Standalone utility -- promote one specific backed-up checkpoint into the final
 # repo. Use this when a session died after a good epoch and you never reached
 # cell 14. Repo ids come from cell 3; only pick which checkpoint you want.
-CHECKPOINT = "checkpoint-3429"
+CHECKPOINT = os.environ.get("PROMOTE_CHECKPOINT")
+if not CHECKPOINT:
+    print("[promote] set PROMOTE_CHECKPOINT=checkpoint-N to promote a backup; skipping")
+    raise SystemExit(0)
 
 print(f"Downloading {CHECKPOINT} from {CKPT_REPO_ID}...")
 local_dir = snapshot_download(
@@ -868,6 +880,11 @@ local_dir = snapshot_download(
     local_dir=os.path.join(os.path.expanduser("~"), "final_checkpoint_download"),
 )
 checkpoint_path = os.path.join(local_dir, CHECKPOINT)
+if not os.path.isfile(os.path.join(checkpoint_path, "config.json")):
+    raise SystemExit(
+        f"{CHECKPOINT} not in {CKPT_REPO_ID} -- check the repo's file list for the "
+        f"available checkpoint-N dirs"
+    )
 print(f"Downloaded to: {checkpoint_path}")
 
 # Load model + processor straight from the checkpoint -- everything needed
