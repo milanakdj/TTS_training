@@ -145,7 +145,7 @@ OUTPUT_DIR = os.path.join(
     os.path.expanduser("~"), "whisper-output"
 )  # local path on DGX Spark
 
-MODEL_VARIANT = "medium"  # one of: "tiny", "base", "small", "medium", "large-v3"
+MODEL_VARIANT = "large-v3"  # one of: "tiny", "base", "small", "medium", "large-v3"
 LANGUAGE = "nepali"  # Whisper's language tag for decoding
 TASK = "transcribe"  # "transcribe" (ne->ne) or "translate" (ne audio -> en text)
 
@@ -223,7 +223,7 @@ MODEL_NAME = f"openai/whisper-{MODEL_VARIANT}"
 HF_USER = "milanakdj"
 RUN_NAME = f"whisper-{MODEL_VARIANT}-nepali"
 CKPT_REPO_ID = f"{HF_USER}/{RUN_NAME}-checkpoints"  # per-epoch backups (cell 10/11)
-FINAL_REPO_ID = f"{HF_USER}/{RUN_NAME}-final"  # trained model + model card (cell 14)
+FINAL_REPO_ID = f"{HF_USER}/{RUN_NAME}-final-largev3"  # trained model + model card (cell 14)
 # Public: free accounts have a small PRIVATE storage quota, and whisper-medium
 # checkpoints are several GB each. A private checkpoints repo hits
 # "403 Private repository storage limit reached" partway through training.
