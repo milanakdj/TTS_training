@@ -141,11 +141,16 @@ HF_SPLIT = "train"  # this dataset only has one split; we carve our own below
 HF_TOKEN = os.environ["HF_TOKEN"]
 login(token=HF_TOKEN)
 NUM_ROWS = 177000  # full dataset (was 20000 subset for the Kaggle run)
+# Scoped by MODEL_VARIANT: checkpoint dirs are not compatible across model
+# sizes (different d_model/mel dims), and the resume logic picks whatever is
+# in OUTPUT_DIR. Without the variant in the path, switching medium -> large-v3
+# would load a medium checkpoint into a large-v3 model and die on state_dict
+# size mismatch.
+MODEL_VARIANT = "large-v3"  # one of: "tiny", "base", "small", "medium", "large-v3"
 OUTPUT_DIR = os.path.join(
-    os.path.expanduser("~"), "whisper-output"
+    os.path.expanduser("~"), "whisper-output", MODEL_VARIANT
 )  # local path on DGX Spark
 
-MODEL_VARIANT = "large-v3"  # one of: "tiny", "base", "small", "medium", "large-v3"
 LANGUAGE = "nepali"  # Whisper's language tag for decoding
 TASK = "transcribe"  # "transcribe" (ne->ne) or "translate" (ne audio -> en text)
 
@@ -210,10 +215,19 @@ if MODEL_VARIANT == "medium":
     GRADIENT_ACCUMULATION_STEPS = 4  # 4 * 4 = 16 effective batch
     PER_DEVICE_EVAL_BATCH_SIZE = 4  # eval has no grads, but keep headroom for generate()
 elif MODEL_VARIANT == "large-v3":
-    # ~1.5B params -- roughly 2x medium, so halve the per-device batch again.
-    PER_DEVICE_TRAIN_BATCH_SIZE = 2
-    GRADIENT_ACCUMULATION_STEPS = 8  # 2 * 8 = 16 effective batch
-    PER_DEVICE_EVAL_BATCH_SIZE = 2
+    # ~1.54B params. fp32 weights (6.2GB) + grads (6.2GB) + 8-bit Adam (3.1GB) is
+    # ~15.5GB of STATIC memory before a single activation -- batch 2 OOM'd on a
+    # 17GB slice with room to spare, and no batch size fixes that. Adafactor's
+    # factored second moment drops the optimizer to megabytes, taking static to
+    # ~12.4GB; checkpointing + batch 1 keeps activations near 1GB. ~13.5GB total.
+    PER_DEVICE_TRAIN_BATCH_SIZE = 1
+    GRADIENT_ACCUMULATION_STEPS = 16  # 1 * 16 = 16 effective batch, unchanged
+    PER_DEVICE_EVAL_BATCH_SIZE = 1  # generate() holds a KV cache -- 2 OOMs at eval
+    GRADIENT_CHECKPOINTING = True  # no longer optional at this size
+    OPTIM = "adafactor"  # NOT free: different update rule to AdamW, so the loss
+    # curve won't match a medium run. It's the only lever that touches static
+    # memory. Put "adamw_bnb_8bit" back the moment you get >25GB of the card.
+    VRAM_BUDGET_GB = 14  # what the above actually needs; the startup check uses it
 
 MODEL_NAME = f"openai/whisper-{MODEL_VARIANT}"
 
