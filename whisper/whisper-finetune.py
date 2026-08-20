@@ -264,9 +264,15 @@ MODEL_NAME = f"openai/whisper-{MODEL_VARIANT}"
 # or account is a single edit and the checkpoints/final repos can never drift
 # apart. Both are created on first push if they don't exist.
 HF_USER = "milanakdj"
+# WHISPER_RUN_SUFFIX names the FINAL repo for this run, so a new run cannot publish
+# over a model you still care about:
+#   WHISPER_RUN_SUFFIX=v2 python whisper-finetune.py  ->  ...-nepali-final-v2
+# The checkpoints repo name is deliberately NOT scoped: it is a crash backup, its
+# contents are overwritten by every run, and nothing depends on old copies.
+_SUFFIX = os.environ.get("WHISPER_RUN_SUFFIX", "")
 RUN_NAME = f"whisper-{MODEL_VARIANT}-nepali"
-CKPT_REPO_ID = f"{HF_USER}/{RUN_NAME}-checkpoints"  # per-epoch backups (cell 10/11)
-FINAL_REPO_ID = f"{HF_USER}/{RUN_NAME}-final-largev3_v2"  # trained model + model card (cell 14)
+CKPT_REPO_ID = f"{HF_USER}/{RUN_NAME}-checkpoints"  # per-epoch backups (cell 10)
+FINAL_REPO_ID = f"{HF_USER}/{RUN_NAME}-final" + (f"-{_SUFFIX}" if _SUFFIX else "")
 # Public: free accounts have a small PRIVATE storage quota, and whisper-medium
 # checkpoints are several GB each. A private checkpoints repo hits
 # "403 Private repository storage limit reached" partway through training.
@@ -744,61 +750,23 @@ trainer = Seq2SeqTrainer(
 )
 
 # %% Cell 11
-# WHISPER_RESUME=0 disables every form of resume. Use it whenever the TRAINING CODE
-# has changed: a checkpoint from the old collator carries the doubled-prefix habit,
-# and silently continuing from it produces another broken model. Resume is for a
-# crashed session, not for a code change.
-RESUME_ENABLED = os.environ.get("WHISPER_RESUME") != "0"
-
-# 1. Look for a checkpoint already sitting in this session's OUTPUT_DIR
+# Resume is LOCAL ONLY, on purpose. An earlier version fell back to downloading the
+# newest checkpoint from the Hub backup repo, which silently pulled 6GB of stale
+# weights into a run meant to start fresh -- and then trained zero steps because
+# that checkpoint was already complete. Deleting the local checkpoint folder is now
+# all it takes to start over.
 resume_checkpoint = None
-if RESUME_ENABLED and os.path.isdir(OUTPUT_DIR):
-    resume_checkpoint = get_last_checkpoint(OUTPUT_DIR)
-
-# 2. If nothing local (e.g. fresh Kaggle session after a disconnect),
-#    check the HF backup repo for the most recent checkpoint and pull it down.
-if not RESUME_ENABLED:
+if os.environ.get("WHISPER_RESUME") == "0":
     print("[resume] disabled by WHISPER_RESUME=0 -- training from the base model",
           flush=True)
-elif resume_checkpoint is None:
-    print("[resume] no local checkpoint -- checking HF backup repo...", flush=True)
-    try:
-        api = HfApi(token=HF_TOKEN)
-        files = api.list_repo_files(CKPT_REPO_ID, repo_type="model")
-        steps = sorted(
-            {
-                int(f.split("/")[0].split("-")[1])
-                for f in files
-                if f.startswith("checkpoint-")
-            }
-        )
-        if steps:
-            latest_step = steps[-1]
-            print(
-                f"[resume] found checkpoint-{latest_step} on HF -- downloading...",
-                flush=True,
-            )
-            snapshot_download(
-                repo_id=CKPT_REPO_ID,
-                repo_type="model",
-                allow_patterns=[f"checkpoint-{latest_step}/*"],
-                local_dir=OUTPUT_DIR,
-                token=HF_TOKEN,
-            )
-            resume_checkpoint = os.path.join(OUTPUT_DIR, f"checkpoint-{latest_step}")
-            print(f"[resume] downloaded to {resume_checkpoint}", flush=True)
-        else:
-            print(
-                "[resume] no checkpoints found on HF either -- starting fresh",
-                flush=True,
-            )
-    except Exception as e:
-        print(
-            f"[resume] couldn't check HF backup repo ({e}) -- starting fresh",
-            flush=True,
-        )
+elif os.path.isdir(OUTPUT_DIR):
+    resume_checkpoint = get_last_checkpoint(OUTPUT_DIR)
+
+if resume_checkpoint:
+    print(f"[resume] continuing from local checkpoint: {resume_checkpoint}", flush=True)
 else:
-    print(f"[resume] found local checkpoint: {resume_checkpoint}", flush=True)
+    print(f"[resume] no local checkpoint in {OUTPUT_DIR} -- training from "
+          f"{MODEL_NAME}", flush=True)
 
 # A checkpoint at or past the planned step count has nothing left to train. The
 # Trainer accepts it, returns in 7 milliseconds, and every downstream cell then
