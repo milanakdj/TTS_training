@@ -140,13 +140,21 @@ HF_SPLIT = "train"  # this dataset only has one split; we carve our own below
 #   export HF_TOKEN=hf_...        (or set it as a Kaggle Secret / env var)
 HF_TOKEN = os.environ["HF_TOKEN"]
 login(token=HF_TOKEN)
-NUM_ROWS = 177000  # full dataset (was 20000 subset for the Kaggle run)
+NUM_ROWS = int(os.environ.get("WHISPER_NUM_ROWS", 177000))  # full dataset
+# (was 20000 subset for the Kaggle run)
 # Scoped by MODEL_VARIANT: checkpoint dirs are not compatible across model
 # sizes (different d_model/mel dims), and the resume logic picks whatever is
 # in OUTPUT_DIR. Without the variant in the path, switching medium -> large-v3
 # would load a medium checkpoint into a large-v3 model and die on state_dict
 # size mismatch.
-MODEL_VARIANT = "large-v3"  # one of: "tiny", "base", "small", "medium", "large-v3"
+# Env overrides exist for ONE reason: to smoke-test this exact script end to end on
+# a tiny model in minutes before committing 80 hours to large-v3. Nothing about the
+# pipeline differs between sizes, so a passing tiny run proves the collator, the
+# label shifting and generate() all agree. Defaults are the real large-v3 run.
+#   WHISPER_VARIANT=tiny WHISPER_NUM_ROWS=400 WHISPER_EPOCHS=1 \
+#   WHISPER_EVAL_SUBSET=32 python whisper-finetune.py
+MODEL_VARIANT = os.environ.get("WHISPER_VARIANT", "large-v3")
+# one of: "tiny", "base", "small", "medium", "large-v3"
 OUTPUT_DIR = os.path.join(
     os.path.expanduser("~"), "whisper-output", MODEL_VARIANT
 )  # local path on DGX Spark
@@ -169,7 +177,7 @@ EVAL_SUBSET = 2000  # per-epoch validation size; see the note above the Trainer
 GENERATION_MAX_LEN = 225
 
 # --- Hyperparameters from your table ---
-NUM_EPOCHS = 3
+NUM_EPOCHS = float(os.environ.get("WHISPER_EPOCHS", 3))
 BASE_LEARNING_RATE = 1e-5
 
 # Optional: per-model LR override. Smaller models often converge better with a
@@ -212,7 +220,9 @@ GRADIENT_CHECKPOINTING = False
 #                        1e-5 LR was tuned for AdamW, so expect to retune.
 # Try adamw_bnb_8bit first: it is the only option that saves memory without
 # changing what the optimizer does.
-OPTIM = "adamw_bnb_8bit"
+OPTIM = os.environ.get("WHISPER_OPTIM", "adamw_bnb_8bit")
+# adamw_bnb_8bit needs bitsandbytes. On a box without it, a smoke run would die on
+# an unrelated dependency, so WHISPER_OPTIM=adamw_torch is the escape hatch.
 
 PER_DEVICE_TRAIN_BATCH_SIZE = 7
 GRADIENT_ACCUMULATION_STEPS = 2  # effective batch size = 7 * 2 = 14
@@ -243,6 +253,10 @@ elif MODEL_VARIANT == "large-v3":
     GENERATION_MAX_LEN = 96  # ceiling only -- the real value is measured from the
     # eval labels just before the Trainer is built, and is usually far lower
 
+# Applied after the per-variant block above so the env value always wins.
+if "WHISPER_EVAL_SUBSET" in os.environ:
+    EVAL_SUBSET = int(os.environ["WHISPER_EVAL_SUBSET"])
+
 MODEL_NAME = f"openai/whisper-{MODEL_VARIANT}"
 
 # --- HF repos: derived from one user + one run name, so switching MODEL_VARIANT
@@ -251,7 +265,7 @@ MODEL_NAME = f"openai/whisper-{MODEL_VARIANT}"
 HF_USER = "milanakdj"
 RUN_NAME = f"whisper-{MODEL_VARIANT}-nepali"
 CKPT_REPO_ID = f"{HF_USER}/{RUN_NAME}-checkpoints"  # per-epoch backups (cell 10/11)
-FINAL_REPO_ID = f"{HF_USER}/{RUN_NAME}-final-largev3"  # trained model + model card (cell 14)
+FINAL_REPO_ID = f"{HF_USER}/{RUN_NAME}-final-largev3_v2"  # trained model + model card (cell 14)
 # Public: free accounts have a small PRIVATE storage quota, and whisper-medium
 # checkpoints are several GB each. A private checkpoints repo hits
 # "403 Private repository storage limit reached" partway through training.
@@ -716,10 +730,16 @@ trainer = Seq2SeqTrainer(
     data_collator=data_collator,
     compute_metrics=compute_metrics,
     processing_class=processor,
-    callbacks=[
-        PrintProgressCallback(),
-        PushCheckpointToHubCallback(CKPT_REPO_ID, HF_TOKEN, private=CKPT_PRIVATE),
-    ],
+    # WHISPER_PUSH=0 keeps a smoke run from creating a junk checkpoints repo and
+    # uploading gigabytes nobody wants.
+    callbacks=(
+        [PrintProgressCallback()]
+        + (
+            []
+            if os.environ.get("WHISPER_PUSH") == "0"
+            else [PushCheckpointToHubCallback(CKPT_REPO_ID, HF_TOKEN, private=CKPT_PRIVATE)]
+        )
+    ),
 )
 
 # %% Cell 11
