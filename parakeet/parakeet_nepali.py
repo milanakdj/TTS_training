@@ -16,6 +16,7 @@ this works at all.
 
 Run the steps in order; each skips itself if its output already exists:
 
+    python parakeet_nepali.py smoke      # run this first on any new box
     python parakeet_nepali.py manifests
     python parakeet_nepali.py tokenizer
     python parakeet_nepali.py train
@@ -59,6 +60,57 @@ AI4BHARAT_NE_URL = (
 # v3's TDT joint emits vocab + 1 blank + 5 durations. Those 6 tail entries are
 # pretrained and language-independent, so they get copied back verbatim.
 TDT_TAIL = 6
+
+# The only knobs the hardware forces. Tuned for a DGX Spark with ~21 GB of the 128 GB
+# unified pool actually free. BATCH * ACCUM is the effective batch -- keep the product
+# at 32 when you change either. Free the rest of the pool and BATCH = 8 fits easily.
+BATCH = 2
+ACCUM = 16
+# Optimizer steps, not batches. Spark's 273 GB/s bandwidth makes this the wall-clock
+# knob: measure it/s over the first 100 steps, then set a number you will actually wait
+# for. 30k steps is ~5 epochs of 177k rows at effective batch 32.
+MAX_STEPS = 30000
+UNFREEZE_AT = 5000
+
+
+# --------------------------------------------------------------------------
+def step_smoke():
+    """Prove the stack works before spending a day on data.
+
+    On aarch64 + CUDA 13 + sm_121 the fragile part is not NeMo itself -- it is the
+    RNNT loss, whose kernels numba-cuda compiles at runtime for whatever arch it
+    finds. If sm_121 is unsupported this fails here in seconds instead of after the
+    dataset download, the wav export and the vocab merge.
+    """
+    import torch
+
+    print(f"[smoke] torch {torch.__version__}, cuda {torch.version.cuda}")
+    assert torch.cuda.is_available(), "no CUDA device"
+    print(f"[smoke] device: {torch.cuda.get_device_name(0)} sm_{''.join(map(str, torch.cuda.get_device_capability()))}")
+
+    import soundfile  # step_manifests writes every wav through this
+
+    from nemo.collections.asr.losses.rnnt import RNNTLoss
+
+    n_classes = 16  # blank is id n_classes, so the logit dim is n_classes + 1
+    loss_fn = RNNTLoss(num_classes=n_classes)
+    B, T, U = 2, 8, 4
+    logits = torch.randn(B, T, U + 1, n_classes + 1, device="cuda", requires_grad=True)
+    loss = loss_fn(
+        log_probs=logits,
+        targets=torch.randint(1, n_classes, (B, U), dtype=torch.int32, device="cuda"),
+        input_lengths=torch.full((B,), T, dtype=torch.int32, device="cuda"),
+        target_lengths=torch.full((B,), U, dtype=torch.int32, device="cuda"),
+    )
+    loss.backward()
+    assert torch.isfinite(loss) and torch.isfinite(logits.grad).all(), "RNNT loss produced NaN/Inf"
+    print(f"[smoke] rnnt loss forward+backward on gpu: {float(loss):.4f}")
+
+    import nemo.collections.asr as nemo_asr
+
+    model = nemo_asr.models.ASRModel.from_pretrained(BASE_MODEL, map_location="cpu")
+    print(f"[smoke] {BASE_MODEL} loaded, vocab {model.tokenizer.vocab_size}")
+    print("[smoke] ok")
 
 
 # --------------------------------------------------------------------------
@@ -229,7 +281,9 @@ def step_train():
     old_embed = model.decoder.prediction.embed
     old_dec_rnn = model.decoder.prediction.dec_rnn
     old_joint_pred, old_joint_enc = model.joint.pred, model.joint.enc
-    old_joint_out = model.joint.joint_net[2]
+    # joint_net is [activation, (dropout if >0), Linear] -- index 2 only lands on the
+    # Linear when jointnet dropout happens to be non-zero. [-1] is always the output.
+    old_joint_out = model.joint.joint_net[-1]
 
     model.change_vocabulary(
         new_tokenizer_dir=MERGED_TOKENIZER_DIR,
@@ -246,7 +300,7 @@ def step_train():
         model.joint.pred, model.joint.enc = old_joint_pred, old_joint_enc
         # Joint output: original ids, then the blank + 5 duration logits at the tail.
         for attr in ("weight", "bias"):
-            new_p, old_p = getattr(model.joint.joint_net[2], attr), getattr(old_joint_out, attr)
+            new_p, old_p = getattr(model.joint.joint_net[-1], attr), getattr(old_joint_out, attr)
             new_p[:prev_vocab] = old_p[:prev_vocab]
             new_p[-TDT_TAIL:] = old_p[-TDT_TAIL:]
     del old_embed, old_dec_rnn, old_joint_pred, old_joint_enc, old_joint_out
@@ -259,18 +313,22 @@ def step_train():
             ds = model.cfg[key]
             ds.manifest_filepath = os.path.join(MANIFEST_DIR, f"{name}.json")
             ds.sample_rate = 16000
-            ds.batch_size = 4
+            ds.batch_size = BATCH
             ds.shuffle = shuffle
             ds.num_workers = 8
             ds.pin_memory = True
             ds.max_duration = 20.0
+            ds.min_duration = 0.1  # TTS corpora carry empty/clipped rows; they blow up the loss
             ds.is_tarred = False
 
         # The RNNT joint materialises a [B, T, U, V] tensor -- at V=8704 that is the
         # single largest allocation in the run, far bigger than the weights. Fusing
         # the loss into the joint computes it in fused_batch_size slices instead.
+        # ponytail: batch 4 is the reported fit for ~11 GB with the encoder frozen.
+        # Unfreezing adds encoder activations and can OOM there, not at step 0 -- so a
+        # run that survived 5000 steps is not proof the config fits.
         model.cfg.joint.fuse_loss_wer = True
-        model.cfg.joint.fused_batch_size = 4
+        model.cfg.joint.fused_batch_size = BATCH
 
         # Encoder is already a good multilingual acoustic model; the decoder/joint
         # rows for Nepali are noise. Same LR for both would wreck the encoder long
@@ -280,11 +338,10 @@ def step_train():
         model.cfg.optim.weight_decay = 1e-3
         model.cfg.optim.sched.warmup_steps = 5000
         model.cfg.optim.sched.min_lr = 1e-6
-        model.cfg.optim.param_groups = {
-            "encoder": {"lr": 1e-6},
-            "decoder": {"lr": 4e-4},
-            "joint": {"lr": 4e-4},
-        }
+        # NeMo reads per-module LRs from cfg.optim_param_groups (a top-level model key),
+        # NOT from cfg.optim.param_groups -- a stray key under optim is silently dropped
+        # and the encoder would then train at the full 4e-4.
+        model.cfg.optim_param_groups = {"encoder": {"lr": 1e-6}}
 
     model.setup_training_data(model.cfg.train_ds)
     model.setup_multiple_validation_data(model.cfg.validation_ds)
@@ -311,15 +368,16 @@ def step_train():
     trainer = pl.Trainer(
         devices=1,
         accelerator="gpu",
-        max_steps=150000,
-        accumulate_grad_batches=8,  # effective batch 32
+        max_steps=MAX_STEPS,
+        accumulate_grad_batches=ACCUM,
         precision="bf16-mixed",
         val_check_interval=2000,
         limit_val_batches=100,
         log_every_n_steps=50,
         gradient_clip_val=1.0,
         enable_progress_bar=False,
-        callbacks=[UnfreezeEncoder(5000)],
+        num_sanity_val_steps=0,  # a fresh vocab predicts noise; the sanity pass proves nothing
+        callbacks=[UnfreezeEncoder(UNFREEZE_AT)],
     )
     exp_manager(
         trainer,
@@ -334,9 +392,22 @@ def step_train():
     trainer.fit(model)
     model.save_to(os.path.join(WORK, "parakeet-tdt-0.6b-v3-nepali.nemo"))
 
+    # Held-out WER. train/val WER during a vocab extension look fine long before the
+    # model generalises, so the untouched test split is the only honest number.
+    test_cfg = model.cfg.validation_ds.copy()
+    with open_dict(test_cfg):
+        test_cfg.manifest_filepath = os.path.join(MANIFEST_DIR, "test.json")
+    model.setup_multiple_test_data(test_cfg)
+    trainer.test(model)
+
 
 if __name__ == "__main__":
-    steps = {"manifests": step_manifests, "tokenizer": step_tokenizer, "train": step_train}
+    steps = {
+        "smoke": step_smoke,
+        "manifests": step_manifests,
+        "tokenizer": step_tokenizer,
+        "train": step_train,
+    }
     if len(sys.argv) != 2 or sys.argv[1] not in steps:
         sys.exit(f"usage: {sys.argv[0]} {{{'|'.join(steps)}}}")
     os.makedirs(WORK, exist_ok=True)

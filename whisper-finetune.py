@@ -158,6 +158,16 @@ TRAIN_VAL_TEST_SPLIT = (0.80, 0.10, 0.10)
 SEED = 42
 EVAL_SUBSET = 2000  # per-epoch validation size; see the note above the Trainer
 
+# Autoregressive eval is the single most expensive thing in this script. The
+# large-v3 run measured 0.178 examples/second at eval batch 1, so 2000 validation
+# examples cost 3.1 HOURS per epoch -- 9 hours of the 80-hour run spent on a number
+# only used to rank three checkpoints. Two levers, both applied for large-v3 below:
+#   EVAL_SUBSET       -- fewer examples
+#   GENERATION_MAX_LEN -- fewer tokens per example. This dataset's transcripts are
+#                        ~24 characters (~15 tokens); 225 let every hallucinating
+#                        decode run 15x longer than any real answer.
+GENERATION_MAX_LEN = 225
+
 # --- Hyperparameters from your table ---
 NUM_EPOCHS = 3
 BASE_LEARNING_RATE = 1e-5
@@ -228,6 +238,10 @@ elif MODEL_VARIANT == "large-v3":
     # curve won't match a medium run. It's the only lever that touches static
     # memory. Put "adamw_bnb_8bit" back the moment you get >25GB of the card.
     VRAM_BUDGET_GB = 14  # what the above actually needs; the startup check uses it
+    EVAL_SUBSET = 500  # 2000 cost 3.1 hours per epoch at batch 1; 500 ranks
+    # checkpoints just as well in ~45 minutes
+    GENERATION_MAX_LEN = 96  # ceiling only -- the real value is measured from the
+    # eval labels just before the Trainer is built, and is usually far lower
 
 MODEL_NAME = f"openai/whisper-{MODEL_VARIANT}"
 
@@ -485,8 +499,23 @@ class DataCollatorSpeechSeq2SeqWithPadding:
             labels_batch.attention_mask.ne(1), -100
         )
 
-        # strip the BOS token if the tokenizer already added one that the model re-adds
-        if (labels[:, 0] == self.processor.tokenizer.bos_token_id).all().cpu().item():
+        # Strip the leading <|startoftranscript|> the tokenizer added, because
+        # Trainer re-adds it when it shifts labels into decoder_input_ids.
+        #
+        # This MUST compare against decoder_start_token_id (<|startoftranscript|>,
+        # 50258). It used to compare against tokenizer.bos_token_id, which for
+        # Whisper is <|endoftext|> (50257) -- a token that never appears first, so
+        # the strip never happened. The model then trained on a doubled prefix
+        # ([sot, sot, lang, task, notimestamps]) while generate() feeds the normal
+        # single-sot prefix: every position off by one, output is fluent garbage,
+        # WER in the hundreds, and the training loss looks perfect because training
+        # is self-consistent. Do not "simplify" this back to bos_token_id.
+        start = self.processor.tokenizer.convert_tokens_to_ids("<|startoftranscript|>")
+        assert start == model.config.decoder_start_token_id, (
+            f"decoder_start_token_id {model.config.decoder_start_token_id} is not "
+            f"<|startoftranscript|> ({start}) -- label shifting would be wrong"
+        )
+        if (labels[:, 0] == start).all().cpu().item():
             labels = labels[:, 1:]
 
         batch["labels"] = labels
@@ -539,6 +568,29 @@ class PrintProgressCallback(TrainerCallback):
             if k in logs:
                 parts.append(f"{k}={logs[k]:.4f}")
         print(f"[train] {' | '.join(parts)}", flush=True)
+
+    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+        """A WER above 100% with a low eval_loss means the model predicts perfectly
+        under teacher forcing but cannot generate -- a decoder prefix / label
+        alignment bug, not a weak model. The large-v3 run burned 80 hours before
+        anyone read this number. Say it loudly at the FIRST eval instead."""
+        if not metrics:
+            return
+        wer = metrics.get("eval_wer")
+        loss = metrics.get("eval_loss")
+        if wer is not None and wer > 100:
+            print(
+                "\n" + "!" * 78 + "\n"
+                f"[ALARM] eval_wer={wer:.1f}% with eval_loss={loss:.4f}.\n"
+                "  A WER above 100% is not a weak model -- generation is broken.\n"
+                "  Teacher forcing hides it, so the loss looks fine and always will.\n"
+                "  Usual cause: the labels still carry <|startoftranscript|>, so the\n"
+                "  Trainer's shift produced a DOUBLED prefix and every position is off\n"
+                "  by one. Check the strip in DataCollatorSpeechSeq2SeqWithPadding.\n"
+                "  STOP THE RUN and fix it -- more epochs will not help.\n"
+                + "!" * 78 + "\n",
+                flush=True,
+            )
 
     def on_epoch_end(self, args, state, control, **kwargs):
         print(
@@ -600,6 +652,27 @@ class PushCheckpointToHubCallback(TrainerCallback):
         )
 
 
+# predict_with_generate runs autoregressive decoding, so per-epoch eval on the
+# full 17.7k validation split means ~17.7k generate() calls -- hours per epoch,
+# for a number only used to rank checkpoints. A fixed subset gives the same
+# ranking far cheaper. The split was already shuffled, so the first N are random,
+# and select() is deterministic so epochs stay comparable. Cell 12 scores a larger
+# TEST_SUBSET once at the end -- that is the number you report.
+eval_subset = vectorized_datasets["validation"].select(
+    range(min(EVAL_SUBSET, len(vectorized_datasets["validation"])))
+)
+print(f"[eval] validating on {len(eval_subset)} of {len(vectorized_datasets['validation'])} examples per epoch")
+
+# Derive the generation cap from the labels instead of guessing. A hallucinating
+# decode runs to this limit on EVERY example, so a cap 10x longer than the longest
+# real transcript multiplies eval time by 10 for nothing. Measured on the eval
+# subset itself, +8 tokens of headroom, and never above GENERATION_MAX_LEN.
+_max_label = max(len(l) for l in eval_subset["labels"])
+GENERATION_MAX_LEN = min(GENERATION_MAX_LEN, _max_label + 8)
+print(f"[eval] longest eval label is {_max_label} tokens -> "
+      f"generation_max_length={GENERATION_MAX_LEN}", flush=True)
+
+
 training_args = Seq2SeqTrainingArguments(
     output_dir=OUTPUT_DIR,
     per_device_train_batch_size=PER_DEVICE_TRAIN_BATCH_SIZE,
@@ -623,9 +696,10 @@ training_args = Seq2SeqTrainingArguments(
     eval_strategy="epoch",
     save_strategy="epoch",
     predict_with_generate=True,
-    generation_max_length=225,
+    generation_max_length=GENERATION_MAX_LEN,
     logging_steps=25,  # on_log fires every 25 steps -- adjust for more/less frequent prints
-    disable_tqdm=True,  # suppress rich progress bars; we print explicitly instead
+    disable_tqdm=False,  # bars ON: the eval bar is the only sign of life during a
+    # multi-hour generate() pass. PrintProgressCallback still prints the milestones.
     report_to=["none"],
     load_best_model_at_end=True,
     metric_for_best_model="wer",
@@ -633,17 +707,6 @@ training_args = Seq2SeqTrainingArguments(
     save_total_limit=2,
     push_to_hub=False,
 )
-
-# predict_with_generate runs autoregressive decoding, so per-epoch eval on the
-# full 17.7k validation split means ~17.7k generate() calls -- hours per epoch,
-# for a number only used to rank checkpoints. A fixed subset gives the same
-# ranking far cheaper. The split was already shuffled, so the first N are random,
-# and select() is deterministic so epochs stay comparable. The test set in cell 12
-# is still evaluated in full -- that runs once and is the number you report.
-eval_subset = vectorized_datasets["validation"].select(
-    range(min(EVAL_SUBSET, len(vectorized_datasets["validation"])))
-)
-print(f"[eval] validating on {len(eval_subset)} of {len(vectorized_datasets['validation'])} examples per epoch")
 
 trainer = Seq2SeqTrainer(
     args=training_args,
@@ -714,8 +777,22 @@ print_disk_usage("after training")
 
 
 # %% Cell 12
+# The full 17.7k test split at eval batch 1 means 17.7k autoregressive generate()
+# calls on large-v3 -- 20+ hours, and it looks like a hang because tqdm is the only
+# output. 2000 examples is plenty for a reported WER. Training is over, so no
+# optimizer/grad memory is held: a bigger eval batch fits now.
+TEST_SUBSET = 2000
+trainer.args.per_device_eval_batch_size = max(PER_DEVICE_EVAL_BATCH_SIZE, 8)
+test_set = vectorized_datasets["test"].select(
+    range(min(TEST_SUBSET, len(vectorized_datasets["test"])))
+)
+print(
+    f"[test] evaluating {len(test_set)} of {len(vectorized_datasets['test'])} examples "
+    f"at batch {trainer.args.per_device_eval_batch_size}",
+    flush=True,
+)
 test_metrics = trainer.evaluate(
-    eval_dataset=vectorized_datasets["test"],
+    eval_dataset=test_set,
     metric_key_prefix="test",
 )
 print(f"\n=== {MODEL_NAME} TEST RESULTS ===")
@@ -803,7 +880,7 @@ Nepali fine-tune of [`{MODEL_NAME}`](https://huggingface.co/{MODEL_NAME}) for `{
 | Rows requested | {NUM_ROWS} |
 | Split | {TRAIN_VAL_TEST_SPLIT[0]:.0%} / {TRAIN_VAL_TEST_SPLIT[1]:.0%} / {TRAIN_VAL_TEST_SPLIT[2]:.0%} (train/val/test) |
 | Train / val / test examples | {len(vectorized_datasets["train"])} / {len(vectorized_datasets["validation"])} / {len(vectorized_datasets["test"])} |
-| Per-epoch validation subset | {min(EVAL_SUBSET, len(vectorized_datasets["validation"]))} (test metrics use the full test split) |
+| Per-epoch validation subset | {min(EVAL_SUBSET, len(vectorized_datasets["validation"]))} (test metrics use {min(TEST_SUBSET, len(vectorized_datasets["test"]))} test examples) |
 | Audio sampling rate | 16 kHz mono |
 | Checkpoint backups | `{CKPT_REPO_ID}` |
 
@@ -832,9 +909,11 @@ print(processor.batch_decode(ids, skip_special_tokens=True)[0])
 """
 
 
-api = HfApi(token=HF_TOKEN)
-api.create_repo(FINAL_REPO_ID, repo_type="model", exist_ok=True, private=FINAL_PRIVATE)
-
+# The card is written to disk BEFORE any network call. The large-v3 run died right
+# here on a RemoteDisconnected from huggingface.co, after 80 hours of training and
+# 29 hours of test eval -- everything after this point was lost to one TCP reset.
+# Weights and card are already on local disk; the push is retried, and a failure
+# prints the manual command instead of raising.
 card = build_model_card(
     FINAL_REPO_ID,
     wer=test_metrics["test_wer"],
@@ -845,18 +924,47 @@ card = build_model_card(
 card_path = os.path.join(final_dir, "README.md")
 with open(card_path, "w", encoding="utf-8") as f:
     f.write(card)
+print(f"[push] card written to {card_path}", flush=True)
 
-model.push_to_hub(FINAL_REPO_ID, private=FINAL_PRIVATE)
-processor.push_to_hub(FINAL_REPO_ID, private=FINAL_PRIVATE)
-# Pushed after the model: push_to_hub writes its own stub card, so ours has to land last.
-api.upload_file(
-    path_or_fileobj=card_path,
-    path_in_repo="README.md",
-    repo_id=FINAL_REPO_ID,
-    commit_message=f"Model card -- test WER {test_metrics['test_wer']:.2f}%",
-)
 
-print(f"Pushed to https://huggingface.co/{FINAL_REPO_ID}")
+def push_final(attempts=3):
+    """Returns True on success. Never raises -- the run is already finished and the
+    artifacts are on disk, so a network error is a nuisance, not a failure."""
+    api = HfApi(token=HF_TOKEN)
+    for attempt in range(1, attempts + 1):
+        try:
+            api.create_repo(
+                FINAL_REPO_ID, repo_type="model", exist_ok=True, private=FINAL_PRIVATE
+            )
+            model.push_to_hub(FINAL_REPO_ID, private=FINAL_PRIVATE)
+            processor.push_to_hub(FINAL_REPO_ID, private=FINAL_PRIVATE)
+            # After the model: push_to_hub writes its own stub card, so ours lands last.
+            api.upload_file(
+                path_or_fileobj=card_path,
+                path_in_repo="README.md",
+                repo_id=FINAL_REPO_ID,
+                commit_message=f"Model card -- test WER {test_metrics['test_wer']:.2f}%",
+            )
+            print(f"Pushed to https://huggingface.co/{FINAL_REPO_ID}", flush=True)
+            return True
+        except Exception as e:
+            print(f"[push] attempt {attempt}/{attempts} failed: "
+                  f"{type(e).__name__}: {e}", flush=True)
+            if attempt < attempts:
+                time.sleep(30 * attempt)
+    print(
+        f"\n[push] could not reach the Hub. NOTHING IS LOST -- the model is at\n"
+        f"  {final_dir}\n"
+        f"and the card at\n  {card_path}\n"
+        f"Upload it by hand when the network is back:\n"
+        f"  HF_TOKEN=... hf upload {FINAL_REPO_ID} {final_dir} . \\\n"
+        f"    --commit-message 'test WER {test_metrics['test_wer']:.2f}%'\n",
+        flush=True,
+    )
+    return False
+
+
+push_final()
 
 # %% Cell 15
 sample = vectorized_datasets["test"].select(
@@ -866,7 +974,7 @@ inputs = data_collator([sample[i] for i in range(len(sample))])
 with torch.no_grad():
     generated_ids = model.generate(
         input_features=inputs["input_features"].to(model.device),
-        max_new_tokens=225,
+        max_new_tokens=GENERATION_MAX_LEN,
     )
 preds = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
 labels = inputs["labels"].clone()
