@@ -109,6 +109,7 @@ import os
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 import gc
+import math
 import shutil
 import time
 from dataclasses import dataclass
@@ -743,14 +744,23 @@ trainer = Seq2SeqTrainer(
 )
 
 # %% Cell 11
+# WHISPER_RESUME=0 disables every form of resume. Use it whenever the TRAINING CODE
+# has changed: a checkpoint from the old collator carries the doubled-prefix habit,
+# and silently continuing from it produces another broken model. Resume is for a
+# crashed session, not for a code change.
+RESUME_ENABLED = os.environ.get("WHISPER_RESUME") != "0"
+
 # 1. Look for a checkpoint already sitting in this session's OUTPUT_DIR
 resume_checkpoint = None
-if os.path.isdir(OUTPUT_DIR):
+if RESUME_ENABLED and os.path.isdir(OUTPUT_DIR):
     resume_checkpoint = get_last_checkpoint(OUTPUT_DIR)
 
 # 2. If nothing local (e.g. fresh Kaggle session after a disconnect),
 #    check the HF backup repo for the most recent checkpoint and pull it down.
-if resume_checkpoint is None:
+if not RESUME_ENABLED:
+    print("[resume] disabled by WHISPER_RESUME=0 -- training from the base model",
+          flush=True)
+elif resume_checkpoint is None:
     print("[resume] no local checkpoint -- checking HF backup repo...", flush=True)
     try:
         api = HfApi(token=HF_TOKEN)
@@ -789,6 +799,26 @@ if resume_checkpoint is None:
         )
 else:
     print(f"[resume] found local checkpoint: {resume_checkpoint}", flush=True)
+
+# A checkpoint at or past the planned step count has nothing left to train. The
+# Trainer accepts it, returns in 7 milliseconds, and every downstream cell then
+# reports and PUBLISHES the old weights as if they were new. That happened once;
+# it does not happen silently again.
+if resume_checkpoint is not None:
+    _resumed_step = int(os.path.basename(resume_checkpoint.rstrip("/")).split("-")[-1])
+    _eff_batch = PER_DEVICE_TRAIN_BATCH_SIZE * GRADIENT_ACCUMULATION_STEPS
+    _planned = math.ceil(len(vectorized_datasets["train"]) / _eff_batch) * NUM_EPOCHS
+    if _resumed_step >= _planned * 0.999:
+        raise SystemExit(
+            f"\n[resume] REFUSING TO RUN.\n"
+            f"  {resume_checkpoint} is at step {_resumed_step} of {int(_planned)} "
+            f"planned steps.\n"
+            f"  Resuming it trains NOTHING, then reports and pushes those old weights.\n"
+            f"  Pick one:\n"
+            f"    WHISPER_RESUME=0 python whisper-finetune.py   # train fresh from the base model\n"
+            f"    WHISPER_EPOCHS=4 python whisper-finetune.py   # genuinely continue this run\n"
+            f"  To score the existing checkpoint instead, use whisper-eval.py.\n"
+        )
 
 print_disk_usage("before training")
 print("[train] entering trainer.train() ...", flush=True)
@@ -984,7 +1014,16 @@ def push_final(attempts=3):
     return False
 
 
-push_final()
+if test_metrics["test_wer"] > 100:
+    print(
+        f"\n[push] NOT pushing. Test WER is {test_metrics['test_wer']:.1f}%, above 100%,\n"
+        f"  which means generation is broken rather than merely weak. The model is on\n"
+        f"  disk at {final_dir} if you want to inspect it. Publishing this number\n"
+        f"  would only mislead whoever downloads it.\n",
+        flush=True,
+    )
+else:
+    push_final()
 
 # %% Cell 15
 sample = vectorized_datasets["test"].select(
