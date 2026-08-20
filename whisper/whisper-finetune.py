@@ -402,9 +402,15 @@ print(
     flush=True,
 )
 
-# Kaggle's "Save Version" (background) log capture doesn't render tqdm bars, so we
-# force plain-text logging and print explicit milestones with flush=True instead.
-hf_datasets_module.disable_progress_bar()
+# Bars are useful in an interactive terminal and useless everywhere else: Kaggle's
+# background log capture and any `> log.txt` redirect cannot render them, and a bar
+# writing \r a thousand times turns a log file into noise. So key it on whether
+# stdout is a real terminal. Milestones are printed with flush=True either way.
+SHOW_BARS = sys.stdout.isatty()
+if not SHOW_BARS:
+    hf_datasets_module.disable_progress_bar()
+print(f"[preprocess] progress bars {'on' if SHOW_BARS else 'off (not a terminal)'}",
+      flush=True)
 
 MAX_LABEL_LENGTH = 448  # Whisper decoder max target length
 
@@ -430,8 +436,8 @@ _t0 = time.time()
 vectorized_datasets = DatasetDict()
 for split_name, split_ds in raw_datasets.items():
     print(
-        f"[preprocess] {split_name}: {len(split_ds)} examples -- processing now "
-        f"(no live bar; this prints once at start and once at finish per split)",
+        f"[preprocess] {split_name}: {len(split_ds)} examples -- processing now"
+        + ("" if SHOW_BARS else " (no live bar; one line at start, one at finish)"),
         flush=True,
     )
     _split_t0 = time.time()
@@ -719,7 +725,7 @@ training_args = Seq2SeqTrainingArguments(
     predict_with_generate=True,
     generation_max_length=GENERATION_MAX_LEN,
     logging_steps=25,  # on_log fires every 25 steps -- adjust for more/less frequent prints
-    disable_tqdm=False,  # bars ON: the eval bar is the only sign of life during a
+    disable_tqdm=not SHOW_BARS,  # the eval bar is the only sign of life during a
     # multi-hour generate() pass. PrintProgressCallback still prints the milestones.
     report_to=["none"],
     load_best_model_at_end=True,
