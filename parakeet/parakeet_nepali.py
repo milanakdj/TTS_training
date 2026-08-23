@@ -25,6 +25,7 @@ Run the steps in order; each skips itself if its output already exists:
 import json
 import os
 import sys
+import time
 
 WORK = os.path.expanduser("~/parakeet-nepali")
 MANIFEST_DIR = os.path.join(WORK, "manifests")
@@ -117,9 +118,10 @@ def step_smoke():
 def step_manifests():
     """HF dataset -> wav files + NeMo line-delimited JSON manifests."""
     import soundfile as sf
-    from datasets import load_dataset
+    from datasets import Audio, load_dataset
 
-    if os.path.exists(os.path.join(MANIFEST_DIR, "train.json")):
+    names = ("train", "val", "test")
+    if all(os.path.exists(os.path.join(MANIFEST_DIR, f"{n}.json")) for n in names):
         print("[manifests] already built, skipping")
         return
 
@@ -127,13 +129,20 @@ def step_manifests():
     os.makedirs(MANIFEST_DIR, exist_ok=True)
 
     ds = load_dataset(HF_DATASET_ID, split=f"train[:{NUM_ROWS}]")
+    # Without this the audio column stays undecoded and row["audio"] has no "array"
+    # key at all. It also resamples to the 16 kHz NeMo's preprocessor expects, so the
+    # wavs on disk need no second pass. Same line the whisper scripts use.
+    ds = ds.cast_column("audio", Audio(sampling_rate=16000))
     ds = ds.train_test_split(test_size=1 - SPLIT[0], seed=SEED)
     holdout = ds["test"].train_test_split(test_size=0.5, seed=SEED)
     splits = {"train": ds["train"], "val": holdout["train"], "test": holdout["test"]}
 
     for name, split in splits.items():
         path = os.path.join(MANIFEST_DIR, f"{name}.json")
-        with open(path, "w", encoding="utf-8") as f:
+        total, kept, secs, t0 = len(split), 0, 0.0, time.time()
+        print(f"[manifests] {name}: {total} rows -> {path}", flush=True)
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
             for i, row in enumerate(split):
                 audio, text = row["audio"], row["text"].strip()
                 if not text:
@@ -141,18 +150,33 @@ def step_manifests():
                 wav = os.path.join(AUDIO_DIR, f"{name}-{i:07d}.wav")
                 if not os.path.exists(wav):
                     sf.write(wav, audio["array"], audio["sampling_rate"])
+                dur = len(audio["array"]) / audio["sampling_rate"]
+                kept, secs = kept + 1, secs + dur
                 f.write(
                     json.dumps(
                         {
                             "audio_filepath": wav,
-                            "duration": len(audio["array"]) / audio["sampling_rate"],
+                            "duration": dur,
                             "text": text,
                         },
                         ensure_ascii=False,
                     )
                     + "\n"
                 )
-        print(f"[manifests] {name}: {path}")
+                # 177k rows is hours of wav writing. Without a heartbeat there is no
+                # way to tell a slow run from a hung one, and no ETA to plan around.
+                if (i + 1) % 2000 == 0:
+                    rate = (i + 1) / max(time.time() - t0, 1e-9)
+                    print(f"[manifests] {name} {i + 1}/{total}  {rate:.0f} rows/s  "
+                          f"eta {(total - i - 1) / rate / 60:.0f} min  "
+                          f"{secs / 3600:.1f} audio-hours", flush=True)
+        # Audio hours is the go/no-go number for this whole run: under ~200 hours of
+        # training data, the recipe does not matter and the WER comes out bad.
+        assert kept, f"{name}: wrote 0 rows -- the dataset load produced nothing"
+        os.replace(tmp, path)
+        print(f"[manifests] {name}: DONE {kept}/{total} rows kept, "
+              f"{secs / 3600:.1f} audio-hours, "
+              f"{(time.time() - t0) / 60:.0f} min -> {path}", flush=True)
 
 
 # --------------------------------------------------------------------------
@@ -313,6 +337,10 @@ def step_train():
             ds = model.cfg[key]
             ds.manifest_filepath = os.path.join(MANIFEST_DIR, f"{name}.json")
             ds.sample_rate = 16000
+            # v3 ships text_field="answer" (its own manifests used that key) and
+            # step_manifests writes "text". Leave it and lhotse reads every
+            # transcript as empty -- the run trains on nothing and looks fine.
+            ds.text_field = "text"
             ds.batch_size = BATCH
             ds.shuffle = shuffle
             ds.num_workers = 8
