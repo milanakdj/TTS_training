@@ -27,6 +27,10 @@ import os
 import sys
 import time
 
+# The OOM report named fragmentation directly ("361.96 MiB reserved but unallocated").
+# Free to set, and it must land before torch initialises CUDA.
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+
 WORK = os.path.expanduser("~/parakeet-nepali")
 MANIFEST_DIR = os.path.join(WORK, "manifests")
 AUDIO_DIR = os.path.join(WORK, "audio")
@@ -51,7 +55,10 @@ SEED = 42
 #   "train"     -- fit fresh pieces on your own transcripts. Better fertility on
 #                  your domain, at the cost of a training pass.
 # Run the `tokenizer` step both ways and compare the fertility numbers it prints.
-NE_TOKENIZER_SOURCE = "ai4bharat"
+# Measured on this corpus: "ai4bharat" (256 pieces) left 314 unknown tokens and
+# fertility 3.63. Its pieces cover no danda (।) and no Devanagari digits, both of which
+# are in these transcripts. Fitting on our own text covers every character present.
+NE_TOKENIZER_SOURCE = "train"
 NE_VOCAB_SIZE = 512  # only used when NE_TOKENIZER_SOURCE == "train"
 AI4BHARAT_NE_URL = (
     "https://raw.githubusercontent.com/AI4Bharat/IndicVoices/master"
@@ -70,8 +77,16 @@ ACCUM = 16
 # Optimizer steps, not batches. Spark's 273 GB/s bandwidth makes this the wall-clock
 # knob: measure it/s over the first 100 steps, then set a number you will actually wait
 # for. 30k steps is ~5 epochs of 177k rows at effective batch 32.
-MAX_STEPS = 30000
-UNFREEZE_AT = 5000
+MAX_STEPS = 15000
+# Overridable so the OOM cliff can be probed directly. The cliff is the unfreeze, not
+# step 5000, and nothing about the memory question needs 5000 steps of warmup first:
+#   PARAKEET_UNFREEZE_AT=20 python parakeet_nepali.py train
+# answers it in two minutes instead of an hour. Throwaway run -- rm -rf the exp dir after.
+UNFREEZE_AT = int(os.environ.get("PARAKEET_UNFREEZE_AT", 5000))
+# The Spark has one 128 GB pool shared by GPU and CPU, and a vLLM server holds ~107 GB
+# of it. An uncapped training OOM takes the whole box down, vLLM included. With no sudo
+# there is no systemd-run cgroup, so the cap goes inside the process instead.
+MEM_CAP_GB = 18
 
 
 # --------------------------------------------------------------------------
@@ -296,6 +311,15 @@ def step_train():
     import nemo.collections.asr as nemo_asr
     from nemo.utils.exp_manager import exp_manager
 
+    # ponytail: caps the torch caching allocator only -- cuDNN workspaces and other
+    # libraries allocate outside it. That is fine here because the [B,T,U,V] joint
+    # tensor is the dominant allocation by far, and this turns a box-killing OOM into
+    # a catchable torch.cuda.OutOfMemoryError. Swap for a cgroup if you ever get sudo.
+    if torch.cuda.is_available():
+        total_gb = torch.cuda.mem_get_info()[1] / 1e9
+        torch.cuda.set_per_process_memory_fraction(min(MEM_CAP_GB / total_gb, 1.0))
+        print(f"[mem] capped at {MEM_CAP_GB} GB of {total_gb:.0f} GB pool", flush=True)
+
     model = nemo_asr.models.ASRModel.from_pretrained(BASE_MODEL)
     prev_vocab = model.tokenizer.vocab_size
 
@@ -345,9 +369,23 @@ def step_train():
             ds.shuffle = shuffle
             ds.num_workers = 8
             ds.pin_memory = True
-            ds.max_duration = 20.0
+            # The [B,T,U,V] joint tensor scales with T, so peak memory is set by the
+            # LONGEST clip in a batch, not the mean. This corpus averages 3.8 s, so
+            # dropping 20 -> 10 loses very little data and halves the worst case. v3's
+            # own config shipped 10.0.
+            ds.max_duration = 10.0
             ds.min_duration = 0.1  # TTS corpora carry empty/clipped rows; they blow up the loss
             ds.is_tarred = False
+            # v3 leaves max_tps null and lhotse's TokenPerSecondFilter asserts
+            # min_tps <= max_tps -- int vs None is a TypeError before step 0. Set both
+            # wide enough that nothing is filtered.
+            ds.min_tps = 0
+            ds.max_tps = 1000
+            # Bucketing with bucket_duration_bins=null makes lhotse scan every cut to
+            # estimate bins, and it batches by bucket_batch_size / batch_duration (both
+            # null) instead of batch_size -- which would also break the fused loss
+            # below, since fused_batch_size=BATCH assumes a fixed batch size.
+            ds.use_bucketing = False
 
         # The RNNT joint materialises a [B, T, U, V] tensor -- at V=8704 that is the
         # single largest allocation in the run, far bigger than the weights. Fusing
@@ -364,7 +402,14 @@ def step_train():
         model.cfg.optim.name = "adamw"
         model.cfg.optim.lr = 4e-4
         model.cfg.optim.weight_decay = 1e-3
-        model.cfg.optim.sched.warmup_steps = 5000
+        # Was 5000, the same as UNFREEZE_AT -- so the new Nepali rows spent the entire
+        # frozen phase at a reduced LR, and full LR arrived at the same step as the live
+        # encoder. Warm up fast, let the decoder learn while the encoder is safe.
+        model.cfg.optim.sched.warmup_steps = 1000
+        # Without this NeMo logs "Scheduler will not be instantiated !" and carries on
+        # with NO warmup and NO decay -- the decoder hits the full 4e-4 at step 1 on
+        # random Nepali rows. A warning, not an error, so it is easy to miss.
+        model.cfg.optim.sched.max_steps = MAX_STEPS
         model.cfg.optim.sched.min_lr = 1e-6
         # NeMo reads per-module LRs from cfg.optim_param_groups (a top-level model key),
         # NOT from cfg.optim.param_groups -- a stray key under optim is silently dropped
@@ -396,14 +441,26 @@ def step_train():
     trainer = pl.Trainer(
         devices=1,
         accelerator="gpu",
+        # exp_manager owns BOTH the logger and the checkpoint callback. Lightning
+        # creates each by default, and exp_manager errors rather than pick a winner.
+        logger=False,
+        enable_checkpointing=False,
+
         max_steps=MAX_STEPS,
         accumulate_grad_batches=ACCUM,
         precision="bf16-mixed",
-        val_check_interval=2000,
+        # Lightning counts this in training BATCHES, not optimizer steps. At 2000 it
+        # fired every 125 steps: measured 16% of wall clock lost to validation plus a
+        # 2.66 GB checkpoint write each time. 16000 batches = every 1000 optimizer
+        # steps, so 15 checkpoints across the run -- enough to rank.
+        val_check_interval=16000,
         limit_val_batches=100,
         log_every_n_steps=50,
         gradient_clip_val=1.0,
-        enable_progress_bar=False,
+        # On. With it off Lightning prints nothing between validations, so there is no
+        # way to tell a live run from a hung one and no it/s to size MAX_STEPS against
+        # -- and it/s is the number this whole run has to be planned around.
+        enable_progress_bar=True,
         num_sanity_val_steps=0,  # a fresh vocab predicts noise; the sanity pass proves nothing
         callbacks=[UnfreezeEncoder(UNFREEZE_AT)],
     )
