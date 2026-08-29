@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Logs
+*.log
+
+# Synthetic data pipeline: generated audio and data artifacts (not source-controlled)
+synthetic_pipeline/audio_out/
+synthetic_pipeline/manifests/
+synthetic_pipeline/pids/
+synthetic_pipeline/vc_service/seed-vc/
+synthetic_pipeline/**/*.wav
+synthetic_pipeline/**/run_log.txt
+
+# secrets
+.env
+synthetic_pipeline/.env
