@@ -18,3 +18,9 @@ synthetic_pipeline/**/run_log.txt
 # secrets
 .env
 synthetic_pipeline/.env
+
+# editor/backup leftovers
+*.bak
+*.prev
+*.pregate
+*.pid
