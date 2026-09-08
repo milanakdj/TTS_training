@@ -13,6 +13,7 @@ training right now.
 | this file | commands, layout, traps |
 | [`docs/ADR.md`](docs/ADR.md) | every decision and why it was taken |
 | [`docs/INTERN_GUIDE.md`](docs/INTERN_GUIDE.md) | how the model works, from the basics |
+| [`../dataset/`](../dataset/) | the data: hours per corpus, GB, provenance, what may be redistributed |
 
 ---
 
