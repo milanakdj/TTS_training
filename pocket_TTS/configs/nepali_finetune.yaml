@@ -1,0 +1,54 @@
+# Nepali Pocket TTS -- stage 1: 24-layer teacher, finetuned from the English
+# release with a fresh text embedding (the Nepali tokenizer is not the one those
+# weights were trained with). Same recipe the Czech note in finetune_language.yaml
+# describes: 12% WER by 10k steps vs 46% for a scratch run.
+#
+# Data: 2,213 h / 748,099 clips / 1,056 speakers, all 24 kHz (= Mimi's rate),
+# quality-gated on the metadata the corpora already carry (see build_manifest_v2.py):
+#   ans_snr40-50   1232.0 h   3-ASR consensus, no speaker overlap
+#   ans_snr50       601.8 h   same, SNR 50+ band
+#   indicvoices-r   162.6 h   restored, 908 speakers, dnsmos-gated
+#   mahadhwani       80.9 h   3-ASR consensus
+#   indicvoices-r-long 74.1 h clips <=30s only
+#   rasa             54.5 h   studio, the only source of the 6 emotion registers
+#   orpheus_snr50     7.4 h
+# Referenced in place on /workspace; nothing was copied.
+model_config: pocket_tts/config/english_2026-04_24l.yaml
+model_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer/nepali_bpe4000.model
+start_from_pretrained: true
+reset_text_embedding: true
+
+data:
+  train_jsonl: /root/tts/TTS_training/pocket_TTS/manifests/train_v2_aligned.jsonl
+  valid_jsonl: /root/tts/TTS_training/pocket_TTS/manifests/valid_v2_aligned.jsonl
+  max_duration_sec: 30.0
+  max_voice_prompt_sec: 5.0
+
+flow:
+  type: lsd
+  kwargs: {}
+
+flow_batch_multiplier: 4
+eos_loss_weight: 0.1
+text_dropout: 0.2
+voice_dropout: 0.2
+
+optim:
+  lr: 2e-4
+  schedule: constant
+  warmup_steps: 1000
+
+run_dir: /root/tts/TTS_training/pocket_TTS/runs/nepali_teacher_24l
+batch_size: 64
+grad_accum_steps: 1
+# 2,213 h is 2.3x the Czech reference run, so this gets the full schedule;
+# WER plateaus by ~15k, the rest buys acoustic quality.
+max_steps: 200000
+stats_ema_steps: 1000
+ema_decay: 0.999
+log_freq: 50
+valid_freq: 2500
+ckpt_freq: 2500
+num_ckpt_keep: 3
+sample_cfg_coef: 2.0

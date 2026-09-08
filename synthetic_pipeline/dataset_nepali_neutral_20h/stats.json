@@ -1,0 +1,32 @@
+{
+  "total_clips": 9949,
+  "total_hours": 20.062,
+  "train_clips": 9850,
+  "validation_clips": 99,
+  "tier_filter": "AB",
+  "per_emotion": {
+    "neutral": {
+      "clips": 9949,
+      "hours": 20.062,
+      "mean_duration_s": 7.26,
+      "mean_cer_final": 0.2717,
+      "mean_rms_p95": 0.3934,
+      "mean_centroid_hz": 1759.6,
+      "references_used": 6
+    }
+  },
+  "tier_counts": {
+    "A": 6362,
+    "B": 3587
+  },
+  "cer_final": {
+    "mean": 0.2717,
+    "median": 0.2597,
+    "p90": 0.3929
+  },
+  "cer_delta": {
+    "mean": 0.0292,
+    "median": 0.0328,
+    "p90": 0.1034
+  }
+}

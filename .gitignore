@@ -24,3 +24,27 @@ synthetic_pipeline/.env
 *.prev
 *.pregate
 *.pid
+
+# pocket_TTS: 37 GB of it is an upstream checkout (repo/, has its own .git),
+# manifests (19 G), checkpoints (11 G) and generated audio. Our own source,
+# configs and docs are tracked; our training configs are copied out of the
+# ignored checkout into pocket_TTS/configs/ so they survive.
+pocket_TTS/repo/
+pocket_TTS/manifests/
+pocket_TTS/runs/
+pocket_TTS/infer/out/
+pocket_TTS/infer/bench/
+pocket_TTS/infer/emo/
+pocket_TTS/infer/ceiling/
+pocket_TTS/infer/refs_scored/
+pocket_TTS/infer/final/wav/
+pocket_TTS/infer/final/listen/
+pocket_TTS/**/*.wav
+pocket_TTS/**/*.safetensors
+
+# packaged datasets belong on the Hub, not in git
+synthetic_pipeline/dataset_nepali_neutral_20h/*.parquet
+synthetic_pipeline/dataset_nepali_neutral_20h/metadata.csv
+
+# timestamped editor backups (server.py.bak.1788573899)
+*.bak.*

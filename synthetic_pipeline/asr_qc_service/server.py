@@ -46,6 +46,48 @@ def normalize_text(text: str) -> str:
     return t
 
 
+# --- script-mix diagnostics --------------------------------------------------------------
+# Whisper occasionally decodes Nepali audio into romanized Latin despite language="ne" being
+# pinned (e.g. "Razzle, qui si c'etro co'bicasca..."). That yields CER ~= 1.0 on audio that is
+# actually fine, which is a measurement failure rather than an audio-quality failure. These two
+# ratios let a caller detect that case (devanagari_ratio near 0 / latin_ratio near 1) and
+# discard the measurement instead of the clip. Purely additive: `pass` is untouched.
+_DEVANAGARI_RANGES = ((0x0900, 0x097F),)  # Devanagari block
+_LATIN_RANGES = (
+    (0x0041, 0x005A),  # A-Z
+    (0x0061, 0x007A),  # a-z
+    (0x00C0, 0x024F),  # Latin-1 Supplement letters + Latin Extended-A/B
+    (0x1E00, 0x1EFF),  # Latin Extended Additional
+)
+_PUNCT_CHARS = frozenset(string.punctuation + _EXTRA_PUNCT)
+
+
+def _in_ranges(ch: str, ranges) -> bool:
+    cp = ord(ch)
+    return any(lo <= cp <= hi for lo, hi in ranges)
+
+
+def _is_punct(ch: str) -> bool:
+    # string.punctuation/_EXTRA_PUNCT plus every Unicode punctuation (P*) and symbol (S*)
+    # category, so quotes, dashes and danda are all excluded from the denominator.
+    return ch in _PUNCT_CHARS or unicodedata.category(ch)[0] in ("P", "S")
+
+
+def script_ratios(text: str) -> tuple[float, float]:
+    """(devanagari_ratio, latin_ratio) over non-whitespace, non-punctuation characters.
+
+    Returns (0.0, 0.0) when there are no such characters (e.g. an empty transcript).
+    """
+    t = unicodedata.normalize("NFC", text or "")
+    chars = [c for c in t if not c.isspace() and not _is_punct(c)]
+    total = len(chars)
+    if total == 0:
+        return 0.0, 0.0
+    dev = sum(1 for c in chars if _in_ranges(c, _DEVANAGARI_RANGES))
+    lat = sum(1 for c in chars if _in_ranges(c, _LATIN_RANGES))
+    return dev / total, lat / total
+
+
 def transcribe_bytes(audio_bytes: bytes, filename: str = "audio.wav"):
     """Run faster-whisper transcription on raw audio bytes via an in-memory buffer."""
     buf = io.BytesIO(audio_bytes)
@@ -93,12 +135,21 @@ async def qc(audio: UploadFile = File(...), expected_text: str = Form(...)):
         cer = float(cer_result.cer)
         wer = float(wer_result.wer)
         passed = cer < CER_PASS_THRESHOLD
+        devanagari_ratio, latin_ratio = script_ratios(transcript)
 
         log.info(
-            "QC result: transcript=%r cer=%.4f wer=%.4f pass=%s (lang=%s)",
-            transcript, cer, wer, passed, language,
+            "QC result: transcript=%r cer=%.4f wer=%.4f pass=%s (lang=%s) "
+            "devanagari_ratio=%.4f latin_ratio=%.4f",
+            transcript, cer, wer, passed, language, devanagari_ratio, latin_ratio,
         )
-        return {"transcript": transcript, "cer": cer, "wer": wer, "pass": passed}
+        return {
+            "transcript": transcript,
+            "cer": cer,
+            "wer": wer,
+            "pass": passed,
+            "devanagari_ratio": devanagari_ratio,
+            "latin_ratio": latin_ratio,
+        }
     except Exception as e:
         log.exception("Error in /qc")
         return JSONResponse(status_code=500, content={"error": str(e)})

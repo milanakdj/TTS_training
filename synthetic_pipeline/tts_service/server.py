@@ -2,7 +2,7 @@
 
 Wraps three Nepali-capable TTS engines behind one HTTP API:
 - mms:    facebook/mms-tts-npi (VITS, transformers)
-- parler: ai4bharat/indic-parler-tts-pretrained (parler-tts package)
+- parler: ai4bharat/indic-parler-tts (finetuned, gated; override with $PARLER_REPO)
 - edge:   edge-tts (Microsoft cloud TTS, no GPU/model download)
 
 See CONTRACT.md (synthetic_pipeline/CONTRACT.md) for the full API contract.
@@ -10,7 +10,9 @@ See CONTRACT.md (synthetic_pipeline/CONTRACT.md) for the full API contract.
 
 import asyncio
 import io
+import os
 import logging
+import re
 import sys
 import traceback
 
@@ -41,6 +43,19 @@ DEFAULT_PARLER_DESCRIPTION = (
 DEFAULT_EDGE_VOICE = "ne-NP-HemkalaNeural"
 ALLOWED_EDGE_VOICES = {"ne-NP-HemkalaNeural", "ne-NP-SagarNeural"}
 
+# Prosody controls for the "edge" engine only. edge_tts.Communicate takes keyword-only
+# `rate`/`volume`/`pitch` strings whose own defaults are "+0%"/"+0%"/"+0Hz"; we forward a field
+# ONLY when the caller supplied it, so an omitted field is byte-for-byte identical to not
+# passing it at all. Formats are validated here so a malformed value fails fast with a 400
+# instead of surfacing as an opaque error from Microsoft's SSML endpoint.
+EDGE_PERCENT_RE = re.compile(r"^[+-]\d{1,3}%$")
+EDGE_HZ_RE = re.compile(r"^[+-]\d{1,3}Hz$")
+EDGE_PROSODY_SPEC = (
+    ("rate", EDGE_PERCENT_RE, "+12%"),
+    ("pitch", EDGE_HZ_RE, "+30Hz"),
+    ("volume", EDGE_PERCENT_RE, "+5%"),
+)
+
 # CONTRACT.md specifies facebook/mms-tts-npi for the "mms" engine. That repo id does not
 # exist: neither on the HF Hub (404, verified via API) nor in Meta's original fairseq MMS-TTS
 # release (dl.fbaipublicfiles.com/mms/tts/npi.tar.gz and nep.tar.gz both 403 = not present).
@@ -53,6 +68,10 @@ MMS_MODEL_ID = "facebook/mms-tts-hin"
 
 app = FastAPI(title="TTS service")
 
+# Finetuned checkpoint (gated). It is the one carrying the emotion-prompt
+# behaviour; "-pretrained" is the base model and does NOT render emotion.
+PARLER_REPO = os.environ.get("PARLER_REPO", "ai4bharat/indic-parler-tts")
+
 _state = {"mms": None, "parler": None}
 
 
@@ -61,6 +80,10 @@ class SynthesizeRequest(BaseModel):
     engine: str
     speaker_description: str | None = None
     voice: str | None = None
+    # Optional prosody controls, edge engine only. None => not forwarded (Edge defaults apply).
+    rate: str | None = None
+    pitch: str | None = None
+    volume: str | None = None
 
 
 def load_mms():
@@ -84,17 +107,24 @@ def load_mms():
 def load_parler():
     if _state["parler"] is not None:
         return _state["parler"]
-    log.info("Loading Parler-TTS model ai4bharat/indic-parler-tts-pretrained on %s ...", DEVICE)
+    log.info("Loading Parler-TTS model %s on %s ...", PARLER_REPO, DEVICE)
     from parler_tts import ParlerTTSForConditionalGeneration
     from transformers import AutoTokenizer
 
     model = ParlerTTSForConditionalGeneration.from_pretrained(
-        "ai4bharat/indic-parler-tts-pretrained", torch_dtype=DTYPE
+        PARLER_REPO, torch_dtype=DTYPE
     ).to(DEVICE)
     model.eval()
-    tokenizer = AutoTokenizer.from_pretrained("ai4bharat/indic-parler-tts-pretrained")
-    # description tokenizer is the model's own text_encoder tokenizer; same tokenizer works fine
-    desc_tokenizer = tokenizer
+    tokenizer = AutoTokenizer.from_pretrained(PARLER_REPO)
+    # The description goes through the model's TEXT ENCODER, which is a separate
+    # model (flan-t5-large) with a completely different vocabulary from the repo's
+    # own Llama-style prompt tokenizer. Feeding repo-tokenized ids to it silently
+    # produces gibberish conditioning -- "Amrita speaks in a sad tone." decodes as
+    # "stenSpitalul Description chlorinement made partially permanently Hospice..."
+    # and every caption-driven feature (emotion, pace, pitch) is lost.
+    desc_encoder = getattr(model.config.text_encoder, "_name_or_path", None) or "google/flan-t5-large"
+    desc_tokenizer = AutoTokenizer.from_pretrained(desc_encoder)
+    log.info("Parler description tokenizer: %s", desc_encoder)
     _state["parler"] = (model, tokenizer, desc_tokenizer)
     sr = model.config.sampling_rate
     log.info("Parler-TTS loaded. native sample rate=%s", sr)
@@ -131,25 +161,40 @@ def synth_mms(text: str) -> tuple[np.ndarray, int]:
 def synth_parler(text: str, description: str | None) -> tuple[np.ndarray, int]:
     model, tokenizer, desc_tokenizer = load_parler()
     desc = description or DEFAULT_PARLER_DESCRIPTION
-    input_ids = desc_tokenizer(desc, return_tensors="pt").input_ids.to(DEVICE)
-    prompt_input_ids = tokenizer(text, return_tensors="pt").input_ids.to(DEVICE)
+    d = desc_tokenizer(desc, return_tensors="pt").to(DEVICE)
+    p = tokenizer(text, return_tensors="pt").to(DEVICE)
     with torch.no_grad():
         generation = model.generate(
-            input_ids=input_ids, prompt_input_ids=prompt_input_ids
+            input_ids=d.input_ids,
+            attention_mask=d.attention_mask,
+            prompt_input_ids=p.input_ids,
+            prompt_attention_mask=p.attention_mask,
         )
     audio = generation.to(torch.float32).cpu().numpy().squeeze()
     sr = model.config.sampling_rate
     return audio, sr
 
 
-async def synth_edge(text: str, voice: str | None) -> tuple[np.ndarray, int]:
+async def synth_edge(
+    text: str,
+    voice: str | None,
+    rate: str | None = None,
+    pitch: str | None = None,
+    volume: str | None = None,
+) -> tuple[np.ndarray, int]:
     import edge_tts
 
     v = voice or DEFAULT_EDGE_VOICE
     if v not in ALLOWED_EDGE_VOICES:
         raise ValueError(f"unknown edge voice '{v}', must be one of {sorted(ALLOWED_EDGE_VOICES)}")
 
-    communicate = edge_tts.Communicate(text, v)
+    # Only pass keys the caller actually set -- omitted keys must behave exactly as before.
+    prosody_kwargs = {
+        k: val
+        for k, val in (("rate", rate), ("pitch", pitch), ("volume", volume))
+        if val is not None
+    }
+    communicate = edge_tts.Communicate(text, v, **prosody_kwargs)
     mp3_bytes = b""
     async for chunk in communicate.stream():
         if chunk["type"] == "audio":
@@ -179,9 +224,36 @@ async def synthesize(req: SynthesizeRequest):
         if not req.text or not req.text.strip():
             return JSONResponse(status_code=400, content={"error": "text must not be empty"})
 
+        supplied_prosody = [
+            name for name, _re, _ex in EDGE_PROSODY_SPEC if getattr(req, name) is not None
+        ]
+        if supplied_prosody and req.engine != "edge":
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "error": (
+                        f"prosody control(s) {sorted(supplied_prosody)} are only supported for "
+                        f"engine='edge', not engine='{req.engine}'"
+                    )
+                },
+            )
+        for name, pattern, example in EDGE_PROSODY_SPEC:
+            val = getattr(req, name)
+            if val is not None and not pattern.fullmatch(val):
+                return JSONResponse(
+                    status_code=400,
+                    content={
+                        "error": (
+                            f"malformed {name}={val!r}: must match {pattern.pattern} "
+                            f"(e.g. {example!r})"
+                        )
+                    },
+                )
+
         log.info(
-            "synthesize engine=%s text=%r desc=%r voice=%r",
+            "synthesize engine=%s text=%r desc=%r voice=%r rate=%r pitch=%r volume=%r",
             req.engine, req.text, req.speaker_description, req.voice,
+            req.rate, req.pitch, req.volume,
         )
 
         if req.engine == "mms":
@@ -189,7 +261,9 @@ async def synthesize(req: SynthesizeRequest):
         elif req.engine == "parler":
             audio, sr = await asyncio.to_thread(synth_parler, req.text, req.speaker_description)
         else:
-            audio, sr = await synth_edge(req.text, req.voice)
+            audio, sr = await synth_edge(
+                req.text, req.voice, req.rate, req.pitch, req.volume
+            )
 
         audio = resample_to_target(audio, sr)
         data = wav_bytes(audio, TARGET_SR)

@@ -1,0 +1,902 @@
+[
+ {
+  "id": "000",
+  "source": "rasa",
+  "speaker": "Nepali/Srijana",
+  "text": "मोहन एकछिन छक्क परेर शेखरका मुखमा हेरिरह्यो।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_BOOK_01145.wav",
+  "duration": 3.789,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_CONV_00347.wav"
+ },
+ {
+  "id": "001",
+  "source": "rasa",
+  "speaker": "Nepali/Srijana",
+  "text": "फुलको गमलाभरि पुरै किराहरू सल्बलाउँदै रहेछ। मलाई त कस्तो घिन लागेको नि!",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_DISGUST_00421.wav",
+  "duration": 6.755,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_CONV_00761.wav"
+ },
+ {
+  "id": "002",
+  "source": "rasa",
+  "speaker": "Nepali/Srijana",
+  "text": "यस गर्मीमा आर्द्रताका साथ पारा बढ्दै जाँदा म चेन्नईको गर्मीबाट थकित अनुभव गर्दछु।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_SAD_00206.wav",
+  "duration": 7.267,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_CONV_02072.wav"
+ },
+ {
+  "id": "003",
+  "source": "rasa",
+  "speaker": "Nepali/Srijana",
+  "text": "ओहो! मेट्रोमा साइकल चलाउने अनुमति रहेछ नि। मलाई त कहिल्यै थाहा थिएन।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_SURPRISE_00339.wav",
+  "duration": 6.568,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_CONV_01099.wav"
+ },
+ {
+  "id": "004",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "म बाथरुमका सामग्री अर्डर गर्न चाहन्छु, के तपाईँ मलाई त्यस कोटीमा उपलब्ध सबै कुरा देखाउन सक्नुहुन्छ?",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_BB_00066.wav",
+  "duration": 7.462,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_BOOK_00184.wav"
+ },
+ {
+  "id": "005",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "एउटा स्वस्थ जीवनको पछाडि सफाइ एउटा महत्त्वपूर्ण कारक हो।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_CONV_00566.wav",
+  "duration": 4.563,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_WIKI_02738.wav"
+ },
+ {
+  "id": "006",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "म ती सङ्गीतसँगै हुर्केको हुँ, तपाईँलाई थाहा छ।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_CONV_00787.wav",
+  "duration": 3.529,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_BOOK_00220.wav"
+ },
+ {
+  "id": "007",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "त्यसकारण बिहान छ पैँतालिस बजी तपाईँ मतदान केन्द्रमा आइपुग्नुहोस्।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_CONV_00867.wav",
+  "duration": 4.716,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_CONV_02098.wav"
+ },
+ {
+  "id": "008",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "र त्यसपछि अन्त्यमा आयकर पोर्टलमा एक्सएमएल फाइल अपलोड गर्नुहोस्।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_CONV_01043.wav",
+  "duration": 5.541,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_BOOK_00171.wav"
+ },
+ {
+  "id": "009",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "के यो योजना नगदरहित हो, र के कुनै लाभार्थीले कुनै बायोमेट्रिक कार्ड प्राप्त गर्नेछन्?",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_CONV_02247.wav",
+  "duration": 6.467,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_BOOK_00106.wav"
+ },
+ {
+  "id": "010",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "मैले होटलबाट अर्डर गरेको खानासँग साँच्चै मेरो चित्त बुझ्यो। साह्रै स्वादिलो!",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_HAPPY_00139.wav",
+  "duration": 5.997,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_SAD_00166.wav"
+ },
+ {
+  "id": "011",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "के तपाईँँ आर्किटेक्चरमा एआइसिटिई स्वीकृत सबै कलेजहरू सूचीबद्ध गर्न सक्नुहुन्छ?",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_UMANG_00077.wav",
+  "duration": 6.824,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_WIKI_01003.wav"
+ },
+ {
+  "id": "012",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "गोपद सोन नदीको प्रमुख शाखा हो र यसको उत्पत्ति मेन्द्रा गाउँबाट लगभग दस किलोमिटर उत्तरमा भएको छ।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_WIKI_02474.wav",
+  "duration": 8.57,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_WIKI_02324.wav"
+ },
+ {
+  "id": "013",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "यहाँ गुन्डोलाव ताल नामको एउटा धरोहर ताल छ।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_WIKI_02831.wav",
+  "duration": 3.91,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_CONV_00053.wav"
+ },
+ {
+  "id": "014",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "खटखटेमा कम्तीमा पाँचवटा तरकारी, ताजा नरिवल र विशेष गोआन मसला हुन्छन् जसले सुगन्ध थप्छन्।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_WIKI_02939.wav",
+  "duration": 8.419,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_BOOK_00169.wav"
+ },
+ {
+  "id": "015",
+  "source": "rasa",
+  "speaker": "Nepali/Sagar",
+  "text": "जति दिन म संसारमा रहुँला जहाँ गए पनि कुनै अवस्थामा पनि, म तिम्रो स्नेह औ प्रीति बिर्सनेछैनँ।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/val/audio/Nepali/NEP_M_BOOK_00572.wav",
+  "duration": 9.048,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/val/audio/Nepali/NEP_M_WIKI_03469.wav"
+ },
+ {
+  "id": "016",
+  "source": "ans_snr40-50",
+  "speaker": "5Sui3R4uQig/SPEAKER_01",
+  "text": "अब यो उहाँले कुन दृष्टिकोणबाट त्यसो कुरा गर्नुभयो? मलाई लाग्छ यो मैले जुन कुरा भनेँ नि, मासिक रूपमा।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/5Sui3R4uQig/chunk_320_7.82s.wav",
+  "duration": 7.82,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/5Sui3R4uQig/chunk_428_4.66s.wav"
+ },
+ {
+  "id": "017",
+  "source": "ans_snr40-50",
+  "speaker": "LJ4qpqpUhXQ/SPEAKER_28",
+  "text": "सत्तारूढ गठबन्धन स्थानीय तहको निर्वाचन नै सार्ने उपाय खोजिरहेका बेला, निर्वाचन आयोग भन्छ— मिति छिटो घोषणा गर।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/LJ4qpqpUhXQ/chunk_000_8.62s.wav",
+  "duration": 8.62,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/LJ4qpqpUhXQ/chunk_153_3.84s.wav"
+ },
+ {
+  "id": "018",
+  "source": "ans_snr40-50",
+  "speaker": "Z8HfufeKg8M/SPEAKER_03",
+  "text": "ले नेपालमा अलिकति गतिशीलता बढाएका छन्, होइन?",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/Z8HfufeKg8M/chunk_035_4.88s.wav",
+  "duration": 4.88,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/Z8HfufeKg8M/chunk_146_3.50s.wav"
+ },
+ {
+  "id": "019",
+  "source": "ans_snr40-50",
+  "speaker": "lCYs2tKZ4kE/SPEAKER_03",
+  "text": "प्याक्टिकल कसरी गर्ने, समय कति दिने भन्दा पनि कसरी गर्नेमा बढी जोड दिनुहुन्थ्यो उहाँले।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/lCYs2tKZ4kE/chunk_160_6.14s.wav",
+  "duration": 6.14,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/lCYs2tKZ4kE/chunk_131_4.72s.wav"
+ },
+ {
+  "id": "020",
+  "source": "ans_snr40-50",
+  "speaker": "gsSA0LceYYs/SPEAKER_00",
+  "text": "त्यो व्यक्तिले ताप उत्पन्न गर्नको लागि यहाँ औँठी लगाएको हुन्छ, तर सामान्यतया त्यसरी औँठी लगाएर ताप उत्पन्न गर्नुभन्दा।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC41lrNBYb9fNWnQHFyuv9wQ/gsSA0LceYYs/chunk_235_9.14s.wav",
+  "duration": 9.14,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC41lrNBYb9fNWnQHFyuv9wQ/gsSA0LceYYs/chunk_197_3.36s.wav"
+ },
+ {
+  "id": "021",
+  "source": "ans_snr40-50",
+  "speaker": "sFXuv3M63_4/SPEAKER_01",
+  "text": "विद्यार्थीहरूलाई डाटा सम्बन्धी ज्ञान नहुनु जस्तै, अहिले हाम्रो एनटिसीले चाहिँ तीन सय पन्ध्र रुपियाँको मासिक डाटा चाहिँ प्रोभाइड गरिरहेको छ।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC6nOP_RGftKR2uW3cibDkHg/sFXuv3M63_4/chunk_150_6.98s.wav",
+  "duration": 6.98,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC6nOP_RGftKR2uW3cibDkHg/sFXuv3M63_4/chunk_092_4.84s.wav"
+ },
+ {
+  "id": "022",
+  "source": "ans_snr40-50",
+  "speaker": "IPQWMk5RqVM/SPEAKER_01",
+  "text": "यसले समाजमा राम्रो गर्दैन। हेर्नुहोस्, एकजना निर्दोष मान्छेलाई।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCGlV0eWm10tmyKm0bJ9ms4w/IPQWMk5RqVM/chunk_296_3.56s.wav",
+  "duration": 3.56,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCGlV0eWm10tmyKm0bJ9ms4w/IPQWMk5RqVM/chunk_120_4.60s.wav"
+ },
+ {
+  "id": "023",
+  "source": "ans_snr40-50",
+  "speaker": "X_9l7u_D86w/SPEAKER_02",
+  "text": "अफकोर्स, यस लाग्छ नि। अति गाह्रो भएपछि थाहा छ, जब अति रुइन्छ नि त?",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCRyTiea063y4QA-YOedu6lQ/X_9l7u_D86w/chunk_1241_6.88s.wav",
+  "duration": 6.88,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCRyTiea063y4QA-YOedu6lQ/X_9l7u_D86w/chunk_545_3.26s.wav"
+ },
+ {
+  "id": "024",
+  "source": "ans_snr40-50",
+  "speaker": "WuoYzhA5-gs/SPEAKER_02",
+  "text": "हजुर, अँ मिलाएर लेख्नुपर्छ। मैले त पोइन्ट लेखिदिएको, यसलाई मिलाएर लेख्नु है।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/WuoYzhA5-gs/chunk_256_3.40s.wav",
+  "duration": 3.4,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/WuoYzhA5-gs/chunk_111_3.58s.wav"
+ },
+ {
+  "id": "025",
+  "source": "ans_snr40-50",
+  "speaker": "qbsw1VmQ1Ks/SPEAKER_01",
+  "text": "र एउटा लास्ट मेटल जुन हाम्रो बाँकी छ, त्यो भनेको चाहिँ गोल्ड हो।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/qbsw1VmQ1Ks/chunk_209_4.36s.wav",
+  "duration": 4.36,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/qbsw1VmQ1Ks/chunk_066_3.36s.wav"
+ },
+ {
+  "id": "026",
+  "source": "ans_snr40-50",
+  "speaker": "ONlNEzMVabk/SPEAKER_03",
+  "text": "जस्तै यौन हिंसाको सन्दर्भमा मैले के भने, मन मिलेसम्म लभ आफ्नो स्वार्थ पुरा भएन भने के भन्छ?",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCo_hCisNRWC3pmRuuEqfP9A/ONlNEzMVabk/chunk_089_9.92s.wav",
+  "duration": 9.92,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCo_hCisNRWC3pmRuuEqfP9A/ONlNEzMVabk/chunk_801_4.54s.wav"
+ },
+ {
+  "id": "027",
+  "source": "ans_snr40-50",
+  "speaker": "c4h_X2I213Y/SPEAKER_01",
+  "text": "यसरी नै राम्रो काम गर्दै जानु, अथवा जारी राख्नु।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCCIg2o64yeZNvECqROUbeEA/c4h_X2I213Y/chunk_441_3.80s.wav",
+  "duration": 3.8,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCCIg2o64yeZNvECqROUbeEA/c4h_X2I213Y/chunk_180_4.38s.wav"
+ },
+ {
+  "id": "028",
+  "source": "ans_snr40-50",
+  "speaker": "7jdS9Uzom_A/SPEAKER_01",
+  "text": "सञ्जाल चलाउनलाई विभिन्न विद्युतीय उपकरणहरूको प्रयोग हुन्छ, जस्तै राउटर, स्विच।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCMiQlCEmLQd6JN3cI0yZ1-A/7jdS9Uzom_A/chunk_029_7.42s.wav",
+  "duration": 7.42,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCMiQlCEmLQd6JN3cI0yZ1-A/7jdS9Uzom_A/chunk_072_3.14s.wav"
+ },
+ {
+  "id": "029",
+  "source": "ans_snr40-50",
+  "speaker": "h8rQsuBAZls/SPEAKER_02",
+  "text": "अब एफएमतिर यस्तो प्रोग्रामहरू गर्ने त्यो पनि मेरो इच्छा थियो।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCVFNatZh-fkYj8AS1rLz4VQ/h8rQsuBAZls/chunk_074_3.20s.wav",
+  "duration": 3.2,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCVFNatZh-fkYj8AS1rLz4VQ/h8rQsuBAZls/chunk_019_4.08s.wav"
+ },
+ {
+  "id": "030",
+  "source": "ans_snr40-50",
+  "speaker": "AZLdaf0Fv4Y/SPEAKER_01",
+  "text": "र त्यो बेलामा भारतले नेपालमाथि नाकाबन्दी लगाएको थियो।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/AZLdaf0Fv4Y/chunk_065_3.30s.wav",
+  "duration": 3.3,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/AZLdaf0Fv4Y/chunk_014_4.46s.wav"
+ },
+ {
+  "id": "031",
+  "source": "ans_snr40-50",
+  "speaker": "QlX_vfOryds/SPEAKER_01",
+  "text": "अलिकति अनकमन नै होस् भन्ने पनि मेरो एउटा चाहना हो।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCsMXyc_vB_bV8c5hFleMXRQ/QlX_vfOryds/chunk_013_3.14s.wav",
+  "duration": 3.14,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCsMXyc_vB_bV8c5hFleMXRQ/QlX_vfOryds/chunk_401_4.08s.wav"
+ },
+ {
+  "id": "032",
+  "source": "ans_snr40-50",
+  "speaker": "f6C64f0RgZ8/SPEAKER_01",
+  "text": "अनि मात्रै प्यारेन्ट्सहरूले त्यस्तो किसिमको स्कुलहरूमा आफ्नो बच्चाहरूलाई लैजाँदा सायद उहाँहरू पछुताउनु पर्दैन भन्ने लाग्छ मलाई।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCtjmWttibtOsdow5lYBD-7A/f6C64f0RgZ8/chunk_021_7.62s.wav",
+  "duration": 7.62,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCtjmWttibtOsdow5lYBD-7A/f6C64f0RgZ8/chunk_065_4.74s.wav"
+ },
+ {
+  "id": "033",
+  "source": "ans_snr50",
+  "speaker": "KNSPN0qleVY/SPEAKER_01",
+  "text": "म कुकुरहरूसँग डराउँछु, भन्नलाई आई एम अ फ्रेड अफ डग्स।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCCIg2o64yeZNvECqROUbeEA/KNSPN0qleVY/chunk_055_4.72s.wav",
+  "duration": 4.72,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCCIg2o64yeZNvECqROUbeEA/KNSPN0qleVY/chunk_087_4.68s.wav"
+ },
+ {
+  "id": "034",
+  "source": "ans_snr50",
+  "speaker": "t7kxzwdrHGA/SPEAKER_02",
+  "text": "अब त्यति आउँदैन भने, जे सक्छौ पकाऊ भन्ने।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCCIg2o64yeZNvECqROUbeEA/t7kxzwdrHGA/chunk_375_4.56s.wav",
+  "duration": 4.56,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCCIg2o64yeZNvECqROUbeEA/t7kxzwdrHGA/chunk_217_4.94s.wav"
+ },
+ {
+  "id": "035",
+  "source": "ans_snr50",
+  "speaker": "6BvliS4pa8w/SPEAKER_02",
+  "text": "त्यसबाट मुक्तिको बाटोलाई हामीले प्राप्त गर्नुपर्छ।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCDeNjdARlhMEO-EbfzD6I9Q/6BvliS4pa8w/chunk_055_3.98s.wav",
+  "duration": 3.98,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCDeNjdARlhMEO-EbfzD6I9Q/6BvliS4pa8w/chunk_022_3.06s.wav"
+ },
+ {
+  "id": "036",
+  "source": "ans_snr50",
+  "speaker": "61Lev_nBWVE/SPEAKER_02",
+  "text": "ज्याक माले आफ्नो फर्स्ट रिसेप्सनिस्टलाई चाहिँ हायर गरेको थियो, उसको नाम चाहिँ टम के थियो। आई डोन्ट नो, मैले अहिले एक्ज्याक्ट मोमेन्टमा मलाई चाहिँ याद भएन।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCEPwYtQk8TZl5kJD9Bq4kcA/61Lev_nBWVE/chunk_227_8.92s.wav",
+  "duration": 8.92,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCEPwYtQk8TZl5kJD9Bq4kcA/61Lev_nBWVE/chunk_218_4.06s.wav"
+ },
+ {
+  "id": "037",
+  "source": "ans_snr50",
+  "speaker": "JgPTiqrfBJ0/SPEAKER_03",
+  "text": "यस्तरी बोल्नु सुहाउँदैन भन्छ। मेरो चाहिँ स्पष्टीकरण के छ भने, म ठुलो मान्छे हुँदै होइन, पहिलो कुरा।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/JgPTiqrfBJ0/chunk_179_7.06s.wav",
+  "duration": 7.06,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/JgPTiqrfBJ0/chunk_525_4.54s.wav"
+ },
+ {
+  "id": "038",
+  "source": "ans_snr50",
+  "speaker": "hH4epVNf3ig/SPEAKER_03",
+  "text": "हामीले जुन खालको एउटा गठबन्धन तयार गरेर अगाडिको यात्रा हामीले चाहिँ बनाएका थियौँ।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/hH4epVNf3ig/chunk_549_8.02s.wav",
+  "duration": 8.02,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/hH4epVNf3ig/chunk_839_4.50s.wav"
+ },
+ {
+  "id": "039",
+  "source": "ans_snr50",
+  "speaker": "r5nMpxUucNc/SPEAKER_02",
+  "text": "अब संविधानअनुसार प्रतिनिधि सभा नै प्रति नै उनी उत्तरदायी हुनुपर्ने अवस्था छ।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/r5nMpxUucNc/chunk_480_7.54s.wav",
+  "duration": 7.54,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/r5nMpxUucNc/chunk_562_4.10s.wav"
+ },
+ {
+  "id": "040",
+  "source": "ans_snr50",
+  "speaker": "Of8OuMwoLDk/SPEAKER_03",
+  "text": "केही पर लगी त्यहाँ हालेको पानी चनामा पुग्ने व्यवस्था गरेछ, र भोलि बिहान शिवलिङ्ग प्रकट हुन्छ भनेर आफू ध्यानमा बसी रातमा चेलाहरूलाई पाइपबाट पानी हाल्न लगाएछ।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCjiIDYcI5hfpv_J16SxuHFg/Of8OuMwoLDk/chunk_617_9.70s.wav",
+  "duration": 9.7,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCjiIDYcI5hfpv_J16SxuHFg/Of8OuMwoLDk/chunk_052_4.44s.wav"
+ },
+ {
+  "id": "041",
+  "source": "ans_snr50",
+  "speaker": "hHA4ShkIxro/SPEAKER_00",
+  "text": "सो जस्तो खालको डाइग्राम दिन्छ। अब यसको ग्राउन्डमा यसले कति पोर्सन टच गऱ्यो, त्यति नै पोर्सनको एरिया निकाल्नु पऱ्यो।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/hHA4ShkIxro/chunk_191_7.88s.wav",
+  "duration": 7.88,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/hHA4ShkIxro/chunk_527_3.16s.wav"
+ },
+ {
+  "id": "042",
+  "source": "ans_snr50",
+  "speaker": "ivTMSoU-600/SPEAKER_01",
+  "text": "तर मेरो मनमा कौतुहलता जाग्यो, कि यो मान्छे को हो जसको बारेमा काकी सबैबाट लुकाउन चाहनुहुन्छ।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCzd7a1YUa2uaqBBYwLH4eIg/ivTMSoU-600/chunk_026_6.70s.wav",
+  "duration": 6.7,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCzd7a1YUa2uaqBBYwLH4eIg/ivTMSoU-600/chunk_194_4.70s.wav"
+ },
+ {
+  "id": "043",
+  "source": "ans_snr50",
+  "speaker": "-RnvVm4aiHI/SPEAKER_01",
+  "text": "पक्का गर्नुहोस् है भन्नको लागि। मेक स्योर, मेक स्योर।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCCIg2o64yeZNvECqROUbeEA/-RnvVm4aiHI/chunk_121_6.18s.wav",
+  "duration": 6.18,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCCIg2o64yeZNvECqROUbeEA/-RnvVm4aiHI/chunk_054_4.64s.wav"
+ },
+ {
+  "id": "044",
+  "source": "ans_snr50",
+  "speaker": "a_qE36xQMRY/SPEAKER_05",
+  "text": "त तिमीलाई कुन अङ्कलको नजिकमा गएर बसेर कुरा गर्न मन लाग्छ? कुन अङ्कललाई नमस्ते गर्न मन लाग्छ?",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCPoDCoxg9_DAn5tkhKCxtow/a_qE36xQMRY/chunk_529_5.76s.wav",
+  "duration": 5.76,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCPoDCoxg9_DAn5tkhKCxtow/a_qE36xQMRY/chunk_225_3.18s.wav"
+ },
+ {
+  "id": "045",
+  "source": "ans_snr50",
+  "speaker": "tlhciYSA3EU/SPEAKER_01",
+  "text": "अब हामीले त मैले त कमसेकम दुई चार सय नै पटक अनुरोध गरेँ होला।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCVFNatZh-fkYj8AS1rLz4VQ/tlhciYSA3EU/chunk_060_4.82s.wav",
+  "duration": 4.82,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCVFNatZh-fkYj8AS1rLz4VQ/tlhciYSA3EU/chunk_102_4.26s.wav"
+ },
+ {
+  "id": "046",
+  "source": "ans_snr50",
+  "speaker": "DSxxGLAcoc4/SPEAKER_00",
+  "text": "मुख्य प्रधान हुनुहुन्छ, बिचमा त्यसपछि अरू छेउछेउमा बस्नुहुन्छ।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCWE-LvehHRp4YAHzmwCwoag/DSxxGLAcoc4/chunk_037_4.50s.wav",
+  "duration": 4.5,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCWE-LvehHRp4YAHzmwCwoag/DSxxGLAcoc4/chunk_683_3.54s.wav"
+ },
+ {
+  "id": "047",
+  "source": "ans_snr50",
+  "speaker": "2fkBA8MIIEY/SPEAKER_01",
+  "text": "यो उहिलेदेखिको गुनासो हो, पाँच सातजनालाई छोडेर नेपालले चिन्दैन नि? हामी पनि नेपाललाई खोजी खोजी पढ्छौँ त।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCbBfzO3Rc1Uxc8VEnAeHWGg/2fkBA8MIIEY/chunk_626_7.80s.wav",
+  "duration": 7.8,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCbBfzO3Rc1Uxc8VEnAeHWGg/2fkBA8MIIEY/chunk_321_4.94s.wav"
+ },
+ {
+  "id": "048",
+  "source": "ans_snr50",
+  "speaker": "aCizmZeQzc4/SPEAKER_00",
+  "text": "राष्ट्रियता, लोकतन्त्र, प्रजातन्त्रको निम्ति संविधानको निम्ति लडेर आउनुभयो।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCcCg5DCDaIpgLphMkJbK-wA/aCizmZeQzc4/chunk_075_6.38s.wav",
+  "duration": 6.38,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCcCg5DCDaIpgLphMkJbK-wA/aCizmZeQzc4/chunk_454_3.60s.wav"
+ },
+ {
+  "id": "049",
+  "source": "ans_snr50",
+  "speaker": "nF4oL2c5NTI/SPEAKER_03",
+  "text": "भन्दा नेपालको सबै किसिमको कानुन होइन, संविधान सबैमाथि एकपल्ट बस्या मानिस हो नि।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/nF4oL2c5NTI/chunk_351_7.32s.wav",
+  "duration": 7.32,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/nF4oL2c5NTI/chunk_581_4.28s.wav"
+ },
+ {
+  "id": "050",
+  "source": "indicvoices-r-long",
+  "speaker": "v1/S4258680300317474",
+  "text": "काठमाडौँ न्युयोर्क हङकङ टोरेन्टो पेरिस",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v1/3940649673970017.wav",
+  "duration": 8.485,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v1/3940649673969982.wav"
+ },
+ {
+  "id": "051",
+  "source": "indicvoices-r-long",
+  "speaker": "v1/S4259160100313221",
+  "text": "के क्यान्डी स्किन केयर सामान उपलब्ध छन्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v1/3940649673979615.wav",
+  "duration": 4.45,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v1/3940649673979621.wav"
+ },
+ {
+  "id": "052",
+  "source": "indicvoices-r-long",
+  "speaker": "v1/S4258722100392237",
+  "text": "के म यस हप्ताको अन्त्यसम्म डियोड्रेन्सको प्राप्तिको अपेक्षा गर्न सक्छु",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v1/3940649673980112.wav",
+  "duration": 7.627,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v1/3940649673980110.wav"
+ },
+ {
+  "id": "053",
+  "source": "indicvoices-r-long",
+  "speaker": "v1/S4259871400332330",
+  "text": "मलाई सबै थरीका भान्साका सामाग्री देखाउनुहोस्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v1/3940649673982973.wav",
+  "duration": 6.27,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v1/3940649673982968.wav"
+ },
+ {
+  "id": "054",
+  "source": "indicvoices-r-long",
+  "speaker": "v2/S4259031200302942",
+  "text": "मेरो वस्तुसूचीबाट क्लास्मेट (Classmate) एक लाइनको खाता हटाउनुहोस्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v2/3940649673950602.wav",
+  "duration": 4.933,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v2/3940649673950609.wav"
+ },
+ {
+  "id": "055",
+  "source": "indicvoices-r-long",
+  "speaker": "v2/S4259808500383736",
+  "text": "दक्षिण दिल्लीमा सबैभन्दा राम्रो समीक्षा प्रापक रेस्टुरेन्ट (restaurant)",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v2/3940649674019350.wav",
+  "duration": 5.713,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v2/3940649674019349.wav"
+ },
+ {
+  "id": "056",
+  "source": "indicvoices-r-long",
+  "speaker": "v2/S4257060500347481",
+  "text": "मेरो एमस्वाइप (MSWIPE) लक (lock) फोनको पासवर्डबाट दुई अङ्कको पिनमा परिवर्तन गर्नुहोस्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v2/3940649674031205.wav",
+  "duration": 8.128,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v2/3940649674031198.wav"
+ },
+ {
+  "id": "057",
+  "source": "indicvoices-r-long",
+  "speaker": "v3/S4259843400332045",
+  "text": "कृपया सम्पर्क फुलमाया फुँयाललाई यो पुरस्कार पठाउनुहोस्।",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649673964532.wav",
+  "duration": 8.301,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649673964555.wav"
+ },
+ {
+  "id": "058",
+  "source": "indicvoices-r-long",
+  "speaker": "v3/S4259694800353731",
+  "text": "कोरोना भाइरस बिमाका लागि रिमाइन्डरहरू बन्द गर्नुहोस्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649673995722.wav",
+  "duration": 6.765,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649673995714.wav"
+ },
+ {
+  "id": "059",
+  "source": "indicvoices-r-long",
+  "speaker": "v3/S4256998600327310",
+  "text": "मेवा सामग्रीमा सबैभन्दा राम्रो अफर के हो",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674000239.wav",
+  "duration": 4.673,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674000236.wav"
+ },
+ {
+  "id": "060",
+  "source": "indicvoices-r-long",
+  "speaker": "v3/S4258895800338959",
+  "text": "मेरो अर्को बैठक अघि मलाई एक दिनको सूचना दिनुहोस्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674010554.wav",
+  "duration": 4.53,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674010573.wav"
+ },
+ {
+  "id": "061",
+  "source": "indicvoices-r-long",
+  "speaker": "v3/S4256930100324689",
+  "text": "कृपया मेरा घरका सबै बत्तीहरू बन्द गर्नुहोस्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674010628.wav",
+  "duration": 4.554,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674010626.wav"
+ },
+ {
+  "id": "062",
+  "source": "indicvoices-r-long",
+  "speaker": "v3/S4258733000392005",
+  "text": "के ड्युरासेल (duracell) रिचारेबल (rechargeable) एए (AA) ब्याट्रिजमा कुनै अफर (offer) छ",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674017652.wav",
+  "duration": 9.02,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674017665.wav"
+ },
+ {
+  "id": "063",
+  "source": "indicvoices-r-long",
+  "speaker": "v3/S4259876700332351",
+  "text": "युएसए (USA) अस्ट्रेलिया क्यालिफोर्निया",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674019628.wav",
+  "duration": 5.328,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674019592.wav"
+ },
+ {
+  "id": "064",
+  "source": "indicvoices-r-long",
+  "speaker": "v3/S4259783000375209",
+  "text": "देब्रे",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674056401.wav",
+  "duration": 3.911,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674056392.wav"
+ },
+ {
+  "id": "065",
+  "source": "indicvoices-r-long",
+  "speaker": "v6/S4259898600383193",
+  "text": "के साबुन कुनै अन्य ब्रान्डमा उपलब्ध छन्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v6/3940649674098861.wav",
+  "duration": 4.49,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v6/3940649674098859.wav"
+ },
+ {
+  "id": "066",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4259741600375889",
+  "text": "तर अब केही अब फेमिली ब्याक प्रब्लमले गर्दा होला होइन मैले अब राम्रोसँगले पढ्नु पाइनँ",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673952892_chunk_5.wav",
+  "duration": 5.92,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673952881_chunk_2.wav"
+ },
+ {
+  "id": "067",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4257744800347497",
+  "text": "उनले पनि फेटा गुँथ्न छोरेर टाउकोमा कपडा बेर्ने गर्थे",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673955767_chunk_1.wav",
+  "duration": 6.208,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673955818_chunk_14.wav"
+ },
+ {
+  "id": "068",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4256923500327821",
+  "text": "जगत् धेरै चोटीमा पुगेका छन्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673957858_chunk_55.wav",
+  "duration": 3.137,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673957858_chunk_27.wav"
+ },
+ {
+  "id": "069",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4257040600362258",
+  "text": "भनेर खोज्दा वोर्दा यसो सोच्दा सोचेर ल्याउँदाखेरि चाहिँ यहाँ सबैभन्दा ठुलो समस्या चाहिँ हाम्रो पोल्टिकल पार्टीजहरू छ",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673961333_chunk_7.wav",
+  "duration": 7.073,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673961322_chunk_6.wav"
+ },
+ {
+  "id": "070",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4257713700348239",
+  "text": "मातृभाषामा चाहिँ जान्नु मातृभाषाबाट सिक्नु हो यो चाहिँ जरुरी एकदमै जरुरी आवश्यक छ",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673986955_chunk_4.wav",
+  "duration": 7.071,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673986914_chunk_1.wav"
+ },
+ {
+  "id": "071",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4259440200361747",
+  "text": "सबैभन्दा मुख्य उद्योगधन्दा चाहिँ टी गार्डन दोस्रोमा छ सिन्कोना प्लान्टेसन",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673993380_chunk_2.wav",
+  "duration": 7.45,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673993379_chunk_1.wav"
+ },
+ {
+  "id": "072",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4259344300393790",
+  "text": "त्यस्तै गोडगाड गर्यो त्यही कामहरू गर्यो",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649673959256_chunk_8.wav",
+  "duration": 3.329,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649673959260_chunk_1.wav"
+ },
+ {
+  "id": "073",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4257258600309052",
+  "text": "त्यहीँ बसेर चाहिँ सबजनाले मज्जा गऱ्यो मज्जाले बस्यो",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674014511_chunk_5.wav",
+  "duration": 4.866,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674014517_chunk_2.wav"
+ },
+ {
+  "id": "074",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4258174000316355",
+  "text": "भष्ट्राचारहरू है हस्पिटलमाथि भएको मुख्य भष्ट्राचार चाहिँ के हो भन्दाखेरि नि",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674018858_chunk_3.wav",
+  "duration": 6.399,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674018812_chunk_1.wav"
+ },
+ {
+  "id": "075",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4259723400369389",
+  "text": "हाम्रो दार्जिलिङ जिल्लामा चाहिँ यो रीति रिवाजको चाहिँ के परम्परा छ भने चाहिँ",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674021238_chunk_1.wav",
+  "duration": 5.281,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674021232_chunk_4.wav"
+ },
+ {
+  "id": "076",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4259394300375548",
+  "text": "बाथरुमको सामग्रीमा सबै भन्दा राम्रो बिक्रीका सिफारिसहरू के हुन्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674026882_chunk_1.wav",
+  "duration": 5.697,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674026911_chunk_1.wav"
+ },
+ {
+  "id": "077",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4259333300339058",
+  "text": "कलकत्ता हावडा बिहार कालिम्पोङ दार्जिलिङ",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673954105_chunk_1.wav",
+  "duration": 4.093,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673954074_chunk_1.wav"
+ },
+ {
+  "id": "078",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4256902200326275",
+  "text": "जिल्ला पटनामा को कोभ्याक्सिनको खोप केन्द्रको सूची देखाउनुहोस्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673971340_chunk_1.wav",
+  "duration": 7.356,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673971369_chunk_7.wav"
+ },
+ {
+  "id": "079",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4259074300369977",
+  "text": "मैले एउटा क्यामेरा किनेको छु क्याननको त्यो क्यानन चाहिँ को क्यामेराको क्वालिटी चाहिँ यस्तो दामी छ म यस्तो खुसी छु यो क्यामेरा किनेर",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674006289_chunk_1.wav",
+  "duration": 9.278,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674006299_chunk_2.wav"
+ },
+ {
+  "id": "080",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4259043200302793",
+  "text": "जियो मनीमा धेरैपटक गलत युपिआई आइडी किन देखाइरहेछ",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674017096_chunk_1.wav",
+  "duration": 4.565,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674017086_chunk_1.wav"
+ },
+ {
+  "id": "081",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4259662500304765",
+  "text": "भाँच्चिए पछि सुन्निने रगत बग्ने र विकृतिले औसत स्नायुलाई सङ्कुचित पार्दछ",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674032272_chunk_1.wav",
+  "duration": 7.868,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674032274_chunk_1.wav"
+ },
+ {
+  "id": "082",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4257010800347026",
+  "text": "अथवा एक मिनट बात गर्नुको लागि तिन रुपियाँ चार रुपियाँ काटिन्थ्यो जसमा डाटा सिस्टम नभएर खालि ब्यालेन्स सिस्टम मात्र हुन्थ्यो त्यसबाहेक",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674051866_chunk_2.wav",
+  "duration": 9.087,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674051830_chunk_1.wav"
+ },
+ {
+  "id": "083",
+  "source": "indicvoices-r",
+  "speaker": "audios/S4256911500327129",
+  "text": "हजुर खानाको बिलहरू चाहिँ आएर दिन्छु म मैले गर्छु बिलहरू चाहिँ",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674075504_chunk_10.wav",
+  "duration": 4.577,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674075504_chunk_15.wav"
+ },
+ {
+  "id": "084",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_02",
+  "text": "र यस्ता चिजहरू छलफल गर्दा पक्कै नै मान्छेहरू यस्ता प्रिन्सिपलहरूलाई एडप्ट गर्दै जान्छ र पक्कै यस्ता एडप्ट गर्यो भने मान्छे स्वस्थ रहनुहुन्छ",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/0P3jYnLWKb4_68cf054b_chunk156_1281732-1290732ms_SPEAKER_02_9000ms.wav",
+  "duration": 9.0,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/33mDuRwkPNE_07a327eb_chunk031_514112-518732ms_SPEAKER_02_4620ms.wav"
+ },
+ {
+  "id": "085",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_01",
+  "text": "तर त्यसको अर्थ यो हो कि संविधान जारी गर्दैमा पुग्छ कि संविधानको सुनिश्चितताका आधारहरू पनि हुन्छन्",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/21qRwJ9FVOI_26e219d3_chunk012_172932-179332ms_SPEAKER_01_6399ms.wav",
+  "duration": 6.399,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/kxXDJNo7VC8_77b9c5e7_chunk011_136892-141812ms_SPEAKER_01_4920ms.wav"
+ },
+ {
+  "id": "086",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_01",
+  "text": "र एक दिवसीय वरियतामा विराट कोहली तेस्रो स्थानमा उक्लिए बलिङतर्फ केशव महाराज शीर्ष स्थानमा",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/29MsiIR9jiY_22c88818_chunk004_57912-64252ms_SPEAKER_01_6340ms.wav",
+  "duration": 6.34,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/5RK4ggpOMgI_69952710_chunk125_1245232-1249152ms_SPEAKER_01_3920ms.wav"
+ },
+ {
+  "id": "087",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_07",
+  "text": "यो पिक्चरमा म क्लिक गर्छु अब यो यो इन्टरफेस खुल्छ सर यहाँ चाहिँ फेरि अनलाइन पिक्चर भन्ने छ",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/4tj8sQe3Blw_50390023_chunk115_620472-629132ms_SPEAKER_07_8659ms.wav",
+  "duration": 8.659,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/25jXVoRxQBE_d8e11492_chunk328_1405012-1409732ms_SPEAKER_07_4720ms.wav"
+ },
+ {
+  "id": "088",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_01",
+  "text": "यो खुर्मा बनाउनको लागि हामीलाई त्यति धेरै समय पनि चाहिँदैन र धेरै सामग्रीहरू पनि चाहिँदैन",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/6dBksLXCN3U_e788ad75_chunk002_15312-21132ms_SPEAKER_01_5820ms.wav",
+  "duration": 5.82,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/qJ9ZWznJCGE_f8231c4c_chunk026_414772-418572ms_SPEAKER_01_3800ms.wav"
+ },
+ {
+  "id": "089",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_01",
+  "text": "महिलाकै हिसाबले चाहिँ काम गर्नको लागि कस्तो खालको चुनौतीहरू चाहिँ देख्नुहुन्छ त",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/6e18T4OlV7o_3af2a3e5_chunk086_1665152-1670532ms_SPEAKER_01_5379ms.wav",
+  "duration": 5.379,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/NNxFVfkEbyo_541ef5f7_chunk022_117632-120992ms_SPEAKER_01_3359ms.wav"
+ },
+ {
+  "id": "090",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_01",
+  "text": "दुःख गरियो मैले पहिलो प्रपर्टी किन्दाखेरि मसँग खातामा पाँच सय डलर थियो जम्मा",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/BA78hFtPhR0_297bf788_chunk043_182152-188212ms_SPEAKER_01_6060ms.wav",
+  "duration": 6.06,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/RB5Zk9_x4Q4_189c8c83_chunk008_103532-106552ms_SPEAKER_01_3020ms.wav"
+ },
+ {
+  "id": "091",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_01",
+  "text": "सुन्दरले भने जस्तो परिस्थिति छ त्यससँग सहमत भएर अघि बढे जीवन स्वाभाविक रूपमा चल्छ",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/D17SZK_1GbA_0ac04757_chunk019_266932-274352ms_SPEAKER_01_7420ms.wav",
+  "duration": 7.42,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/p3FNmvWPeUI_ddb09c76_chunk005_43212-46352ms_SPEAKER_01_3140ms.wav"
+ },
+ {
+  "id": "092",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_04",
+  "text": "हो बिरुवा हो अनि त्यसलाई लगेर ठाउँमा रोपेर सबै कुरा गर्दा कति खर्च हुन्छ",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/Op9zDSjBaQI_7e780ce2_chunk044_278572-282932ms_SPEAKER_04_4360ms.wav",
+  "duration": 4.36,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/O1d7BjlR3AA_518f5d00_chunk265_486992-491492ms_SPEAKER_04_4500ms.wav"
+ },
+ {
+  "id": "093",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_05",
+  "text": "उहाँहरू अहिले खानको लागि न चामल छ न सब्जी छ",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/QAefNjZXhV8_3fc85920_chunk052_252792-257152ms_SPEAKER_05_4359ms.wav",
+  "duration": 4.359,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/Pt5Qx5vGeWQ_9b623c1b_chunk190_1465972-1469452ms_SPEAKER_05_3480ms.wav"
+ },
+ {
+  "id": "094",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_02",
+  "text": "त्यहाँ चाहिँ सन्यास शब्दको अर्थ चाहिँ मन पुरै परमात्मामा भएको भन्ने हुन्छ वानप्रस्थमा मन आधा आधा छ",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/RsQQ_04UFQY_b18d4c2a_chunk026_317912-327552ms_SPEAKER_02_9639ms.wav",
+  "duration": 9.639,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/-4jJCzjNU_k_e9ba9d7f_chunk521_1777192-1780992ms_SPEAKER_02_3799ms.wav"
+ },
+ {
+  "id": "095",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_02",
+  "text": "होइन माओवादीबाट मोटामोटी रूपमा",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/myTRqZFDU_w_431b3a7b_chunk059_325772-329732ms_SPEAKER_02_3960ms.wav",
+  "duration": 3.96,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/2fR1IsAUEwE_167b3dbf_chunk080_476012-479532ms_SPEAKER_02_3519ms.wav"
+ },
+ {
+  "id": "096",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_02",
+  "text": "क्याबिनेटबाट पास भएर तपाईँको पार्लियामेन्टमा चाहिँ टेबुल गर्नका लागि अनुमति दियो भनिसकेपछि हामी त हेर्न पनि पाएका थिएनौँ",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/nWoDNugEnos_136ed3cc_chunk017_177252-186252ms_SPEAKER_02_9000ms.wav",
+  "duration": 9.0,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/1iJqeJZp_q8_b61a7805_chunk174_832192-836092ms_SPEAKER_02_3899ms.wav"
+ },
+ {
+  "id": "097",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_01",
+  "text": "अब तापक्रम तपाईँ अहिले हेर्नुहुन्छ भने अहिले गल्फको भन्दा नेपालमा तापक्रम बढी छ",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/plOKhzvw3CE_942b28b4_chunk089_397592-402992ms_SPEAKER_01_5400ms.wav",
+  "duration": 5.4,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/ovNxdIqcOgs_354f4288_chunk002_36172-40372ms_SPEAKER_01_4200ms.wav"
+ },
+ {
+  "id": "098",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_03",
+  "text": "हजुर हजुर भोलि भातका कुराहरू यो चिजहरूले चाहिँ यो निबन्धलाई चाहिँ नाट्य रूपान्तरण गर्न सक्यो भने",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/q8E3Cv9d5e4_2233eb69_chunk064_316932-325392ms_SPEAKER_03_8459ms.wav",
+  "duration": 8.459,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/4G3R_K9ICEw_d722bc6b_chunk580_2056952-2061352ms_SPEAKER_03_4399ms.wav"
+ },
+ {
+  "id": "099",
+  "source": "mahadhwani",
+  "speaker": "yt-md/SPEAKER_00",
+  "text": "अहिले कालेबुङका विभिन्न स्कुलहरूको भ्रमण गर्ने सङ्गठनको टोलीमा सङ्गठनका जिल्ला समिति अध्यक्ष सिबी गुरुङ केन्द्रीय समिति सचिव सेन्डुप लामा",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/qkIgYNU_TWc_ac6a4817_chunk063_839152-848892ms_SPEAKER_00_9740ms.wav",
+  "duration": 9.74,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/OGv2jedONkc_c80c83b6_chunk548_1457692-1460772ms_SPEAKER_00_3079ms.wav"
+ }
+]

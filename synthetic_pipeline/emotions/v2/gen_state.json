@@ -1,0 +1,181 @@
+{
+ "done": [
+  {
+   "emotion": "angry",
+   "idx": 0,
+   "text": "मैले पटक पटक भनेँ, तर तिमीले मेरो कुरा कहिल्यै सुनेनौ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/angry/amrita_angry_001.wav",
+   "duration_s": 5.72
+  },
+  {
+   "emotion": "happy",
+   "idx": 0,
+   "text": "मेरो नतिजा आयो, मैले परीक्षामा सबैभन्दा राम्रो अङ्क ल्याएँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/happy/amrita_happy_001.wav",
+   "duration_s": 4.84
+  },
+  {
+   "emotion": "sad",
+   "idx": 0,
+   "text": "आज घर सुनसान छ, उहाँको आवाज सुन्ने आशा सधैंको लागि टुट्यो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/sad/amrita_sad_001.wav",
+   "duration_s": 8.48
+  },
+  {
+   "emotion": "excited",
+   "idx": 0,
+   "text": "हामीले जित्यौं, हामीले साँच्चै जित्यौं, मलाई विश्वास नै लागेको छैन।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/excited/amrita_excited_001.wav",
+   "duration_s": 4.4
+  },
+  {
+   "emotion": "neutral",
+   "idx": 0,
+   "text": "यो कार्यक्रम प्रत्येक बिहान सात बजे प्रसारण हुनेछ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/neutral/amrita_neutral_001.wav",
+   "duration_s": 4.76
+  },
+  {
+   "emotion": "angry",
+   "idx": 1,
+   "text": "यो अन्याय अब मैले सहन सक्दिनँ, मलाई तुरुन्तै जवाफ देऊ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/angry/amrita_angry_002.wav",
+   "duration_s": 6.2
+  },
+  {
+   "emotion": "happy",
+   "idx": 1,
+   "text": "धेरै वर्षपछि आज हामी सबै एकै ठाउँमा भेटियौं, कति रमाइलो भयो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/happy/amrita_happy_002.wav",
+   "duration_s": 7.56
+  },
+  {
+   "emotion": "sad",
+   "idx": 1,
+   "text": "मैले सबै गुमाएँ, अब मेरो साथमा एक्लोपन मात्र बाँकी छ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/sad/amrita_sad_002.wav",
+   "duration_s": 7.72
+  },
+  {
+   "emotion": "excited",
+   "idx": 1,
+   "text": "भोलि हामी हिमाल घुम्न जाँदैछौं, मैले सबै तयारी सकेँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/excited/amrita_excited_002.wav",
+   "duration_s": 3.92
+  },
+  {
+   "emotion": "neutral",
+   "idx": 1,
+   "text": "सेवाग्राहीले आवश्यक कागजात लिएर कार्यालयमा सम्पर्क राख्नुहोला।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/neutral/amrita_neutral_002.wav",
+   "duration_s": 5.64
+  },
+  {
+   "emotion": "angry",
+   "idx": 2,
+   "text": "तिमीले मलाई कति पटक ढाँट्यौ, अब मेरो धैर्यको सीमा सकियो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/angry/amrita_angry_003.wav",
+   "duration_s": 7.44
+  },
+  {
+   "emotion": "happy",
+   "idx": 2,
+   "text": "तिमीले पठाएको उपहार मैले पाएँ, मलाई साँच्चै धेरै मन पर्यो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/happy/amrita_happy_003.wav",
+   "duration_s": 5.4
+  },
+  {
+   "emotion": "sad",
+   "idx": 2,
+   "text": "मलाई माफ गरिदेऊ, मैले चाहेर पनि केही राम्रो गर्न सकिनँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/sad/amrita_sad_003.wav",
+   "duration_s": 7.08
+  },
+  {
+   "emotion": "excited",
+   "idx": 2,
+   "text": "छिटो आऊ, तिमीले यो हेर्नै पर्छ, यो एकदमै अद्भुत छ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/excited/amrita_excited_003.wav",
+   "duration_s": 3.84
+  },
+  {
+   "emotion": "neutral",
+   "idx": 2,
+   "text": "तापक्रम आज दिनभरि सामान्य रहने अनुमान गरिएको छ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/neutral/amrita_neutral_003.wav",
+   "duration_s": 4.68
+  },
+  {
+   "emotion": "angry",
+   "idx": 3,
+   "text": "मैले तिमीलाई विश्वास गरेकी थिएँ, तर तिमीले त्यो विश्वास तोड्यौ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/angry/amrita_angry_004.wav",
+   "duration_s": 6.04
+  },
+  {
+   "emotion": "happy",
+   "idx": 3,
+   "text": "आज बिहानको मौसम यति सुन्दर छ कि मन आफै प्रसन्न भयो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/happy/amrita_happy_004.wav",
+   "duration_s": 5.48
+  },
+  {
+   "emotion": "sad",
+   "idx": 3,
+   "text": "सोचेकी थिएँ परिस्थिति अलि सुध्रिएला, तर झन् बिग्रँदै गयो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/sad/amrita_sad_004.wav",
+   "duration_s": 7.6
+  },
+  {
+   "emotion": "excited",
+   "idx": 3,
+   "text": "मेरो नाम छनौट भयो, मैले त्यो अवसर पाएँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/excited/amrita_excited_004.wav",
+   "duration_s": 3.52
+  },
+  {
+   "emotion": "neutral",
+   "idx": 3,
+   "text": "नयाँ नियम आउँदो महिनाको पहिलो सातादेखि लागू हुनेछ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2/neutral/amrita_neutral_004.wav",
+   "duration_s": 5.2
+  }
+ ],
+ "failed": [
+  {
+   "emotion": "angry",
+   "idx": 4,
+   "text": "अब बहाना बनाउन छोड, र आफ्नो गल्ती स्वीकार गर।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 4,
+   "text": "मेरो सानो भान्जीले आज पहिलो पटक मलाई फुपू भनेर बोलाई।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 4,
+   "text": "अब बहाना बनाउन छोड, र आफ्नो गल्ती स्वीकार गर।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 4,
+   "text": "मेरो सानो भान्जीले आज पहिलो पटक मलाई फुपू भनेर बोलाई।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 4,
+   "text": "अब फेरि पहिले जस्तो केही पनि हुने छैन।"
+  },
+  {
+   "emotion": "excited",
+   "idx": 4,
+   "text": "अब केही घण्टामा नतिजा आउँछ, मलाई पर्खिनै सकिनँ।"
+  },
+  {
+   "emotion": "neutral",
+   "idx": 4,
+   "text": "यात्रुहरूलाई समयमै स्थानमा आइपुग्न अनुरोध गरिन्छ।"
+  }
+ ]
+}

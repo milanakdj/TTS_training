@@ -1,0 +1,86 @@
+{
+ "neutral": [
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/val/audio/Nepali/NEP_F_CONV_02697.wav",
+   "dur": 3.944,
+   "text": "जहाँसम्म मलाई थाहा छ, पञ्जीकरण अक्टोबरमा सुरु हुन्छ।"
+  },
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_CONV_01723.wav",
+   "dur": 3.837,
+   "text": "अनि यसको अर्थ ध्यान दिनेहरूको ध्यान हटाइदिन्छन्।"
+  }
+ ],
+ "sad": [
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_SAD_00328.wav",
+   "dur": 4.286,
+   "text": "उनीहरू एउटा समूहमा गए तर फर्किने उनीमात्र थिइन्।"
+  },
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_SAD_00141.wav",
+   "dur": 4.045,
+   "text": "म यस घोर अन्धकारमा घामको किरण खोज्दै छु।"
+  }
+ ],
+ "fear": [
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_FEAR_00134.wav",
+   "dur": 4.915,
+   "text": "के वर्षावनमा जिप लाइनिङका लागि कुनै पनि सुरक्षा उपायहरू छैनन्?"
+  },
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_FEAR_00247.wav",
+   "dur": 4.195,
+   "text": "बजार सुधारको सम्भावनाबारे मलाई अलिक डर लागिरहेको छु।"
+  }
+ ],
+ "disgust": [
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_DISGUST_00221.wav",
+   "dur": 4.616,
+   "text": "रेफ्री, उनले बलमा थुक्यो। म अब यसलाई छुने छैन।"
+  },
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_DISGUST_00256.wav",
+   "dur": 3.923,
+   "text": "उनीहरूले अचारको छेउमा डायपर किन राखेका होलान्?"
+  }
+ ],
+ "happy": [
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_HAPPY_00459.wav",
+   "dur": 4.947,
+   "text": "मेरो शयनकक्षमा यो अनुकूलित वस्तु राख्नु साह्रै राम्रो हुनेछ।"
+  },
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_HAPPY_00289.wav",
+   "dur": 4.68,
+   "text": "दुबईको सहर स्काइलाइन मरुभूमिको मनमोहक दृश्य हो।"
+  }
+ ],
+ "surprise": [
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_SURPRISE_00192.wav",
+   "dur": 4.872,
+   "text": "यो आवाज चिन्ने सफ्टवेयरको अचूक क्षमता देखेर म चकित भएँ।"
+  },
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/val/audio/Nepali/NEP_F_SURPRISE_00167.wav",
+   "dur": 4.6,
+   "text": "म दिल्लीका विभिन्न सङ्ग्रहालयहरूबाट साँच्चै प्रभावित छु।"
+  }
+ ],
+ "angry": [
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_ANGER_00018.wav",
+   "dur": 4.968,
+   "text": "हाम्रो अपार्टमेन्टको सुरक्षा अस्थिर छ अनि अचानक झगडा हुन्छ।"
+  },
+  {
+   "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_ANGER_00322.wav",
+   "dur": 4.835,
+   "text": "कार्तिक! लाइनमा फर्कनुहोस् अनि बात गर्न बन्द गर्नुहोस्।"
+  }
+ ]
+}

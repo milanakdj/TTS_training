@@ -1,0 +1,463 @@
+{
+ "done": [
+  {
+   "emotion": "angry",
+   "idx": 0,
+   "text": "मैले पटक पटक भनेँ, तर तिमीले मेरो कुरा कहिल्यै सुनेनौ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/angry/amrita_angry_001.wav",
+   "duration_s": 4.97
+  },
+  {
+   "emotion": "happy",
+   "idx": 0,
+   "text": "मेरो नतिजा आयो, मैले परीक्षामा सबैभन्दा राम्रो अङ्क ल्याएँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/happy/amrita_happy_001.wav",
+   "duration_s": 4.81
+  },
+  {
+   "emotion": "sad",
+   "idx": 0,
+   "text": "आज घर सुनसान छ, उहाँको आवाज सुन्ने आशा सधैंको लागि टुट्यो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/sad/amrita_sad_001.wav",
+   "duration_s": 7.73
+  },
+  {
+   "emotion": "excited",
+   "idx": 0,
+   "text": "हामीले जित्यौं, हामीले साँच्चै जित्यौं, मलाई विश्वास नै लागेको छैन।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/excited/amrita_excited_001.wav",
+   "duration_s": 4.13
+  },
+  {
+   "emotion": "neutral",
+   "idx": 0,
+   "text": "यो कार्यक्रम प्रत्येक बिहान सात बजे प्रसारण हुनेछ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/neutral/amrita_neutral_001.wav",
+   "duration_s": 4.45
+  },
+  {
+   "emotion": "angry",
+   "idx": 1,
+   "text": "यो अन्याय अब मैले सहन सक्दिनँ, मलाई तुरुन्तै जवाफ देऊ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/angry/amrita_angry_002.wav",
+   "duration_s": 4.61
+  },
+  {
+   "emotion": "happy",
+   "idx": 1,
+   "text": "धेरै वर्षपछि आज हामी सबै एकै ठाउँमा भेटियौं, कति रमाइलो भयो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/happy/amrita_happy_002.wav",
+   "duration_s": 5.05
+  },
+  {
+   "emotion": "sad",
+   "idx": 1,
+   "text": "मैले सबै गुमाएँ, अब मेरो साथमा एक्लोपन मात्र बाँकी छ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/sad/amrita_sad_002.wav",
+   "duration_s": 6.61
+  },
+  {
+   "emotion": "excited",
+   "idx": 1,
+   "text": "भोलि हामी हिमाल घुम्न जाँदैछौं, मैले सबै तयारी सकेँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/excited/amrita_excited_002.wav",
+   "duration_s": 3.45
+  },
+  {
+   "emotion": "neutral",
+   "idx": 1,
+   "text": "सेवाग्राहीले आवश्यक कागजात लिएर कार्यालयमा सम्पर्क राख्नुहोला।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/neutral/amrita_neutral_002.wav",
+   "duration_s": 5.77
+  },
+  {
+   "emotion": "angry",
+   "idx": 2,
+   "text": "तिमीले मलाई कति पटक ढाँट्यौ, अब मेरो धैर्यको सीमा सकियो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/angry/amrita_angry_003.wav",
+   "duration_s": 4.93
+  },
+  {
+   "emotion": "happy",
+   "idx": 2,
+   "text": "तिमीले पठाएको उपहार मैले पाएँ, मलाई साँच्चै धेरै मन पर्यो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/happy/amrita_happy_003.wav",
+   "duration_s": 4.13
+  },
+  {
+   "emotion": "sad",
+   "idx": 2,
+   "text": "मलाई माफ गरिदेऊ, मैले चाहेर पनि केही राम्रो गर्न सकिनँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/sad/amrita_sad_003.wav",
+   "duration_s": 8.49
+  },
+  {
+   "emotion": "excited",
+   "idx": 2,
+   "text": "छिटो आऊ, तिमीले यो हेर्नै पर्छ, यो एकदमै अद्भुत छ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/excited/amrita_excited_003.wav",
+   "duration_s": 4.29
+  },
+  {
+   "emotion": "neutral",
+   "idx": 2,
+   "text": "तापक्रम आज दिनभरि सामान्य रहने अनुमान गरिएको छ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/neutral/amrita_neutral_003.wav",
+   "duration_s": 4.29
+  },
+  {
+   "emotion": "angry",
+   "idx": 3,
+   "text": "मैले तिमीलाई विश्वास गरेकी थिएँ, तर तिमीले त्यो विश्वास तोड्यौ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/angry/amrita_angry_004.wav",
+   "duration_s": 5.77
+  },
+  {
+   "emotion": "happy",
+   "idx": 3,
+   "text": "आज बिहानको मौसम यति सुन्दर छ कि मन आफै प्रसन्न भयो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/happy/amrita_happy_004.wav",
+   "duration_s": 5.17
+  },
+  {
+   "emotion": "sad",
+   "idx": 3,
+   "text": "सोचेकी थिएँ परिस्थिति अलि सुध्रिएला, तर झन् बिग्रँदै गयो।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/sad/amrita_sad_004.wav",
+   "duration_s": 6.65
+  },
+  {
+   "emotion": "excited",
+   "idx": 3,
+   "text": "मेरो नाम छनौट भयो, मैले त्यो अवसर पाएँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/excited/amrita_excited_004.wav",
+   "duration_s": 3.05
+  },
+  {
+   "emotion": "neutral",
+   "idx": 3,
+   "text": "नयाँ नियम आउँदो महिनाको पहिलो सातादेखि लागू हुनेछ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/neutral/amrita_neutral_004.wav",
+   "duration_s": 4.81
+  },
+  {
+   "emotion": "angry",
+   "idx": 4,
+   "text": "अब बहाना बनाउन छोड, र आफ्नो गल्ती स्वीकार गर।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/angry/amrita_angry_005.wav",
+   "duration_s": 3.93
+  },
+  {
+   "emotion": "happy",
+   "idx": 4,
+   "text": "मेरो सानो भान्जीले आज पहिलो पटक मलाई फुपू भनेर बोलाई।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/happy/amrita_happy_005.wav",
+   "duration_s": 3.93
+  },
+  {
+   "emotion": "sad",
+   "idx": 4,
+   "text": "अब फेरि पहिले जस्तो केही पनि हुने छैन।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/sad/amrita_sad_005.wav",
+   "duration_s": 4.53
+  },
+  {
+   "emotion": "excited",
+   "idx": 4,
+   "text": "अब केही घण्टामा नतिजा आउँछ, मलाई पर्खिनै सकिनँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/excited/amrita_excited_005.wav",
+   "duration_s": 3.73
+  },
+  {
+   "emotion": "neutral",
+   "idx": 4,
+   "text": "यात्रुहरूलाई समयमै स्थानमा आइपुग्न अनुरोध गरिन्छ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/neutral/amrita_neutral_005.wav",
+   "duration_s": 4.01
+  },
+  {
+   "emotion": "angry",
+   "idx": 5,
+   "text": "यति धेरै लापरवाही गरेपछि पनि तिमीलाई कुनै पछुतो छैन।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/angry/amrita_angry_006.wav",
+   "duration_s": 4.45
+  },
+  {
+   "emotion": "happy",
+   "idx": 5,
+   "text": "हामीले सोचेभन्दा धेरै राम्रो काम भयो, सबैलाई धन्यवाद।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/happy/amrita_happy_006.wav",
+   "duration_s": 3.89
+  },
+  {
+   "emotion": "sad",
+   "idx": 5,
+   "text": "म केवल अलिकति माया चाहन्थिएँ, त्यो पनि मैले पाइनँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/sad/amrita_sad_006.wav",
+   "duration_s": 9.13
+  },
+  {
+   "emotion": "excited",
+   "idx": 5,
+   "text": "यो खबर सुनेपछि मैले तुरुन्तै तिमीलाई फोन गरेँ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/excited/amrita_excited_006.wav",
+   "duration_s": 2.89
+  },
+  {
+   "emotion": "neutral",
+   "idx": 5,
+   "text": "यो पुस्तकालय बिहान नौ बजेदेखि साँझ पाँच बजेसम्म खुल्ला रहन्छ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/neutral/amrita_neutral_006.wav",
+   "duration_s": 6.45
+  },
+  {
+   "emotion": "angry",
+   "idx": 6,
+   "text": "मेरो समय र मेहनत तिमीले व्यर्थमा बर्बाद गरिदियौ।",
+   "path": "/root/tts/TTS_training/synthetic_pipeline/emotions/v2_25flash/angry/amrita_angry_007.wav",
+   "duration_s": 5.37
+  }
+ ],
+ "failed": [
+  {
+   "emotion": "happy",
+   "idx": 6,
+   "text": "लामो समयपछि घर फर्किँदा आमाको हातको खाना खाएँ।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 6,
+   "text": "यो पीडा कसैलाई सुनाउन पनि मन लाग्दैन।"
+  },
+  {
+   "emotion": "excited",
+   "idx": 6,
+   "text": "हामीले वर्षौंदेखि सोचेको योजना अन्ततः सुरु हुँदैछ।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 7,
+   "text": "यो कुरा यहीँ सक्किँदैन, मैले जवाफ खोजेरै छाड्छु।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 7,
+   "text": "तिम्रो सफलताको खबर सुनेर मेरो मन खुसीले भरियो।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 7,
+   "text": "बर्षौंको मेहनत एकै दिनमा सबै व्यर्थ भयो।"
+  },
+  {
+   "emotion": "excited",
+   "idx": 7,
+   "text": "यत्रो भीडमा पनि मैले तिमीलाई देखेँ, कति राम्रो भयो।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 8,
+   "text": "तिमीले जे गरे पनि म अब चुप लागेर बस्ने छैन।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 8,
+   "text": "आजको दिन मेरो जीवनको सबैभन्दा राम्रो दिन बन्यो।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 8,
+   "text": "उहाँ बित्नुभएको आज एक वर्ष पुग्यो, तर मन अझै मान्दैन।"
+  },
+  {
+   "emotion": "excited",
+   "idx": 8,
+   "text": "मैले नयाँ काम पाएँ, भोलिदेखि नै सुरु गर्दैछु।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 9,
+   "text": "मलाई अरू कसैको सल्लाह चाहिँदैन, मैले निर्णय गरिसकेँ।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 9,
+   "text": "सबै मिलेर काम गर्दा कति सजिलो र रमाइलो हुन्छ।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 9,
+   "text": "मैले धेरै प्रयास गरेँ, तर अन्तमा एक्लै रह्याछु।"
+  },
+  {
+   "emotion": "excited",
+   "idx": 9,
+   "text": "सबै जना आइपुगेका छन्, अब कार्यक्रम सुरु हुनै लाग्यो।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 10,
+   "text": "बारम्बार सम्झाउँदा पनि तिमीले किन बुझ्दैनौ।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 10,
+   "text": "यो सुन्दर ठाउँमा आउन पाउँदा म साँच्चै भाग्यमानी छु।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 10,
+   "text": "जीवन कहिलेकाहीँ यति निर्दयी हुन्छ कि शब्द नै भेटिँदैन।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 11,
+   "text": "यो व्यवहार मैले अब कदापि सहन गर्ने छैन।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 11,
+   "text": "तिमीलाई भेट्न पाउँदा सधैं मेरो दिन राम्रो हुन्छ।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 11,
+   "text": "बिदाइको बेला केही भन्न खोजेँ, तर आवाज नै निस्किएन।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 6,
+   "text": "लामो समयपछि घर फर्किँदा आमाको हातको खाना खाएँ।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 6,
+   "text": "यो पीडा कसैलाई सुनाउन पनि मन लाग्दैन।"
+  },
+  {
+   "emotion": "excited",
+   "idx": 6,
+   "text": "हामीले वर्षौंदेखि सोचेको योजना अन्ततः सुरु हुँदैछ।"
+  },
+  {
+   "emotion": "neutral",
+   "idx": 6,
+   "text": "नेपाल एउटा सुन्दर र विविध संस्कृतिले भरिएको बहुभाषिक देश हो।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 7,
+   "text": "यो कुरा यहीँ सक्किँदैन, मैले जवाफ खोजेरै छाड्छु।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 7,
+   "text": "तिम्रो सफलताको खबर सुनेर मेरो मन खुसीले भरियो।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 7,
+   "text": "बर्षौंको मेहनत एकै दिनमा सबै व्यर्थ भयो।"
+  },
+  {
+   "emotion": "excited",
+   "idx": 7,
+   "text": "यत्रो भीडमा पनि मैले तिमीलाई देखेँ, कति राम्रो भयो।"
+  },
+  {
+   "emotion": "neutral",
+   "idx": 7,
+   "text": "थप जानकारीको लागि हाम्रो आधिकारिक वेबसाइट हेर्न सक्नुहुनेछ।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 8,
+   "text": "तिमीले जे गरे पनि म अब चुप लागेर बस्ने छैन।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 8,
+   "text": "आजको दिन मेरो जीवनको सबैभन्दा राम्रो दिन बन्यो।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 8,
+   "text": "उहाँ बित्नुभएको आज एक वर्ष पुग्यो, तर मन अझै मान्दैन।"
+  },
+  {
+   "emotion": "excited",
+   "idx": 8,
+   "text": "मैले नयाँ काम पाएँ, भोलिदेखि नै सुरु गर्दैछु।"
+  },
+  {
+   "emotion": "neutral",
+   "idx": 8,
+   "text": "काम सुरु गर्नुअघि सबै नियम र निर्देशनहरू राम्ररी पढ्नुहोला।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 9,
+   "text": "मलाई अरू कसैको सल्लाह चाहिँदैन, मैले निर्णय गरिसकेँ।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 9,
+   "text": "सबै मिलेर काम गर्दा कति सजिलो र रमाइलो हुन्छ।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 9,
+   "text": "मैले धेरै प्रयास गरेँ, तर अन्तमा एक्लै रह्याछु।"
+  },
+  {
+   "emotion": "excited",
+   "idx": 9,
+   "text": "सबै जना आइपुगेका छन्, अब कार्यक्रम सुरु हुनै लाग्यो।"
+  },
+  {
+   "emotion": "neutral",
+   "idx": 9,
+   "text": "अहिलेको समयमा प्रविधिको प्रयोगले हाम्रो जीवनलाई निकै सहज बनाएको छ।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 10,
+   "text": "बारम्बार सम्झाउँदा पनि तिमीले किन बुझ्दैनौ।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 10,
+   "text": "यो सुन्दर ठाउँमा आउन पाउँदा म साँच्चै भाग्यमानी छु।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 10,
+   "text": "जीवन कहिलेकाहीँ यति निर्दयी हुन्छ कि शब्द नै भेटिँदैन।"
+  },
+  {
+   "emotion": "neutral",
+   "idx": 10,
+   "text": "बैठकको निर्णय सबै सदस्यलाई लिखित रूपमा जानकारी गराइनेछ।"
+  },
+  {
+   "emotion": "angry",
+   "idx": 11,
+   "text": "यो व्यवहार मैले अब कदापि सहन गर्ने छैन।"
+  },
+  {
+   "emotion": "happy",
+   "idx": 11,
+   "text": "तिमीलाई भेट्न पाउँदा सधैं मेरो दिन राम्रो हुन्छ।"
+  },
+  {
+   "emotion": "sad",
+   "idx": 11,
+   "text": "बिदाइको बेला केही भन्न खोजेँ, तर आवाज नै निस्किएन।"
+  },
+  {
+   "emotion": "neutral",
+   "idx": 11,
+   "text": "यो तथ्याङ्क गत वर्षको सर्वेक्षणमा आधारित रहेको छ।"
+  }
+ ]
+}

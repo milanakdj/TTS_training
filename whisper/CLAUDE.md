@@ -213,11 +213,15 @@ Notes:
 
 ## Published models
 
+**These moved to the `himalaya-ai` org on/before 2026-09-08 and are private there.**
+The old `milanakdj/...` names below 404 even for the owning account, so a fine-grained
+token scoped to `milanakdj` is not enough — it must grant read on `himalaya-ai`.
+
 | Repo | What |
 |---|---|
-| `milanakdj/whisper-large-v3-nepali-final-largev3_1` | `checkpoint-26550`, **WER 10.98% / CER 3.43%** on 5000 clips — but only with the doubled prefix. Card documents it. |
-| `milanakdj/whisper-large-v3-nepali-checkpoints` | per-epoch crash backup. Overwritten by every run; nothing depends on it. |
-| `milanakdj/whisper-medium-nepali-final` | trained by the same script before the fix, so it has the **same doubled-prefix bug**. Every commit in git history carries the bad line. Score it with `--n-sot 2` and the matching `--num-rows`. |
+| `himalaya-ai/whisper-large-v3-nepali-final` | was `milanakdj/whisper-large-v3-nepali-final-largev3_1`. **WER 10.98% / CER 3.43%** on 5000 clips of its own clean test split — but only with the doubled prefix. Weights sit at the repo ROOT now, so `checkpoint-26550` is no longer a subfolder path: pass the bare repo id. Re-measured 2026-09-08 on 100 real-human Nepali clips from the TTS eval set: **WER 0.343 / CER 0.122**, versus 0.917 / 0.344 for base `large-v3-turbo` on the same clips. |
+| `himalaya-ai/whisper-medium-nepali-final` | was `milanakdj/whisper-medium-nepali-final`. Trained by the same script before the fix, so it has the **same doubled-prefix bug**. Every commit in git history carries the bad line. Score it with `--n-sot 2` and the matching `--num-rows`. |
+| ~~`milanakdj/whisper-large-v3-nepali-checkpoints`~~ | **gone.** The per-epoch crash backup no longer exists under either account; nothing depended on it. |
 
 `checkpoint-26550` and `checkpoint-8850` were the only survivors of the first run:
 `save_total_limit=2` deleted `checkpoint-17700`, and `load_best_model_at_end` pinned

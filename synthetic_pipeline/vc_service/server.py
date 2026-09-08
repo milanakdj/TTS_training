@@ -22,7 +22,7 @@ import torchaudio
 import librosa
 import soundfile as sf
 import yaml
-from fastapi import FastAPI, File, UploadFile, Request
+from fastapi import FastAPI, File, Form, UploadFile, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, Response
 
@@ -47,6 +47,82 @@ from hf_utils import load_custom_model_from_hf  # noqa: E402
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 FP16 = torch.cuda.is_available()
 OUTPUT_SR = 24000  # contract-mandated output sample rate
+
+# --- /convert tunables -------------------------------------------------------------------
+# Defaults below reproduce the previous hard-coded behaviour exactly.
+# length_adjust feeds `target_lengths = int(mel.size(2) * length_adjust)`, i.e. it sets the
+# number of output mel frames -> values > 1.0 produce a LONGER (slower) output, < 1.0 a
+# shorter (faster) one. Verified empirically, see report.
+LENGTH_ADJUST_DEFAULT, LENGTH_ADJUST_RANGE = 1.0, (0.5, 2.0)
+DIFFUSION_STEPS_DEFAULT, DIFFUSION_STEPS_RANGE = 10, (4, 50)
+INFERENCE_CFG_RATE_DEFAULT, INFERENCE_CFG_RATE_RANGE = 0.7, (0.0, 1.0)
+
+# --- reference VAD -----------------------------------------------------------------------
+# The emotional reference clips audited for this pipeline are 44-66% non-speech (leading /
+# trailing silence, breaths, sniffs), so roughly half of the CAM++ style vector -- and of the
+# mel/semantic prompt derived from the same clip -- was computed over non-voice. Trim it with
+# a plain energy VAD (librosa.effects.split, already a dependency) before it reaches the
+# encoders. This touches the REFERENCE path ONLY; the source path is deliberately untouched
+# because Seed-VC takes F0 contour and timing from the source.
+REF_VAD_TOP_DB = 30          # dB below peak counted as silence
+REF_VAD_FRAME_LENGTH = 2048
+REF_VAD_HOP_LENGTH = 512
+REF_VAD_PAD_S = 0.03         # keep 30 ms either side of each speech run
+REF_VAD_MIN_KEEP_S = 1.0     # safety floor: below this, fall back to the untrimmed reference
+
+
+def _clamp(name, value, lo, hi):
+    clamped = min(max(value, lo), hi)
+    if clamped != value:
+        log.warning("%s=%s out of range [%s, %s] -- clamped to %s", name, value, lo, hi, clamped)
+    return clamped
+
+
+def vad_trim_reference(y: np.ndarray, sr: int):
+    """Energy-VAD the REFERENCE clip: drop leading/trailing silence and interior silent runs.
+
+    Returns (trimmed_audio, seconds_trimmed). Falls back to the input unchanged (and 0.0
+    trimmed) if the VAD finds no speech or leaves less than REF_VAD_MIN_KEEP_S of audio, so a
+    pathological reference can never produce a degenerate style vector.
+    """
+    orig_s = len(y) / sr
+    if len(y) == 0:
+        return y, 0.0
+    intervals = librosa.effects.split(
+        y,
+        top_db=REF_VAD_TOP_DB,
+        frame_length=REF_VAD_FRAME_LENGTH,
+        hop_length=REF_VAD_HOP_LENGTH,
+    )
+    if len(intervals) == 0:
+        log.warning(
+            "ref_vad: no speech detected in %.2fs reference (top_db=%d) -- using it untrimmed",
+            orig_s, REF_VAD_TOP_DB,
+        )
+        return y, 0.0
+
+    # Pad each speech run, then merge runs whose padding made them overlap/abut so the
+    # concatenation cannot duplicate audio.
+    pad = int(round(sr * REF_VAD_PAD_S))
+    merged = []
+    for start, end in intervals:
+        start = max(0, int(start) - pad)
+        end = min(len(y), int(end) + pad)
+        if merged and start <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+
+    trimmed = np.concatenate([y[a:b] for a, b in merged])
+    kept_s = len(trimmed) / sr
+    if kept_s < REF_VAD_MIN_KEEP_S:
+        log.warning(
+            "ref_vad: only %.2fs of %.2fs survived VAD (< %.2fs floor) -- using reference untrimmed",
+            kept_s, orig_s, REF_VAD_MIN_KEEP_S,
+        )
+        return y, 0.0
+    return trimmed, orig_s - kept_s
+
 
 app = FastAPI()
 
@@ -181,7 +257,14 @@ def crossfade(chunk1, chunk2, overlap):
 
 
 @torch.no_grad()
-def run_voice_conversion(source_path, ref_path, diffusion_steps=10, length_adjust=1.0, inference_cfg_rate=0.7):
+def run_voice_conversion(
+    source_path,
+    ref_path,
+    diffusion_steps=DIFFUSION_STEPS_DEFAULT,
+    length_adjust=LENGTH_ADJUST_DEFAULT,
+    inference_cfg_rate=INFERENCE_CFG_RATE_DEFAULT,
+    ref_vad=True,
+):
     model = STATE["model"]
     semantic_fn = STATE["semantic_fn"]
     vocoder_fn = STATE["vocoder_fn"]
@@ -196,6 +279,19 @@ def run_voice_conversion(source_path, ref_path, diffusion_steps=10, length_adjus
 
     source_audio = librosa.load(source_path, sr=sr)[0]
     ref_audio = librosa.load(ref_path, sr=sr)[0]
+
+    # REFERENCE ONLY -- source_audio is never touched (timing/F0 come from the source).
+    if ref_vad:
+        ref_len_before = len(ref_audio) / sr
+        ref_audio, ref_trimmed_s = vad_trim_reference(ref_audio, sr)
+        log.info(
+            "ref_vad: trimmed %.2fs of non-speech from reference (%.2fs -> %.2fs, %.1f%% removed, top_db=%d)",
+            ref_trimmed_s, ref_len_before, len(ref_audio) / sr,
+            100.0 * ref_trimmed_s / ref_len_before if ref_len_before else 0.0,
+            REF_VAD_TOP_DB,
+        )
+    else:
+        log.info("ref_vad: disabled by request -- reference used untrimmed (%.2fs)", len(ref_audio) / sr)
 
     source_audio = torch.tensor(source_audio).unsqueeze(0).float().to(DEVICE)
     ref_audio = torch.tensor(ref_audio[: sr * 25]).unsqueeze(0).float().to(DEVICE)
@@ -292,9 +388,21 @@ def run_voice_conversion(source_path, ref_path, diffusion_steps=10, length_adjus
 
 
 @app.post("/convert")
-async def convert(source_audio: UploadFile = File(...), reference_audio: UploadFile = File(...)):
+async def convert(
+    source_audio: UploadFile = File(...),
+    reference_audio: UploadFile = File(...),
+    length_adjust: float = Form(LENGTH_ADJUST_DEFAULT),
+    diffusion_steps: int = Form(DIFFUSION_STEPS_DEFAULT),
+    inference_cfg_rate: float = Form(INFERENCE_CFG_RATE_DEFAULT),
+    ref_vad: bool = Form(True),
+):
     src_tmp = ref_tmp = None
     try:
+        length_adjust = _clamp("length_adjust", float(length_adjust), *LENGTH_ADJUST_RANGE)
+        diffusion_steps = _clamp("diffusion_steps", int(diffusion_steps), *DIFFUSION_STEPS_RANGE)
+        inference_cfg_rate = _clamp(
+            "inference_cfg_rate", float(inference_cfg_rate), *INFERENCE_CFG_RATE_RANGE
+        )
         src_bytes = await source_audio.read()
         ref_bytes = await reference_audio.read()
 
@@ -306,9 +414,20 @@ async def convert(source_audio: UploadFile = File(...), reference_audio: UploadF
             ref_tmp = f.name
 
         t0 = time.time()
-        wave, model_sr = run_voice_conversion(src_tmp, ref_tmp)
-        log.info("Converted %s + %s in %.2fs (output %.2fs audio)",
-                  source_audio.filename, reference_audio.filename, time.time() - t0, len(wave) / model_sr)
+        wave, model_sr = run_voice_conversion(
+            src_tmp,
+            ref_tmp,
+            diffusion_steps=diffusion_steps,
+            length_adjust=length_adjust,
+            inference_cfg_rate=inference_cfg_rate,
+            ref_vad=ref_vad,
+        )
+        log.info(
+            "Converted %s + %s in %.2fs (output %.2fs audio) "
+            "[length_adjust=%s diffusion_steps=%s inference_cfg_rate=%s ref_vad=%s]",
+            source_audio.filename, reference_audio.filename, time.time() - t0,
+            len(wave) / model_sr, length_adjust, diffusion_steps, inference_cfg_rate, ref_vad,
+        )
 
         # Resample to contract-mandated 24000 Hz mono
         if model_sr != OUTPUT_SR:

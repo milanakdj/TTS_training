@@ -1,0 +1,36 @@
+{
+  "teacher_24l": [
+    {
+      "audio_s": 3.28,
+      "wall_s": 2.52,
+      "rtf": 1.3
+    },
+    {
+      "audio_s": 4.72,
+      "wall_s": 3.33,
+      "rtf": 1.42
+    },
+    {
+      "audio_s": 5.52,
+      "wall_s": 2.94,
+      "rtf": 1.88
+    }
+  ],
+  "student_6l": [
+    {
+      "audio_s": 3.76,
+      "wall_s": 0.74,
+      "rtf": 5.05
+    },
+    {
+      "audio_s": 4.08,
+      "wall_s": 0.85,
+      "rtf": 4.79
+    },
+    {
+      "audio_s": 5.84,
+      "wall_s": 1.11,
+      "rtf": 5.28
+    }
+  ]
+}
