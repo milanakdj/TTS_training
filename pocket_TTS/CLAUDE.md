@@ -47,7 +47,7 @@ run unguided — [ADR-005](docs/ADR.md#adr-005).
 
 | model | params | on disk | weights |
 |---|---|---|---|
-| student 6L | 109.5M (75.5M backbone + 9.8M flow head + 4.2M emb + 20.1M Mimi) | 438 MB | `/workspace/nepali_student_6l/model_final_200k.safetensors` |
+| student 6L | 109.5M (75.5M backbone + 9.8M flow head + 4.2M emb + 20.1M Mimi) | 438 MB | `hf://milanakdj/pocket-tts-nepali-6l` (private) or `himalaya-ai/pocket-tts-nepali-6l` (public) |
 | teacher 24L | 336.1M (302.1M backbone, rest identical) | 1.34 GB | `hf://milanakdj/pocket-tts-nepali-24l-teacher` (local run dir deleted) |
 
 Every removed parameter came out of the backbone; the flow head and Mimi are copied
@@ -71,8 +71,12 @@ pocket_TTS/
 └── train_{teacher,student}.log
 ```
 
-Checkpoints live on `/workspace/nepali_student_6l/`, not here: `ckpt_freq 2500` over
-200k steps is ~54 GB and `/` was 88% full — [ADR-011](docs/ADR.md#adr-011).
+Checkpoints were written to `/workspace`, never here: `ckpt_freq 2500` over 200k
+steps is ~54 GB and `/` was 88% full — [ADR-011](docs/ADR.md#adr-011). **Both run
+dirs were deleted on 2026-09-09** once the exports were verified on the Hub; the
+inference configs point at `hf://`, so both models still load. Re-distilling a new
+student needs the teacher's training checkpoint, which `torch.load` cannot fetch
+over `hf://` — see the comment in `configs/nepali_distill.yaml`.
 
 ---
 
@@ -153,10 +157,16 @@ When a benchmark says an architectural change bought nothing, suspect the harnes
 
 **Base Whisper cannot score Nepali.** `whisper-large-v3-turbo` scores *real human*
 held-out Nepali at 0.917 WER. Use `himalaya-ai/whisper-large-v3-nepali-final`
-(0.343 on the same clips) — private, org-owned, and it needs a **doubled**
-`<|startoftranscript|>` decoder prefix or it emits nonsense above 400% WER. The
-prefix cannot be expressed through `pipeline()`, faster-whisper or a plain
-`generate()`; use the loop in `infer/final/score_wer_ft.py`.
+(private, org-owned).
+
+**Corrected 2026-09-08 — that model takes the STANDARD single-sot prefix.** Its
+card warns a doubled `<|startoftranscript|>` is required; measured on 100 unseen
+mahadhwani clips it is *better* without one — **0.245/0.090 with 1x sot against
+0.282/0.106 with 2x**. Neither published repo was realigned, so the pathology
+applied to intermediate checkpoints, not the release. It therefore works with
+`faster-whisper` and `pipeline()` directly. Check both conventions on any new
+checkpoint with `infer/asr_test/asr_ab.py FT_NSOT=1|2`: the wrong one does not
+error, it silently returns worse text.
 
 **Whisper silently romanizes some Nepali clips**, giving CER ≈ 1.0 on fine audio.
 Filter on a Devanagari-character ratio and discard the *measurement*, not the clip.
