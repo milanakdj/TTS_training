@@ -9,7 +9,6 @@ with the model, in [`../pocket_TTS/`](../pocket_TTS/).
 | [`DATA_INVENTORY.md`](DATA_INVENTORY.md) | Nepali hours per corpus directory, hours that reached training, GB figures, provenance and redistribution status |
 | [`scripts/nepali_inventory.sh`](scripts/nepali_inventory.sh) | counts Nepali hours per directory — one `awk` pass per manifest |
 | [`scripts/nepali_inventory2.sh`](scripts/nepali_inventory2.sh) | the same for the four directories that keep sharded or differently-named manifests |
-| [`scripts/backup_corpus.py`](scripts/backup_corpus.py) | packages the corpus to a gated HF dataset repo as FLAC, with provenance stripped |
 
 ## The three numbers, kept apart
 

@@ -81,8 +81,9 @@ channel id, video id or source name.
 not uploaded. Without it the archive still restores audio and text, but not original
 filenames — so that file needs its own backup, ideally a small private repo.
 
-Rebuild or resume with `scripts/backup_corpus.py` (running copy lives at `/workspace/hf_release/`) (idempotent; skips
-shards already in the repo).
+The packaging script is not kept. The archive is complete, it is a backup rather
+than something to reproduce, and the code documented how provenance was stripped
+from YouTube-derived audio — which is not something to leave lying around.
 
 ---
 
