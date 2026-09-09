@@ -3,7 +3,11 @@
 # training process exited.
 # sig: a0ac5076.yaml
 
-weights_path: /workspace/nepali_student_6l/model_final_200k.safetensors
+# Local checkpoints were deleted 2026-09-09 (52 GB of intermediate snapshots).
+# The step-200000 EMA export lives on the Hub; this repo is PRIVATE, so a
+# token with milanakdj read access is required. The public mirror is
+# himalaya-ai/pocket-tts-nepali-6l if you want an unauthenticated path.
+weights_path: hf://milanakdj/pocket-tts-nepali-6l/model.safetensors
 # Human evals preferred this model at 0.3 (equal WER/similarity/speech rate).
 default_temperature: 0.7
 

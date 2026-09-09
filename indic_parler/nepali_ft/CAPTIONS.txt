@@ -1,0 +1,29 @@
+Best captions found for the UNTOUCHED base model (ai4bharat/indic-parler-tts)
+with speaker "Amrita" -- the only configuration judged usable by ear.
+
+Do not finetune. Three finetunes (2x Rasa, 1x Gemini) all degraded audio quality,
+because they trained the audio decoder while freezing the text encoder.
+
+Two tokenizers are required. The description goes through flan-t5-large:
+    prompt_tokenizer      = AutoTokenizer.from_pretrained(MODEL_ID)
+    description_tokenizer = AutoTokenizer.from_pretrained(model.config.text_encoder._name_or_path)
+Using one tokenizer for both fails SILENTLY and destroys all caption control.
+
+QUALITY = " The recording is very high quality, with her voice sounding clear and very close up."
+
+ANGRY  (SER 50%, cleanest separation - little leakage into happy)
+  "Amrita sounds intensely angry. Her voice is highly expressive, with dramatic
+   pitch movement and heavy stress on each word." + QUALITY
+
+HAPPY  (SER 75% - best result of the whole sweep)
+  "Amrita speaks in a happy tone, highly expressive and animated, at a fast pace
+   with strong emphasis." + QUALITY
+
+NEUTRAL (SER 100%)
+  "Amrita speaks in a neutral tone at a moderate pace with balanced pitch." + QUALITY
+
+SAD -- NOT SOLVED. 0% in every caption variant and every model tried. The SER model
+hears it as neutral every time. Rasa's own paper flags certain emotions as hard, and
+no caption wording recovers it.
+
+Generation: do_sample=True, temperature=0.8, max_new_tokens=1500

@@ -48,3 +48,15 @@ synthetic_pipeline/dataset_nepali_neutral_20h/metadata.csv
 
 # timestamped editor backups (server.py.bak.1788573899)
 *.bak.*
+
+# release/: model-release tooling. The staged_* dirs are byte-identical copies of
+# what is already on the Hub, id_map.jsonl maps the archive's hashed ids back to
+# original YouTube paths (the most provenance-sensitive file here), and the upload
+# log is 17 MB of progress bars. Only the scripts and templates are tracked.
+release/staged/
+release/staged_brief/
+release/staged_teacher/
+release/staged_parler/
+release/id_map.jsonl
+release/*.log
+release/_shards/

@@ -1,0 +1,288 @@
+---
+license: cc-by-4.0
+language:
+- ne
+library_name: pocket-tts
+pipeline_tag: text-to-speech
+base_model: kyutai/pocket-tts
+base_model_relation: finetune
+tags:
+- text-to-speech
+- nepali
+- voice-cloning
+- knowledge-distillation
+- on-device
+- cpu
+extra_gated_prompt: >-
+  This model performs zero-shot voice cloning from a 3-5 second sample, so it can
+  imitate a real person's voice from a short recording. Access is gated for that
+  reason. By requesting access you confirm that you will not use it to impersonate
+  any person, to create audio presented as a genuine recording of someone, or to
+  clone a voice without that person's informed consent.
+extra_gated_fields:
+  Name: text
+  Affiliation: text
+  Intended use: text
+  I will not use this model to impersonate anyone or to clone a voice without consent: checkbox
+---
+
+# Nepali Pocket-TTS — 6-layer distilled student
+
+A Nepali text-to-speech model with zero-shot voice cloning that runs **~5x faster
+than real time on CPU** (4 threads, no GPU). It is a 6-layer depth-distilled student
+of a 24-layer Nepali teacher, and it **outperforms that teacher** on intelligibility
+while being 3.3x faster and 3x smaller.
+
+| | student (this model) | teacher (24L) |
+|---|---|---|
+| backbone layers | 6 | 24 |
+| parameters | **109.5M** (89.4M LM + 20.1M Mimi) | 336.1M |
+| weights on disk | **438 MB** | 1.34 GB |
+| CPU speed | **5.04x real-time** | 1.53x real-time |
+| WER / CER (held-out, Nepali ASR) | **0.322 / 0.139** | 0.402 / 0.177 |
+
+## Quickstart
+
+```bash
+pip install pocket-tts
+huggingface-cli login     # required: this repo is gated, so hf:// downloads need auth
+```
+
+Access must be granted before the code below can fetch anything — request it with
+the form at the top of this page, then log in with a token from the same account.
+Without that, the `hf://` paths return HTTP 401.
+
+```python
+from pocket_tts.models.tts_model import TTSModel
+
+# config.yaml self-resolves: it fetches this repo's weights and tokenizer via hf://
+model = TTSModel.load_model(config="hf://__REPO_ID__/config.yaml")
+model.to("cpu")
+
+# Any 3-5 s mono clip of the voice you want. You must supply this yourself --
+# no reference audio ships with this repo (see "Voice prompts" below).
+state = model.get_state_for_audio_prompt("my_voice.wav")
+
+audio = model.generate_audio(state, "नेपाल हिमाल, पहाड र तराई गरी तीन भौगोलिक क्षेत्रमा विभाजित छ।")
+
+import scipy.io.wavfile as wav
+wav.write("out.wav", model.config.mimi.sample_rate, audio.detach().cpu().numpy().squeeze())
+```
+
+A runnable version with CPU thread pinning and timing is in
+[`inference.py`](./inference.py).
+
+> **Pin your thread count.** `torch.set_num_threads(4)` is in the example on purpose.
+> Oversubscribing threads on a loaded machine erased the entire 3.3x speed difference
+> between this model and its teacher in our first benchmark — both measured ~0.16x
+> real-time until the count was pinned. If you measure this model as slower than real
+> time, check thread contention before anything else.
+
+## Model details
+
+- **Architecture** — Kyutai Pocket-TTS: a flow-matching LM over Mimi latents. 6-layer
+  transformer backbone (`d_model` 1024, 16 heads), 6-layer/512-dim flow head, Mimi
+  codec at 12.5 Hz frame rate / 24 kHz output. Single-step LSD flow decode.
+- **Text frontend** — Nepali SentencePiece BPE, 4000 tokens, trained on this corpus.
+  The text embedding was reinitialized from scratch for Nepali; the English
+  tokenizer's vocabulary contains no Devanagari.
+- **Languages** — Nepali (Devanagari) only. It has no English capability: the text
+  embedding was reset and it saw no English during training.
+- **Sample rate** — 24 kHz mono.
+- **Precision** — float32.
+
+## How this was trained
+
+Two stages, 200k steps each, `batch_size` 64 on one H100.
+
+1. **Teacher (24L)** — `kyutai/pocket-tts` English 24-layer checkpoint, fine-tuned on
+   Nepali with a fresh text embedding and the Nepali BPE-4000 tokenizer. lr 2e-4
+   cosine.
+2. **Student (6L, this model)** — trained *from scratch* (no pretrained init) to match
+   the teacher's backbone activations. Same `d_model`, so the flow head and all
+   non-backbone weights are copied from the teacher and the flow head stays frozen.
+   lr 4e-4 cosine, 1000 warmup steps, EMA 0.9999. Final distillation MSE 0.0118 on
+   the validation split.
+
+**Why the student beats its teacher.** Distillation targets were computed with
+classifier-free guidance at coefficient 2.0, so the student learned the teacher's
+*guided* output distribution. Guidance is not implemented anywhere in the Pocket-TTS
+inference path, so the teacher can only ever be sampled unguided — the student has
+guidance baked into its weights and needs no second forward pass to get it. The
+teacher is now only a distillation source; there is no reason to deploy it.
+
+### Training data
+
+2,215.7 hours of Nepali speech after quality gating (749,610 utterances):
+
+| source | hours | what it is | redistributable? |
+|---|---|---|---|
+| `ans_snr40-50` | 1,230.2 | spontaneous YouTube speech, SNR 40-50 dB | no |
+| `ans_snr50` | 600.7 | spontaneous YouTube speech, SNR > 50 dB | no |
+| `indicvoices-r` | 168.1 | AI4Bharat IndicVoices-R, read speech | CC-BY-4.0 |
+| `mahadhwani` | 80.8 | internal YouTube-derived Nepali corpus | no |
+| `indicvoices-r-long` | 74.0 | IndicVoices-R, long utterances | CC-BY-4.0 |
+| `rasa` | 54.5 | AI4Bharat Rasa, acted emotional speech | CC-BY-4.0 |
+| `orpheus_snr50` | 7.4 | additional YouTube-derived speech | no |
+
+The distribution is dominated by spontaneous, in-the-wild speech rather than studio
+read speech, which is why it clones conversational voices more convincingly than
+polished narration.
+
+### The training corpus is not available for download
+
+**1,919.1 of the 2,215.7 hours — 86.6% — is derived from YouTube audio** and is not
+ours to redistribute. It is retained here only as model weights, which are a
+transformation rather than a copy.
+
+The remaining **296.6 hours (13.4%) is CC-BY-4.0** and is already publicly available
+from its source, so there is nothing to gain from us re-hosting it:
+
+- [`ai4bharat/indicvoices_r`](https://huggingface.co/datasets/ai4bharat/indicvoices_r)
+- [`ai4bharat/Rasa`](https://huggingface.co/datasets/ai4bharat/Rasa)
+
+Please do not request the corpus — the answer will be no for the YouTube-derived
+part regardless of who is asking. What *is* open is the recipe: the quality-gating,
+manifest-building and alignment code is at
+<https://github.com/milanakdj/TTS_training> under `pocket_TTS/scripts/`.
+
+## Evaluation
+
+100 held-out utterances, 77 distinct speaker identities, all 6 corpus sources
+represented. The target utterance is strictly held out; the voice prompt is a
+*different* clip of the same speaker taken from the train split, since a prompt is
+conditioning rather than a target.
+
+Speaker identity is keyed on (directory, diarization label) — a bare `SPEAKER_01`
+label is per-video, so two videos' `SPEAKER_01` are different people, and keying on
+the label alone silently pairs unrelated voices.
+
+**`real_human` is the genuine recording of the same utterance, scored through the
+identical pipeline.** It is a ceiling and a sanity check on the metric, not a
+competitor.
+
+### Intelligibility
+
+Scored with a Nepali-fine-tuned Whisper large-v3 (WER 10.98% on its own clean test
+split), text NFC-normalized and punctuation-stripped:
+
+| system | n | WER | CER |
+|---|---|---|---|
+| real human (ceiling) | 100 | 0.343 | 0.122 |
+| teacher 24L | 100 | 0.402 | 0.177 |
+| **student 6L** | 100 | **0.322** | **0.139** |
+
+Per-source CER, showing the student is ahead of the teacher on every source
+independently rather than on one source's average:
+
+| source | real human | teacher 24L | student 6L |
+|---|---|---|---|
+| `ans_snr40-50` | 0.382 | 0.389 | 0.387 |
+| `ans_snr50` | 0.334 | 0.383 | 0.352 |
+| `indicvoices-r` | 0.380 | 0.480 | 0.397 |
+| `indicvoices-r-long` | 0.364 | 0.449 | 0.367 |
+| `mahadhwani` | 0.343 | 0.420 | 0.380 |
+| `rasa` | 0.257 | 0.286 | 0.275 |
+
+**Do not read "the student's WER is below the human's" as beating human quality.**
+The held-out human audio is largely spontaneous speech with disfluencies scored
+against a reference transcript, and synthetic read speech is simply easier for an
+ASR. The honest conclusion is that **WER has saturated as a discriminator at this
+quality level** — not that the model is superhuman.
+
+### Why the ASR choice matters
+
+The same 100 clips, scored with off-the-shelf `whisper-large-v3-turbo`
+(`language="ne"`):
+
+| system | n | WER | CER |
+|---|---|---|---|
+| real human | 98 | 0.917 | 0.344 |
+| teacher 24L | 95 | 0.991 | 0.402 |
+| student 6L | 97 | 0.937 | 0.361 |
+
+At 0.917 WER on *genuine human speech*, base Whisper cannot rank two TTS systems —
+the differences are inside the instrument's noise. It also silently romanizes a few
+percent of Nepali clips, producing CER ≈ 1.0 on audio that is fine; those rows are
+detected by a Devanagari-character ratio and discarded as broken measurements, which
+is why `n` varies. **Any Nepali TTS evaluation should score real human audio as a
+control before trusting a WER delta.**
+
+### Speaker similarity
+
+Resemblyzer cosine between the generated audio and the voice prompt:
+
+| system | n | similarity |
+|---|---|---|
+| real human vs prompt | 100 | 0.807 |
+| teacher 24L | 100 | 0.826 |
+| **student 6L** | 100 | **0.841** |
+
+Both TTS systems score *above* genuine human cross-utterance similarity. That is an
+artifact: a clone sits unnaturally close to its own prompt, while two real recordings
+of one person differ in content, session and channel. Read this column as a
+teacher-vs-student comparison only, never as an absolute or as "more like the speaker
+than the speaker".
+
+### Speed
+
+Three Nepali sentences, CPU only, `torch.set_num_threads(4)` on a 16-core machine:
+
+| system | real-time factor | AR loop | Mimi decode |
+|---|---|---|---|
+| teacher 24L | 1.53x | 39.9 ms/frame | 7.5 ms/frame |
+| **student 6L** | **5.04x** | **12.7 ms/frame** | 8.1 ms/frame |
+
+The frame budget for real-time at 12.5 Hz is 80 ms. The backbone is 3.14x cheaper;
+Mimi is identical in both (same weights) and is only ~19% of the teacher's per-frame
+cost, so cutting the backbone pays almost in full.
+
+## Limitations
+
+- **Nepali only.** No English or code-switching ability; the text embedding was reset.
+- **Numbers, dates, abbreviations and Latin-script tokens are not normalized.** Expand
+  them in the input text yourself.
+- **Emotional control is not available.** There is no style or emotion conditioning;
+  prosody comes entirely from the voice prompt. Separate work on this corpus found
+  that emotion is not linearly decodable from a related model's states for Nepali, and
+  no emotion claim is made here.
+- **Prompt quality dominates output quality.** A noisy, reverberant or clipped prompt
+  produces a noisy voice. 3-5 s of clean speech is the sweet spot.
+- **Inherited codec ceiling.** Mimi at 12.5 Hz caps achievable audio fidelity; this is
+  a compact on-device model, not a studio-quality one.
+- **Speaker coverage is skewed** toward the YouTube-derived portion of the corpus.
+- Occasional generations end without EOS on very long inputs; feed sentence-sized
+  chunks.
+
+### Voice prompts
+
+**No reference audio ships in this repo.** The training corpus contains recordings of
+identifiable real people who did not consent to having their voices redistributed as
+cloning prompts, and shipping cloned samples of them would compound that. Supply your
+own prompt from a speaker who has agreed to it.
+
+## Intended use
+
+Nepali speech synthesis on CPU — accessibility tooling, offline assistants, voice
+interfaces for low-resource deployments, and research on distillation for
+low-resource TTS.
+
+**Out of scope:** impersonating real people, generating audio presented as a genuine
+recording, cloning any voice without that person's informed consent, and any use
+where synthetic speech is passed off as human. Access to this repo is gated because
+3-5 seconds of audio is enough to clone a voice.
+
+## Attribution and license
+
+Released under **CC-BY-4.0**, matching the upstream weights it derives from.
+
+- Architecture, training code and the English checkpoint the teacher was fine-tuned
+  from: [Kyutai Pocket-TTS](https://github.com/kyutai-labs/pocket-tts)
+  ([`kyutai/pocket-tts`](https://huggingface.co/kyutai/pocket-tts), CC-BY-4.0). The
+  Mimi codec weights in this repo are Kyutai's, unmodified.
+- Nepali speech data: AI4Bharat IndicVoices-R and Rasa (both CC-BY-4.0 — please
+  honour their terms and cite them), plus YouTube-derived audio that makes up 86.6%
+  of the corpus and is **not** redistributable. See the training-data section above:
+  the corpus is not released, and the weights are the only artefact published.
+
+If you use this model, please cite Kyutai's Pocket-TTS alongside this repo.
