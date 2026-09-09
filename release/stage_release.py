@@ -13,7 +13,7 @@ REPO = sys.argv[1] if len(sys.argv) > 1 else "himalaya-ai/pocket-tts-nepali-6l"
 BRIEF = "--brief" in sys.argv
 OUT_SUFFIX = "_brief" if BRIEF else ""
 SRC = "/root/tts/TTS_training/pocket_TTS"
-OUT = "/workspace/hf_release/staged" + ("_brief" if "--brief" in sys.argv else "")
+OUT = "/root/tts/TTS_training/release/staged" + ("_brief" if "--brief" in sys.argv else "")
 WEIGHTS = "/workspace/nepali_student_6l/model_final_200k.safetensors"
 
 os.makedirs(f"{OUT}/tokenizer", exist_ok=True)
@@ -85,7 +85,7 @@ print("wrote eval_results.json")
 # hf:// paths and the documentation that tells people to use them.
 card = "README.brief.md.tmpl" if BRIEF else "README.md.tmpl"
 for tmpl, dst in [(card, "README.md"), ("inference.py.tmpl", "inference.py")]:
-    body = open(f"/workspace/hf_release/templates/{tmpl}").read()
+    body = open(f"/root/tts/TTS_training/release/templates/{tmpl}").read()
     assert "__REPO_ID__" in body, tmpl
     open(f"{OUT}/{dst}", "w").write(body.replace("__REPO_ID__", REPO))
     print(f"wrote {dst}")

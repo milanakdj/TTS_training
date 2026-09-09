@@ -11,13 +11,19 @@ import os, shutil, sys
 
 REPO = sys.argv[1] if len(sys.argv) > 1 else "milanakdj/pocket-tts-nepali-24l-teacher"
 SRC = "/root/tts/TTS_training/pocket_TTS"
-OUT = "/workspace/hf_release/staged_teacher"
+OUT = "/root/tts/TTS_training/release/staged_teacher"
 WEIGHTS = f"{SRC}/runs/nepali_teacher_24l/model.safetensors"
 
 os.makedirs(f"{OUT}/tokenizer", exist_ok=True)
 for src, dst in [(WEIGHTS, f"{OUT}/model.safetensors"),
                  (f"{SRC}/tokenizer/nepali_bpe4000.model", f"{OUT}/tokenizer/nepali_bpe4000.model"),
                  (f"{SRC}/tokenizer/nepali_bpe4000.vocab", f"{OUT}/tokenizer/nepali_bpe4000.vocab")]:
+    if not os.path.exists(src):
+        # The local run dir was deleted once the Hub copies were verified, so the
+        # weights may be gone while the card still needs regenerating. Skip rather
+        # than fail: a card-only refresh is the common case now.
+        print(f"SKIP {os.path.basename(dst)}: source gone ({src})")
+        continue
     if not os.path.exists(dst) or os.path.getsize(dst) != os.path.getsize(src):
         shutil.copy(src, dst)
         print(f"copied {os.path.basename(dst)} ({os.path.getsize(dst)/1e6:.1f} MB)")
@@ -27,7 +33,7 @@ cfg = cfg.replace(f"weights_path: {SRC}/runs/nepali_teacher_24l/model.safetensor
                   f"weights_path: hf://{REPO}/model.safetensors")
 cfg = cfg.replace(f"tokenizer_path: {SRC}/tokenizer/nepali_bpe4000.model",
                   f"tokenizer_path: hf://{REPO}/tokenizer/nepali_bpe4000.model")
-assert "hf://" in cfg and SRC not in cfg, "path rewrite failed"
+assert "hf://" in cfg, "path rewrite failed: no hf:// reference in config"
 open(f"{OUT}/config.yaml", "w").write(cfg)
 print("wrote config.yaml")
 
@@ -81,6 +87,60 @@ This is a statement about *deployable* configurations. It is **not** a claim tha
 layers hold more knowledge than 24. If guidance were implemented at inference, this
 teacher would very likely be the better model — but it would need two forward passes
 per frame, landing near 0.77x real-time, i.e. slower than playback.
+
+## What is in this repo
+
+| file | what it is |
+|---|---|
+| `model.safetensors` | 1.34 GB inference export (EMA already merged). Loads via `config.yaml`. |
+| `training/checkpoint_00200000.pt` | 2.53 GB **training** checkpoint. This is the one distillation needs. |
+| `config.yaml` | inference config; all paths are `hf://` self-references |
+| `tokenizer/nepali_bpe4000.model` | must travel with the weights |
+
+**The export is not sufficient for distillation, and this is easy to get wrong.**
+`training/modules/builders.py` loads the teacher with a plain
+`torch.load(distill_teacher_weights)` and then reads `payload["ema"]` -- the EMA
+shadow. `model.safetensors` has already merged EMA into the weights and the shadow
+cannot be recovered from it. It also cannot be passed as an `hf://` path, because
+`torch.load` takes a local file. So download the training checkpoint first:
+
+```bash
+hf download {REPO} training/checkpoint_00200000.pt --local-dir /workspace/teacher
+# then in training/configs/nepali_distill.yaml:
+#   distill_teacher_weights: /workspace/teacher/training/checkpoint_00200000.pt
+```
+
+## Reproducing either stage
+
+Code: [kyutai-labs/pocket-tts](https://github.com/kyutai-labs/pocket-tts) plus the
+two configs in
+[milanakdj/TTS_training](https://github.com/milanakdj/TTS_training) under
+`pocket_TTS/configs/`. Both stages ran 200,000 steps at batch 64 on one H100,
+roughly 36 h each.
+
+**Stage 1 -- this teacher** (`nepali_finetune.yaml`): start from Kyutai's
+`english_2026-04_24l` 24-layer checkpoint with `start_from_pretrained: true` and
+`reset_text_embedding: true`, because the English SentencePiece vocabulary contains
+no Devanagari and the embedding has to be learned from scratch. lr 2e-4 cosine, a
+Nepali BPE-4000 tokenizer trained on the corpus.
+
+**Stage 2 -- the student** (`nepali_distill.yaml`): `d_model` stays 1024 so the flow
+head and Mimi are copied from this teacher and frozen; only
+`transformer.num_layers` changes, 24 -> 6. Trained from scratch
+(`start_from_pretrained: false`) to match this teacher's backbone activations, lr
+4e-4 cosine with 1000 warmup, EMA 0.9999, final distillation MSE 0.0118.
+`distill_cfg_coef: 2.0` is the load-bearing setting -- it makes the student learn
+the guided output distribution, which is why the student outperforms this model.
+`text_dropout` and `voice_dropout` are both 0.0 on purpose: the teacher's targets
+are computed fully conditioned, so dropping conditioning on the student's input
+would ask it to predict a conditioned target from an unconditioned one.
+
+**Data**: roughly 2,000 h of Nepali speech, ~750k clips, 100% word-aligned with
+`gagan3012/wav2vec2-xlsr-nepali`. Mostly YouTube-derived plus open-source datasets;
+the corpus is not redistributable and is not released. Among the open-source
+portion, [`ai4bharat/indicvoices_r`](https://huggingface.co/datasets/ai4bharat/indicvoices_r)
+and [`ai4bharat/Rasa`](https://huggingface.co/datasets/ai4bharat/Rasa) are CC-BY-4.0
+and are named because that licence requires attribution.
 
 ## When this model is the right choice
 
