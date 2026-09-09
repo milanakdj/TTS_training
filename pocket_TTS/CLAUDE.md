@@ -48,7 +48,7 @@ run unguided — [ADR-005](docs/ADR.md#adr-005).
 | model | params | on disk | weights |
 |---|---|---|---|
 | student 6L | 109.5M (75.5M backbone + 9.8M flow head + 4.2M emb + 20.1M Mimi) | 438 MB | `/workspace/nepali_student_6l/model_final_200k.safetensors` |
-| teacher 24L | 336.1M (302.1M backbone, rest identical) | 1.34 GB | `runs/nepali_teacher_24l/model.safetensors` |
+| teacher 24L | 336.1M (302.1M backbone, rest identical) | 1.34 GB | `hf://milanakdj/pocket-tts-nepali-24l-teacher` (local run dir deleted) |
 
 Every removed parameter came out of the backbone; the flow head and Mimi are copied
 and frozen. Mimi is only ~19% of the teacher's per-frame cost, so there is no Amdahl
@@ -64,7 +64,6 @@ pocket_TTS/
 │   └── .venv/                 the interpreter for anything touching pocket_tts
 ├── manifests/                 train/valid jsonl; *_v2_aligned.jsonl is what training reads
 ├── tokenizer/                 nepali_bpe4000.model — MUST travel with the weights
-├── runs/nepali_teacher_24l/   stage 1 output
 ├── scripts/                   manifest building, alignment, train launchers
 ├── infer/                     inference configs, benchmarks, generation
 │   └── final/                 the evaluation harness and its results

@@ -1,7 +1,9 @@
 # Inference config for the Nepali 24-layer teacher (stage 1), finetuned from
 # english_2026-04_24l with a fresh text embedding + Nepali BPE-4000 tokenizer.
 # Generated from pocket_tts/config/english_2026-04_24l.yaml.
-weights_path: /root/tts/TTS_training/pocket_TTS/runs/nepali_teacher_24l/model.safetensors
+# Local run dir was deleted 2026-09-09 (11 GB on a 95%-full root disk).
+# Weights live on the Hub; the repo is PRIVATE so a milanakdj token is needed.
+weights_path: hf://milanakdj/pocket-tts-nepali-24l-teacher/model.safetensors
 
 default_temperature: 0.7
 flow_lm:

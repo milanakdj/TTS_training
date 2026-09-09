@@ -13,7 +13,15 @@ distill_teacher_config: pocket_tts/config/english.yaml
 distill_teacher_overrides:
   flow_lm.transformer.num_layers: 24
   flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer/nepali_bpe4000.model
-distill_teacher_weights: /root/tts/TTS_training/pocket_TTS/runs/nepali_teacher_24l/checkpoint_00200000.pt
+# The local run dir was deleted; this file now lives on the Hub at
+# milanakdj/pocket-tts-nepali-24l-teacher under training/checkpoint_00200000.pt.
+# It CANNOT be given as an hf:// path -- builders.py does a plain
+# torch.load(distill_teacher_weights) and also reads payload["ema"], the EMA shadow,
+# which the safetensors export has already merged in and cannot be recovered from.
+# So to distil a new student, download it first and point this at the local copy:
+#   hf download milanakdj/pocket-tts-nepali-24l-teacher \
+#     training/checkpoint_00200000.pt --local-dir /workspace/teacher
+distill_teacher_weights: /workspace/teacher/training/checkpoint_00200000.pt
 
 data:
   train_jsonl: /root/tts/TTS_training/pocket_TTS/manifests/train_v2_aligned.jsonl
