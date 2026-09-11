@@ -15,7 +15,7 @@
 #
 # Configuration (all of it lives in cell 3 -- nothing is configured anywhere else):
 #   Model variants      : whisper-tiny / base / small / medium / large-v3
-#                         (set MODEL_VARIANT; repo names derive from it)
+#                         / large-v3-turbo   (set MODEL_VARIANT; repo names derive)
 #   Epochs              : 3
 #   Learning rate       : per-variant via LR_OVERRIDES, default 1e-5
 #   Batch size          : 7 x accum 2 (= 14), retuned per variant for a ~20GB
@@ -109,6 +109,7 @@ import os
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 import gc
+import importlib.util
 import math
 import shutil
 import time
@@ -119,6 +120,7 @@ import torch
 import evaluate
 import datasets as hf_datasets_module
 
+import json
 from datasets import Audio, DatasetDict, load_dataset
 from huggingface_hub import HfApi, login, snapshot_download
 from transformers import (
@@ -156,9 +158,14 @@ NUM_ROWS = int(os.environ.get("WHISPER_NUM_ROWS", 177000))  # full dataset
 #   WHISPER_EVAL_SUBSET=32 python whisper-finetune.py
 MODEL_VARIANT = os.environ.get("WHISPER_VARIANT", "large-v3")
 # one of: "tiny", "base", "small", "medium", "large-v3"
+# WHISPER_OUTPUT_ROOT because $HOME is on `/`, which sat at 95% full with 84GB
+# free. save_total_limit=2 plus a final export is ~10GB for turbo and ~40GB for
+# large-v3, and a run that fills the root filesystem takes the box down with it.
+# /workspace has 851TB. Same reasoning as pocket_TTS ADR-011.
 OUTPUT_DIR = os.path.join(
-    os.path.expanduser("~"), "whisper-output", MODEL_VARIANT
-)  # local path on DGX Spark
+    os.environ.get("WHISPER_OUTPUT_ROOT", os.path.join(os.path.expanduser("~"), "whisper-output")),
+    MODEL_VARIANT,
+)
 
 LANGUAGE = "nepali"  # Whisper's language tag for decoding
 TASK = "transcribe"  # "transcribe" (ne->ne) or "translate" (ne audio -> en text)
@@ -191,6 +198,10 @@ LR_OVERRIDES = {
     "medium": 1e-5,
     "large-v3": 5e-6,  # larger pretrained models generally fine-tune better with a
     # lower LR -- less risk of overwriting what it already learned
+    # turbo shares large-v3's encoder (most of its parameters) but has only 4
+    # decoder layers instead of 32, so the decoder has far less redundancy to
+    # spare. Between large-v3's 5e-6 and the 1e-5 baseline; a candidate to screen.
+    "large-v3-turbo": 1e-5,
 }
 LEARNING_RATE = LR_OVERRIDES.get(MODEL_VARIANT, BASE_LEARNING_RATE)
 
@@ -224,10 +235,32 @@ GRADIENT_CHECKPOINTING = False
 OPTIM = os.environ.get("WHISPER_OPTIM", "adamw_bnb_8bit")
 # adamw_bnb_8bit needs bitsandbytes. On a box without it, a smoke run would die on
 # an unrelated dependency, so WHISPER_OPTIM=adamw_torch is the escape hatch.
+# That escape hatch only helps whoever remembers to set it: the `small` run in the
+# 2,215 h queue took this default, hit the missing module and died at
+# trainer.train() -- AFTER 3 minutes of manifest load and split. Fall back here
+# instead. 8-bit Adam and adamw_torch run the SAME update rule; the quantization
+# only shrinks optimizer state, so dropping to fp32 states costs memory, never
+# convergence. Loud on purpose -- on a small VRAM slice this can turn a run that
+# fit into one that OOMs, and that is worth seeing in the log.
+if OPTIM == "adamw_bnb_8bit" and importlib.util.find_spec("bitsandbytes") is None:
+    print(
+        "[optim] bitsandbytes not installed -- falling back adamw_bnb_8bit -> "
+        "adamw_torch. Same Adam update, fp32 optimizer states (~8 bytes/param "
+        "more). Set WHISPER_OPTIM explicitly to override.",
+        flush=True,
+    )
+    OPTIM = "adamw_torch"
 
 PER_DEVICE_TRAIN_BATCH_SIZE = 7
 GRADIENT_ACCUMULATION_STEPS = 2  # effective batch size = 7 * 2 = 14
 PER_DEVICE_EVAL_BATCH_SIZE = 7
+
+# Audio decode + mel extraction happen in the dataloader on the lazy path, so this
+# is what keeps the GPU fed. Per-variant, because the right number depends on how
+# long a step takes: a big model hides slow loading behind compute, a small one
+# does not. 16 cores here, but 8 are permanently held by wekanode (the /workspace
+# client), so ~8 are actually available -- treat that, not nproc, as the ceiling.
+DATALOADER_WORKERS = 4
 
 if MODEL_VARIANT == "medium":
     # ~769M params. fp32 weights + grads + Adam states alone are ~12GB before a
@@ -254,6 +287,65 @@ elif MODEL_VARIANT == "large-v3":
     GENERATION_MAX_LEN = 96  # ceiling only -- the real value is measured from the
     # eval labels just before the Trainer is built, and is usually far lower
 
+elif MODEL_VARIANT == "large-v3-turbo":
+    # ~809M params: large-v3's encoder (635M) with a 4-layer decoder instead of 32.
+    # OpenAI already distilled large-v3 into this, so it is the pre-distilled
+    # variant rather than something we have to build.
+    #
+    # Unlike every branch above, this one is sized for the WHOLE H100 (80GB free,
+    # measured) rather than a ~20GB shared slice. adamw_torch fp32 costs ~13GB
+    # static (3.2 weights + 3.2 grads + 6.5 Adam); the rest is activations, so
+    # batch 8 is deliberately conservative for a first run. If nvidia-smi shows
+    # plenty spare during training, raise PER_DEVICE and lower ACCUM by the same
+    # factor -- effective batch, and therefore the result, is unchanged.
+    # MEASURED, not assumed. Effective batch is 64 either way, so total FLOPs are
+    # identical and only the chunking differs -- yet:
+    #     batch 8 x accum 8   -> 39GB used, ~11.7 h/epoch
+    #     batch 16 x accum 4  -> 63GB used, 15.6 h/epoch   (SLOWER)
+    # At 63GB our process plus ~11GB of other tenants puts the card at 91%
+    # occupancy, where the caching allocator burns time on malloc/free cycles.
+    # The GPU was already pinned at 100% utilisation at batch 8, so a larger batch
+    # had no headroom to convert into throughput and only cost memory. Do not
+    # "optimise" this upward again without measuring h/epoch afterwards.
+    PER_DEVICE_TRAIN_BATCH_SIZE = 8
+    GRADIENT_ACCUMULATION_STEPS = 8   # effective batch 64, unchanged
+    PER_DEVICE_EVAL_BATCH_SIZE = 8
+    GRADIENT_CHECKPOINTING = False    # no reason to trade speed for memory here
+    OPTIM = os.environ.get("WHISPER_OPTIM", "adamw_torch")  # bitsandbytes absent,
+    # and 8-bit Adam buys nothing on a card this size
+    VRAM_BUDGET_GB = 30
+
+elif MODEL_VARIANT == "small":
+    # ~244M params: 12 encoder + 12 decoder layers at d=768. Like the turbo branch
+    # above, this is sized for the WHOLE H100 (78GB free, measured), not the ~20GB
+    # slice the module-level defaults assume. Without this branch `small` fell
+    # through to batch 7 x accum 2 -- an effective batch of 14 against turbo's 64,
+    # which would have made the two runs incomparable on top of wasting the card.
+    #
+    # Effective batch 64 and lr 1e-5 are deliberately IDENTICAL to turbo's, so the
+    # only variable between the two runs is model size -- that comparison is the
+    # whole point of the queue.
+    #
+    # Memory estimate, from turbo's measured 39GB at batch 8: static is ~4GB here
+    # (0.97 weights + 0.97 grads + 1.95 fp32 Adam) and activations scale with
+    # layers x width, so the encoder costs (12*768)/(32*1280) = 0.23x turbo's
+    # ~3.3GB/sample. Call it ~1GB/sample with the 12-layer decoder's cross-
+    # attention over the same 1500 encoder frames: ~36GB at batch 32. That leaves
+    # >40GB spare, well clear of the ~91% occupancy where turbo's allocator
+    # started thrashing. ESTIMATED, not measured -- if it OOMs, 16 x 4 is the same
+    # effective batch.
+    PER_DEVICE_TRAIN_BATCH_SIZE = 32
+    GRADIENT_ACCUMULATION_STEPS = 2   # effective batch 64, same as turbo
+    PER_DEVICE_EVAL_BATCH_SIZE = 32
+    GRADIENT_CHECKPOINTING = False    # nothing to buy at this size
+    OPTIM = os.environ.get("WHISPER_OPTIM", "adamw_torch")  # 8-bit Adam would save
+    # ~1.5GB of 78GB and needs a package this box does not have
+    VRAM_BUDGET_GB = 45
+    # A small model's step is quick enough that audio decode, not the GPU, becomes
+    # the limit -- turbo hid that behind an 11.7 h/epoch compute load. 6 of the ~8
+    # non-wekanode cores; leave the rest for the main process and eval.
+    DATALOADER_WORKERS = 6
+
 # Applied after the per-variant block above so the env value always wins.
 if "WHISPER_EVAL_SUBSET" in os.environ:
     EVAL_SUBSET = int(os.environ["WHISPER_EVAL_SUBSET"])
@@ -277,7 +369,10 @@ FINAL_REPO_ID = f"{HF_USER}/{RUN_NAME}-final" + (f"-{_SUFFIX}" if _SUFFIX else "
 # checkpoints are several GB each. A private checkpoints repo hits
 # "403 Private repository storage limit reached" partway through training.
 CKPT_PRIVATE = False
-FINAL_PRIVATE = False
+# The FINAL model is small enough to sit in a private repo (turbo ~3.2GB, medium
+# ~3.1GB, small ~1GB) even though per-epoch CHECKPOINTS are not -- which is why
+# only this one is switchable. WHISPER_FINAL_PRIVATE=1 for private.
+FINAL_PRIVATE = os.environ.get("WHISPER_FINAL_PRIVATE", "0") == "1"
 # -------------------------------------------------------------------------
 
 print(
@@ -337,15 +432,46 @@ def print_disk_usage(label=""):
 print_disk_usage("at start")
 
 # %% Cell 4
-print(f"Loading {NUM_ROWS} rows from {HF_DATASET_ID} ({HF_SPLIT} split)...")
+# WHISPER_LOCAL_MANIFEST swaps the Hub dataset for a local jsonl of
+# {"audio": <path>, "text": <transcript>} -- how the 2,215 h spontaneous corpus is
+# fed in. Two reasons this matters more than another SLR run:
+#   * whisper-medium-nepali-final was ALREADY trained on SLR and scores 0.301 on
+#     held-out spontaneous audio, so retraining any size on SLR alone largely
+#     reproduces a model we own.
+#   * every existing Nepali Whisper saw only clean studio read speech, which is why
+#     they land at 0.245-0.301 on spontaneous speech. Domain adaptation is the
+#     largest available win, ahead of any change of model size.
+# The 100 mahadhwani clips used as the out-of-domain yardstick are excluded from the
+# manifest at build time -- without that, every comparison becomes train-on-test.
+LOCAL_MANIFEST = os.environ.get("WHISPER_LOCAL_MANIFEST", "")
+if LOCAL_MANIFEST:
+    from datasets import Dataset
 
-# Slice syntax pulls only the requested rows instead of downloading the full 177k-row
-# dataset -- much faster and lighter on Kaggle disk/session time.
-full_dataset = load_dataset(
-    HF_DATASET_ID,
-    split=f"{HF_SPLIT}[:{NUM_ROWS}]",
-    token=HF_TOKEN,
-)
+    print(f"Loading local manifest {LOCAL_MANIFEST} ...", flush=True)
+    _rows = [json.loads(l) for l in open(LOCAL_MANIFEST)]
+    if NUM_ROWS and NUM_ROWS < len(_rows):
+        # Deterministic subsample, stratified by nothing on purpose: the manifest is
+        # already shuffled relative to source order by path sort, and a contiguous
+        # slice would be one corpus only.
+        import random as _r
+
+        _r.Random(42).shuffle(_rows)
+        _rows = _rows[:NUM_ROWS]
+    print(f"  {len(_rows):,} rows from manifest", flush=True)
+    full_dataset = Dataset.from_dict({
+        "audio": [r["audio"] for r in _rows],
+        "text": [r["text"] for r in _rows],
+    })
+    del _rows
+else:
+    print(f"Loading {NUM_ROWS} rows from {HF_DATASET_ID} ({HF_SPLIT} split)...")
+    # Slice syntax pulls only the requested rows instead of downloading the full
+    # 177k-row dataset -- much faster and lighter on disk/session time.
+    full_dataset = load_dataset(
+        HF_DATASET_ID,
+        split=f"{HF_SPLIT}[:{NUM_ROWS}]",
+        token=HF_TOKEN,
+    )
 print(f"Loaded {len(full_dataset)} rows. Columns: {full_dataset.column_names}")
 
 # drop rows with missing/empty transcripts
@@ -434,7 +560,42 @@ print(
 _t0 = time.time()
 
 vectorized_datasets = DatasetDict()
-for split_name, split_ds in raw_datasets.items():
+
+# Whisper pads EVERY clip to 30 s, so one precomputed example is ~1.5 MB of mel
+# features regardless of how short the audio is. Precomputing the 2,215 h corpus
+# (749k clips) would therefore write ~1 TB of cache before the first training step.
+# set_transform computes the same features lazily, per batch, in the dataloader
+# workers -- identical maths, no cache, and mel extraction is cheap next to a
+# forward pass on an H100.
+if LOCAL_MANIFEST:
+    def _on_the_fly(batch):
+        # A single-column access (dataset["text"]) passes only that column, so the
+        # transform has to cope with either key being absent.
+        out = {}
+        if "text" in batch:
+            out["labels"] = [tokenizer(t).input_ids[:MAX_LABEL_LENGTH] for t in batch["text"]]
+        if "audio" not in batch:
+            return out
+        feats = [
+            feature_extractor(a["array"], sampling_rate=a["sampling_rate"]).input_features[0]
+            for a in batch["audio"]
+        ]
+        # Labels are truncated rather than filtered: the overlength .filter() below
+        # would force the whole lazy dataset to materialise. At <=30 s a Nepali
+        # utterance is ~180 tokens against MAX_LABEL_LENGTH, so it rarely fires.
+        out["input_features"] = feats
+        return out
+
+    for split_name, split_ds in raw_datasets.items():
+        split_ds.set_transform(_on_the_fly, columns=["audio", "text"])
+        vectorized_datasets[split_name] = split_ds
+        print(f"[preprocess] {split_name}: {len(split_ds)} examples -- lazy "
+              f"(set_transform, no feature cache)", flush=True)
+    print(f"[preprocess] skipped precompute entirely; "
+          f"saved roughly {sum(len(d) for d in raw_datasets.values()) * 1.5 / 1000:.0f} GB of cache",
+          flush=True)
+else:
+  for split_name, split_ds in raw_datasets.items():
     print(
         f"[preprocess] {split_name}: {len(split_ds)} examples -- processing now"
         + ("" if SHOW_BARS else " (no live bar; one line at start, one at finish)"),
@@ -461,7 +622,10 @@ def is_valid_length(labels):
 
 print("[preprocess] filtering overlength labels...", flush=True)
 _t0 = time.time()
-for split_name in list(vectorized_datasets.keys()):
+# The lazy path has no materialised `labels` column to filter on, and calling
+# .filter() would defeat the point by computing every mel. Labels are truncated in
+# the transform instead.
+for split_name in ([] if LOCAL_MANIFEST else list(vectorized_datasets.keys())):
     before = len(vectorized_datasets[split_name])
     vectorized_datasets[split_name] = vectorized_datasets[split_name].filter(
         is_valid_length, input_columns=["labels"]
@@ -694,13 +858,26 @@ print(f"[eval] validating on {len(eval_subset)} of {len(vectorized_datasets['val
 # decode runs to this limit on EVERY example, so a cap 10x longer than the longest
 # real transcript multiplies eval time by 10 for nothing. Measured on the eval
 # subset itself, +8 tokens of headroom, and never above GENERATION_MAX_LEN.
-_max_label = max(len(l) for l in eval_subset["labels"])
+if LOCAL_MANIFEST:
+    # Reading eval_subset["labels"] would run the transform over the whole subset,
+    # decoding audio and computing mels just to measure token counts. Tokenise the
+    # raw text instead -- same answer, no audio touched.
+    _raw_text = eval_subset.data.column("text").to_pylist()
+    _max_label = max(len(tokenizer(t).input_ids) for t in _raw_text)
+else:
+    _max_label = max(len(l) for l in eval_subset["labels"])
 GENERATION_MAX_LEN = min(GENERATION_MAX_LEN, _max_label + 8)
 print(f"[eval] longest eval label is {_max_label} tokens -> "
       f"generation_max_length={GENERATION_MAX_LEN}", flush=True)
 
 
 training_args = Seq2SeqTrainingArguments(
+    # Trainer's column pruning inspects dataset.column_names and drops anything the
+    # model's forward() does not name. On the lazy path those columns are "audio"
+    # and "text" -- exactly what set_transform needs to read -- so pruning them
+    # breaks training. Harmless to disable on the precomputed path, where the
+    # columns are already only input_features/labels.
+    remove_unused_columns=False,
     output_dir=OUTPUT_DIR,
     per_device_train_batch_size=PER_DEVICE_TRAIN_BATCH_SIZE,
     per_device_eval_batch_size=PER_DEVICE_EVAL_BATCH_SIZE,
@@ -718,8 +895,8 @@ training_args = Seq2SeqTrainingArguments(
     # (no loss-scaling needed) and just as fast on this hardware.
     fp16=torch.cuda.is_available() and not torch.cuda.is_bf16_supported(),  # fallback
     # only if bf16 isn't available (e.g. testing on older hardware)
-    dataloader_num_workers=4,  # DGX Spark has 20 CPU cores -- use a few for data
-    # loading so the GPU isn't waiting on audio decode between steps
+    dataloader_num_workers=DATALOADER_WORKERS,  # per-variant, set above -- keeps
+    # the GPU from waiting on audio decode between steps
     eval_strategy="epoch",
     save_strategy="epoch",
     predict_with_generate=True,
@@ -750,6 +927,7 @@ trainer = Seq2SeqTrainer(
         + (
             []
             if os.environ.get("WHISPER_PUSH") == "0"
+            or os.environ.get("WHISPER_CKPT_BACKUP") == "0"
             else [PushCheckpointToHubCallback(CKPT_REPO_ID, HF_TOKEN, private=CKPT_PRIVATE)]
         )
     ),
@@ -988,7 +1166,16 @@ def push_final(attempts=3):
     return False
 
 
-if test_metrics["test_wer"] > 100:
+if os.environ.get("WHISPER_PUSH") == "0":
+    # WHISPER_PUSH=0 already suppresses the checkpoint-backup callback, but it used
+    # to leave this final push live -- so a 400-row smoke run could publish a junk
+    # model, and FINAL_PRIVATE is False, meaning publicly. One flag now means one
+    # thing: this run publishes nothing.
+    print(
+        f"\n[push] NOT pushing: WHISPER_PUSH=0. Model is on disk at {final_dir}.\n",
+        flush=True,
+    )
+elif test_metrics["test_wer"] > 100:
     print(
         f"\n[push] NOT pushing. Test WER is {test_metrics['test_wer']:.1f}%, above 100%,\n"
         f"  which means generation is broken rather than merely weak. The model is on\n"

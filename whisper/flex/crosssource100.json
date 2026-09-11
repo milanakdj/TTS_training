@@ -1,0 +1,602 @@
+[
+ {
+  "id": "ai4bharat___rasa-00",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_ALEXA_00280.wav",
+  "text": "सिटी प्राइडमा के चल्दैछ?",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-01",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_ANGER_00375.wav",
+  "text": "एउटा कार ड्राइभर सिग्नलमा ठिक्क रातो बत्ती बलेकै बेला हामी बसेको अटोलाई सिधै काटेर अगाडि गयो। अब हामी कसरी अघि बढ्नु भन्नुहोस् त! अटो ड्राइभरले रिसले त्यसलाई सातो जानेगरी गाली गऱ्यो! ठिक पाऱ्यो!",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-02",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_WIKI_03456.wav",
+  "text": "जिनहुवाले उक्त आक्रमणलाई 'नियोजित, पूर्वनियोजित हिंसात्मक आतङ्ककारी आक्रमण' हो भन्यो।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-03",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_FEAR_00338.wav",
+  "text": "सेफाली, सुन्नुहोस् न, त्यो कुनामा उभिएको मान्छेले त एक घन्टादेखि मलाई हेरिरहेको छ हौ।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-04",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_WIKI_00173.wav",
+  "text": "भक्त श्री प्रभुपाद हजुरले हिजो भन्दै हुनुहुन्थ्यो, वर्षाद्वारा सबै राम्रा कुराहरू आउँछन् र वर्षा यज्ञद्वारा आउँछ।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-05",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_NEWS_00610.wav",
+  "text": "दार्जिलिङका सांसद राजु विष्टले आज केन्द्रिय मन्त्री प्रकाश जावडेकरसित भेट गरी आकाशवाणी खरसाङको महत्त्वबारे जानकारी दिनुभयो साथै यहाँको सर्टवेभ ट्रान्समिटरलाई डिआरएम ट्रान्समिटरमा परिणत गर्नुपर्ने आवश्यकतामाथि जोड दिनुभयो।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-06",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_BB_00134.wav",
+  "text": "मैले अरहम फ्यान्सी मल्टी कलर फ्लोरल मोती राखी अर्डर गरेँ र नौ दिनपछि प्राप्त गरेँ।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-07",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_SAD_00379.wav",
+  "text": "अन्तरिक्ष यात्रीहरूले गरेको बलिदान अनि अन्तरिक्ष अभियानमा ज्यान गुमाउने सम्भावनाको विचारले मलाई गहिरो दुःख दिन्छ।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-08",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_WIKI_02712.wav",
+  "text": "उनलाई पेरिसको प्री लाचाइज कब्रिस्तानमा गाडिएको थियो।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-09",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_NEWS_00452.wav",
+  "text": "रेकर्ड गरिएका केही सन्देशहरूलाई कार्यक्रममा सामेल गर्न सकिनेछ।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-10",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_NAMES_01478.wav",
+  "text": "डिब्रुगढ, कन्याकुमारी विवेक एक्सप्रेस",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-11",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_SURPRISE_00029.wav",
+  "text": "यो किराया घरको मास्टर बेडरुमको वकइन क्लोसेट कति राम्रो! म त छक्क परेँ। यसमा त मजाले सुत्न सकिने रहेछ नि।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-12",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_NAMES_02671.wav",
+  "text": "राम नवमी",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-13",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_NEWS_00043.wav",
+  "text": "यसबाहेक उत्तर बङ्गालमा विशेष गरी अलिपुरद्वार, जलपाइगुडी, कुचबिहार दार्जीलिङ अनि कालेबुङमा पनि वर्षा हुने सम्भावना छ। मौसम विभागले आशङ्का व्यक्त गरे अनुसार वर्षा साथै तापमानमा पनि बढोत्तरीको क्रम जारी रहनेछ।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-14",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_NAMES_01608.wav",
+  "text": "इन्दौर, डिआर अम्बेडकर नगर डेमु",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-15",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_BOOK_00431.wav",
+  "text": "मोहन पनि शेखरकी आमालाई आमा भन्छ शेखरको घरलाई आफ्नै घर ठान्छ।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-16",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/val/audio/Nepali/NEP_M_WIKI_02770.wav",
+  "text": "प्रत्युत्तरमा, गुरु तेग बहादुरका छोरा र उत्तराधिकारी, गुरु गोविन्दसिंहले औरङ्गजेबको मृत्यु हुनुभन्दा आठ वर्षअघि, सन् सोह्र सय उनान्सयमा खालसाको स्थापनासँगै आफ्ना अनुयायीहरूलाई थप सैन्यीकरण गरे।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-17",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_HAPPY_00236.wav",
+  "text": "मेरो कर फिर्ता धेरै छिटो प्रशोधन गरिएको थियो, र पैसा तुरुन्तै ट्रान्फर हुँदा म उत्साहित थिएँ।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-18",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_WIKI_00009.wav",
+  "text": "वैष्णोदेवीले उनको शिरको दर्शन नगर्ने हो भने तीर्थयात्रा फलदायी नहुने बताइन्।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-19",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_NAMES_01780.wav",
+  "text": "मङ्गलोर मेल",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-20",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_SAD_00028.wav",
+  "text": "म साँच्चै चाहान्छु कि हामी दुर्लभ सामग्रीको स्रोत पाउन सक्दछौँ जुन तपाईँ आफ्नो सपनाको कामका लागि कल्पना गर्दै हुनुहुन्छ, तर यो त एकदम पाउनै कठिन भइरहेको छ।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-21",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_NAMES_02652.wav",
+  "text": "इन्डियन इन्स्टिच्युट अफ् टेक्नोलोजी रुड्की, आइआइटिआर",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-22",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_CONV_00660.wav",
+  "text": "ठिक छ, म बुझ्छु।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-23",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_CONV_02290.wav",
+  "text": "के ताजमहलमा यस्तो देखिन्छ?",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ai4bharat___rasa-24",
+  "path": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_NEWS_00642.wav",
+  "text": "उहाँले भन्नुभयो, बोडो युवाहरूलाई यस दिशामा एउटा उदाहरणका रूपमा हेर्न सकिन्छ।",
+  "src": "ai4bharat___rasa"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-00",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/s81Nw-xeHFY/chunk_001_11.30s.wav",
+  "text": "आज हामीले चाहिँ विभिन्न जिल्लाका सहकर्मी तथा राजनीतिक विश्लेषकहरूसँग पनि कुराकानी गरेका छौँ। अहिले चाहिँ हामीसँग राजनीतिक विश्लेषक सुरेन्द्र केसी हुनुहुन्छ। केसीज्यू, रेडियो कान्तिपुरमा यहाँलाई स्वागत छ।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-01",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/wF6wcDDk3Ps/chunk_053_7.28s.wav",
+  "text": "त्यसै गरी अर्को भनेको यहाँनिर हेर्नुहोस् त, फिफ्टिनदेखि टुवेल्भ भइरहेछ, टुवेल्भदेखि सेभेन भयो अरे।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-02",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCPoDCoxg9_DAn5tkhKCxtow/WX-rRsOTePE/chunk_004_6.82s.wav",
+  "text": "स्टुलको म्युकस देखिनु नर्मल नै मानिन्छ, त्यही भएर तपाईँले यदि दिशामा चेकअप गर्दा प्यारासाइट देखिँदैन।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-03",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC6lqjMQywooPQmZVXfr6SJQ/9s_HWaGBF2o/chunk_013_20.02s.wav",
+  "text": "नामक यो किताबमा जम्मा जम्मी बाह्रवटा लेखहरू छन्। यी लेखहरू गरिमा साझा प्रकाशनको गरिमा मासिकमा प्रकाशित भएका र अन्यत्र पनि प्रकाशित भएका लेखहरूलाई यसमा समावेश गरिएको छ, र यसको भूमिकाको रूपमा।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-04",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCt45vxlTQ0WP2kow6dKSlGg/f1bNMc2pSkg/chunk_017_16.18s.wav",
+  "text": "योजना के बनाइएको रहेछ भने, मैले दुई हजार सन्ताउन्न सालमै राजा वीरेन्द्र जीवितै हुँदा पाएको प्रबल गोर्खा दक्षिण बाहु चौथो नामक पदक मलाई अझै दिइएको थिएन। मैले त्यसको खोजी खबर केही गरेकी थिइनँ, मलाई वास्ता पनि थिएन।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-05",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/SIQYJYKIUN0/chunk_152_13.36s.wav",
+  "text": "ध्यान दिएर जनताको जीविकालाई राम्रो गर्ने कुरा हो। अर्को चाहिँ त मुलुकको सबै पक्ष अहिले कोभिड नाइन्टिनको प्रकोपका कारणले प्रभावित भएको छ।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-06",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UClgqAXWBfF1p4sGKtcvs39Q/UMvJXqMZPaA/chunk_099_13.30s.wav",
+  "text": "फर्दर पनि हामीले के सोचेका छौँ भने, अझै चाहिँ अगाडि पनि हामीले के सोचेका छौँ भने? यो फुड ब्याङ्क हामीले जीवित राखिराख्ने, यसलाई स्थायी रूपमा सञ्चालन गरिरहने, जसका कारणले चाहिँ जुन फुड ब्याङ्कको यो अवधारणा।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-07",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCVFNatZh-fkYj8AS1rLz4VQ/7ea4U42eUvQ/chunk_167_7.92s.wav",
+  "text": "जिल्ला केन्द्रसँग जोड्ने सडकको निर्माण बजेट अभावमा अनिश्चित छ। कहीँ दुर्घटना भई अङ्गभङ्ग भएमा?",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-08",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCbs0xk6PavMVDt5UJqxGV6g/ad45fidHoCI/chunk_054_21.14s.wav",
+  "text": "सम्झौता अवधि पुरा नहुँदै प्रदेश सरकारले मन्त्री परिषद निर्णयबाट व्यवस्थापनको जिम्मा फिर्ता लिएको हो। व्यवस्थापनको सम्झौता खारेज गर्ने निर्णय भएपछि स्वास्थ्य तथा जनसङ्ख्या मन्त्रालयले तिन महिनाभित्र व्यवस्थापन हस्तान्तरण प्रक्रिया सुरु गर्न एसडिसिएसलाई पत्राचार गरेको छ। यस्तै उक्त अवधिभित्र अस्पतालको चल अचल सम्पत्ति प्रदेश सरकारलाई हस्तान्तरण गर्न भनिएको छ।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-09",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCrZsvQJwYpNYYoSP4EwsJrw/4KZAPeckCbA/chunk_021_21.18s.wav",
+  "text": "दुध पनि प्रोटिनको राम्रो स्रोत हो। दुधमा भएको प्रोटिनले नयाँ कपाल उम्रन, झरेको कपाललाई उम्रन, कपाललाई बाक्लो बनाउन र छिटो लामो बनाउनको लागि मद्दत गर्दछ। दुधमा प्रोटिन पाउनुको साथै यसमा भिटामिन डी र क्याल्सियम पनि प्रशस्त मात्रामा पाइन्छ, र भिटामिन डी र क्याल्सियम पनि हाम्रो कपालको लागि महत्त्वपूर्ण भिटामिन हुन्।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-10",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC1p86Eqax3IrYqJ3akGyFEQ/x7jcoQdmvtc/chunk_877_2.16s.wav",
+  "text": "त्यसले गर्दाखेरि हामीलाई दुःख त्यहाँनिर हो।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-11",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/PPygQ0wLhVI/chunk_072_8.94s.wav",
+  "text": "यो हुने भयो, कस स्क्वायर ए माइनस साइन स्क्वायर ए? यदि एङ्गल मेरो यहाँ हाफ एङ्गल फर्मुला भयो भने के हुने भयो त?",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-12",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCGlV0eWm10tmyKm0bJ9ms4w/_-rkpBpvtBg/chunk_233_20.86s.wav",
+  "text": "तर चिनलाई देखाएर भौतिक पूर्वाधार मन्त्रालय पटक पटक बाहनाबाजी गर्दै पन्सिने गरेको छ, समाधानतर्फ उन्मुख होइन, पन्सिनेतर्फ उन्मुख भइरहेको छ। यसले के देखाउँछ भने पुराना राजनीतिक दलहरूको कार्यशैली के हो, बाहनाबाजी कसरी बनाउँछन् र बोल्छन् एउटा, र व्यवहारमा के गर्छन् यो कुरा प्रष्ट हुन्छ।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-13",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCswjHGDAfchSHs7gcxwdZNw/Ojkh-3tpc10/chunk_001_13.48s.wav",
+  "text": "एक महिनासम्म बत्तिस राष्ट्रको प्रतिस्पर्धापछि फाइनलमा दुईवटा टिम पुगेका छन्, अर्जेन्टिना र फ्रान्स। अर्जेन्टिना र फ्रान्स आज उपाधिका लागि प्रतिस्पर्धा गर्दैछन्। दुवै टिमले तेस्रो पटक उपाधि जित्ने योजनामा छ।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-14",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/i-S3nX5MwZg/chunk_152_17.34s.wav",
+  "text": "यो जुन तिमीहरूले देखिरहेको छौ यहाँनिर, जुन यो लामो डन्ठा छ, यो डन्ठा भनेको फिलामेन्ट भयो। यसमा एन्थर हुन्छ, हो? यो एन्थरमा चाहिँ के हुन्छ त? मेल रिप्रोडक्टिभ पोलेन ग्रेन्सहरू हुन्छ। ओके, पोलेन ग्रेन्स यसमा प्रेजेन्ट हुन्छ, यसरी हुन्छ।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-15",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/ezaeHo6--3s/chunk_003_19.38s.wav",
+  "text": "मुस्किलले जोहो गरेको सबै पैसा भिज्यो खोलामा। पानी कम भएकाले उनको प्राण जोगियो। यस्ता घटना यहाँ दैनिक दोहोरिरहन्छन्। यस्तो दुरावस्था देख्दा पनि स्थानीय सरकार, प्रदेश सरकार र सङ्घीय तिन तहकै सरकारको ध्यान जान सकेको छैन।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-16",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/ZScLFMjeJsQ/chunk_177_9.72s.wav",
+  "text": "वाम गठबन्धनको पहिलो आधार के हो भने, त्यो चरित्रको हिसाबले, व्यवहारको हिसाबले, सिद्धान्तको दुवै हिसाबले त्यसमा वाम चरित्र।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-17",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCBcovRc7nr16Wvpdgg-zx6g/gjryYaEbLTg/chunk_044_25.10s.wav",
+  "text": "गत वर्षको माघ महिनामा जम्मा पाँचवटा उद्योग दर्ता भएका थिए। चालु आर्थिक वर्षको सात महिनामा तेह्र हजार तिन सय छत्तिस रोजगारी सिर्जना गर्ने गरी दुई सय छयानब्बेवटा उद्योग दर्ता भएका छन्। तीमध्ये एक सय दुईवटा उद्योग पर्यटन तथा अन्ठानब्बेवटा उद्योग सेवा क्षेत्रसँग सम्बन्धित हुन्। गत वर्षको पहिलो सात महिनामा आठ हजार नौ सय एकवटा रोजगारी सिर्जना गर्ने गरी एक सय अन्ठानब्बेवटा उद्योग दर्ता भएका थिए।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-18",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCgCXm1PbtwhkxqRUnOUaLDg/Y1s5M8lOzAs/chunk_058_3.82s.wav",
+  "text": "या सुधारका निमित्त केही प्रयास गर्छ, पहल गर्छ र अगाडि बढ्छ भने।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-19",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCi41qC1RrQtby4dUxtIXYwQ/vD1EcVz5E0g/chunk_153_15.24s.wav",
+  "text": "अमेरिका आएपछि तालु खुइले भइयो, हजुर। अमेरिका आएपछि तालु खुइले भइयो, हजुर। रौँ उमार्नु पऱ्यो भन्दै डक्टरकोमा गइयो, हजुर।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-20",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/UNpMYqfyCGM/chunk_042_5.82s.wav",
+  "text": "गाउनुपर्ने रहेछ, ठाडी भाका राम्रो रहेछ भन्ने सोच गयो, गाउँदा गाउँदै गाउँदा गाउँदै ठाडी भाका गायो अब।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-21",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCRYDDlN3ReZavLNXKLaR6Rg/bOr-XSIjkgE/chunk_061_10.70s.wav",
+  "text": "त्यो ज्ञान चाहिँ हामीले प्राप्त हुँदाखेरि, अनि हामीले के थाहा हुन्छ? अनि नराम्रो र राम्रोको फरक के के हो, अनि।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-22",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCIQgCjhAKP47FilU10FQqfw/xicZVfXI118/chunk_125_8.08s.wav",
+  "text": "अनि छ दिनपछि, इलेभेन्थ नोभेम्बर नाइन्टिन एटी नाइनमा बाइस वर्षको यङ केटी फ्रान्सेस नाम गरेको ऊ पनि हरायो।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-23",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/HnK2q26w81k/chunk_068_11.22s.wav",
+  "text": "हरेक कम्प्युटरहरू, हरेक केबलहरू, हरेक नोडहरू चाहिँ कसरी एरेन्ज गरिएको छ? सर्भर कुन ठाउँमा राखिएको छ? कम्प्युटर कता राखिएको छ? होइन, कुन पोर्टमा के हालिएको छ?",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "ans_snr40-50.part1of2-24",
+  "path": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCgcKBxPNgjfD2jpxNnQJiFQ/_B4Zr31dwuU/chunk_003_17.94s.wav",
+  "text": "दोस्रो नम्बरमा रहेको छ चुकन्दर, जसलाई बिट रुट भन्ने गरिन्छ साथीहरू। यसमा प्रशस्त मात्रामा आइरन, प्रशस्त मात्रामा पावरफुल एन्टिअक्सिडेन्ट र प्रशस्त मात्रामा भिटामिन सी रहेको हुन्छ साथीहरू। यसले हाम्रो रगत बढाउनको लागि अत्यधिक मात्रामा आइरन हाम्रो शरीरलाई प्रदान गर्ने कार्य गर्छ।",
+  "src": "ans_snr40-50.part1of2"
+ },
+ {
+  "id": "indicvoices-r-00",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673978289_chunk_2.wav",
+  "text": "अठार सौ उन्नाइस सौ",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-01",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649673955403_chunk_4.wav",
+  "text": "हुन थालेको छ जाडोमा त हामी छेउछाउ एरियातिर लाभातिर हिउँ पनि पर्न थालेको छ",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-02",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649673971025_chunk_11.wav",
+  "text": "त्यस बाहेक उपन्यासहरूमा",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-03",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673967599_chunk_13.wav",
+  "text": "होइन अहिले त अब टक्कै ओभनमा राख्यो पछि आबो आफै उइसहरू भुन्छ कत्ति उइसहरू फेसिलिटी अब धेरै राम्रो छ होइन जस्तै अब",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-04",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674001683_chunk_17.wav",
+  "text": "त्यहाँ हातले बुनेको लुगा चित्रले बुनेको सर सामानहरू किन्न सक्छौँ अनि हाम्रो स्थानीय",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-05",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673957323_chunk_1.wav",
+  "text": "कृपया मेरो आइजियो वालेटमा रुपियाँ नब्बे हजार स्थानान्तरण गर्नुहोस्",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-06",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673951256_chunk_1.wav",
+  "text": "पन्ध्र तारिक एक महिना दुई हजार तिन सत्ताइस तारिक बाह्र महिना दुई हजार बाह्र सोह्र तारिक तिन महिना उन्नाइ सय सतासी पन्ध्र तारिक छ महिना उन्नाइस सय छ्यासी पन्ध्र तारिक दुई महिना दुई हजार सत्र",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-07",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649673971180_chunk_9.wav",
+  "text": "ठाउँहरूमा हामीले चाहेको कुराहरूलाई हामीले त्यो कुरालाई ट्रान्सलेट गरेर चाहिँ हामी सुन्न सक्छौँ अनि",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-08",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673993024_chunk_8.wav",
+  "text": "वातावरणमा धेरै असर पर्नसक्छ दुर्गन्धहरू फैलिएर जान्छ त्यस्तो विभि विषयहरूमा मान्छेहरूलाई बिस्तारै ज्ञान हुँदै मान्छेले त्यो खुला स्थानमा दिसा पिसाब गर्ने ए",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-09",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674024795_chunk_1.wav",
+  "text": "मालास् कच्चा आम फ्रुट सिरपको प्याकेजिङ खराब थियो",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-10",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673986262_chunk_7.wav",
+  "text": "अनि उनेरलाई दबाई पानीहरू गरेर मलजलहरू सबै हामीले लायो भने चाहिँ ठन्डा महिनामा असल रुख बिरुवाहरू बचाउनु सक्ने रैछ",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-11",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649673953102_chunk_11.wav",
+  "text": "आफ्नो भाषालाई त्यहाँनिर कति माया गर्दोरहेछ भन्ने कुरा त्यहाँ त्यहाँ थाहा पाउँछ र ती मानिससँग आफ्नो भाषामा कुरा गर्नपाउँदा एकदमै खुसी लाग्छ",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-12",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674032312_chunk_3.wav",
+  "text": "मान्यता पनि प्राप्त गरिसकेको छ नेपाली भाषा यति शुद्ध छन् यसलाई बोल्नु",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-13",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674025798_chunk_1.wav",
+  "text": "टेलिभिजनमा मेरो मन पर्ने मन पर्ने प्रोग्राम",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-14",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673958248_chunk_2.wav",
+  "text": "हो त्यसै कारण पहिला म त्यो त्यसलाई त्यो कार्टबाट निकाल्नु लागि चाहिँ पहिला एमाजोन एप खोल्छु त्यसको बादमा",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-15",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673966436_chunk_4.wav",
+  "text": "दुई महिनापछि हुन्छ अनि त्यो चाहिँ मुम्बईमा हो हाम्रो प्लेसमेन्ट",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-16",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674025426_chunk_10.wav",
+  "text": "आएको छ भने चाहिँ अब हामी भन्दा नि हामी केटीहरू महिलाहरू भन्दा पनि बेसी चाहिँ हाम्रो चाहिँ घरमा चाहिँ फ्याम्लीहरू चाहिँ पापाहरूले गर्नु हुन्छ हो पापा दाजु भाइहरूले गर्नु हुन्छ उनीहरूले नै अब ठुल्ठुलो खानाहरू भतेरहरू त उनीहरूले बनाउँछ हामीहरू त त्यसमा त उयो गर्दैन त्यही भएर चाहिँ मैले चाहिँ अब केटाले बनाउँछ भनेर चाहिँ भनेको",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-17",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673970862_chunk_1.wav",
+  "text": "छिटो गर्नुहोस् डाबर च्यवनप्रास र गार्डन रायता बुन्दी चाँडै सकिन आँट्दैछन्",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-18",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674015612_chunk_16.wav",
+  "text": "यसरी नै हाम्रो दिवालीमा बिचमा हाम्रो गाई तिहार हुने गर्दछ गाई तिहारको दिन",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-19",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674067222_chunk_2.wav",
+  "text": "के के के के खेल्थेँ म पहिला पहिला सानोको खेलेकोहरू अहिले मलाई पुरा याद आउँछ पहिला पहिलाको खेलेको कुदेको नाँचेको घुमेको रोटेपिङ खेलेको",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-20",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673998631_chunk_1.wav",
+  "text": "पिआरएएन नम्बरमा सात एक नौ दुई पाँच तिन छ सात दुई पाँच सात छ मा मेरो एपिवाई खाताको हालको होल्डिङहरू देखाउनुहोस्",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-21",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v1/train/audios/3940649673980732_chunk_14.wav",
+  "text": "टाइममा पुग्नुसकिन्छ अनि अल्टरनेटिभ रुट बाटो भन्दा पनि कुन चाहिँ बाटो चाहिँ अलिक राम्रो छ अलिक लेन्थ छ जुन चाहिँ बाटो अलिक डिस्टर्ब दिँदैन तपाईँलाई थाहा होला नि होइन त्यही बाटो जानुपर्छ होला दाजु",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-22",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673968435_chunk_1.wav",
+  "text": "पन्ध्र अगस्त छब्बिस जनवरी पाँच सेप्टेम्बर चौध नोभेम्बर",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-23",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649673990245_chunk_10.wav",
+  "text": "कता कता पुगेर अहिले हाम्रो नानीहरू हिन्दी इङ्लिस",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "indicvoices-r-24",
+  "path": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649674006302_chunk_8.wav",
+  "text": "जहाँ चाहिँ पढाई छ भने चाहिँ तिमी जहाँ पनि जाऊ जता पनि जाऊ तिमीलाई कसैले पनि चिट गर्नु सक्दैन लन्ड्याउनु सक्दैन",
+  "src": "indicvoices-r"
+ },
+ {
+  "id": "mahadhwani-00",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/0XI_qih_kJE_a739059b_chunk002_27532-40672ms_SPEAKER_01_13140ms.wav",
+  "text": "कथा सङ्ग्रहको नाम यो कथा सङ्ग्रहको चर्चा परिचर्चा व्यापक भइरहेको छ र किताबको माग बढेपछि दोस्रो दोस्रो संस्करण समेत बजारमा आइसकेको छ",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-01",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/obvdynI5TCA_9ec51851_chunk026_63092-66612ms_SPEAKER_08_3519ms.wav",
+  "text": "त्यसले दबाई खोजेको दबाई पाइहालो अब खुकुरी",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-02",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/a-Hc9FwoA7E_8637aa13_chunk056_400192-406992ms_SPEAKER_01_6800ms.wav",
+  "text": "मैले तपाईँसँगै भनेको छु सारा संसारका मान्छे एकातिर जाउन् म एक्लै एकातिर उभिन तयार छु",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-03",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/4P0rBjjvqpQ_322e7cf0_chunk020_156612-166592ms_SPEAKER_01_9980ms.wav",
+  "text": "चेतना भनेको हाम्रो बोध अथवा थाहा पाउने क्षमता म थाहा पाउँछु थाहा पाउने क्षमता मसँग छु भने म चेतनशील प्राणी",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-04",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/PArC5xIVC6I_431c79ca_chunk012_148732-153952ms_SPEAKER_01_5219ms.wav",
+  "text": "नयाँ फोनमा फोर जी नेटवर्क र युट्युब तथा सर्ट्स जस्ता विशेषताहरू समावेश गरिएका छन्",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-05",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/OAK9Fq8oj7E_150b2a8f_chunk438_1929412-1939272ms_SPEAKER_04_9859ms.wav",
+  "text": "उहाँहरूलाई मजाले हेर्न पाउनुहुन्छ त्यही त हो नि होइन अनि हामी छोरी भएर पनि छोराले गर्ने हामी सँगै छौँ हामी हेरिरहेछौँ हाम्रो परिवारलाई दुःख सुखमा साथ दिन्छौँ",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-06",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/7H-7Eqbi9uQ_602e2825_chunk003_35672-47092ms_SPEAKER_06_11420ms.wav",
+  "text": "यी नानीहरूले सायद जिन्दगीमा आफ्नो आमाको अनुहार याद थिएन बुवाको अनुहार याद थिएन अहिले सबै उहाँहरूको त्यो तस्बिर उहाँ नानीहरूको मनमुटुमा छिरिसक्यो",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-07",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/0Cx7I9BRjmg_666b6701_chunk100_1700372-1718752ms_SPEAKER_01_18379ms.wav",
+  "text": "विद्यालय क्षेत्र विकास कार्यक्रमले एकीकृत विद्यालय कतिवटा स्थापना गरी समावेशी शिक्षा प्रदान गर्ने भनेको छ अप्सन ए तिन सय पैँसट्ठी अप्सन बी तिन सय पाँच अप्सन सी तिन सय पचहत्तर अप्सन डी तिन सय पचपन्न",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-08",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/q4RWgs-eO6A_790fa70f_chunk025_607772-628032ms_SPEAKER_02_20259ms.wav",
+  "text": "वेटर चितवनले गाउँ समाजमा हुने हिंसाजन्य घटना तथा दुर्घटनाहरूको नियन्त्रण के कसरी गर्न सकिन्छ भन्ने सम्बन्धमा अन्तर्क्रिया गरेको हो उक्त कार्यक्रममा हिंसाजन्य घटना न्यूनीकरणमा समाजले खेल्नुपर्ने भूमिका तथा आगामी दिनमा बन्ने कानुनहरूमा महिलाहरूको हक हित र अधिकार सुनिश्चित हुनुपर्ने विषयमा बहस गरिएको थियो",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-09",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/5kR3QgQGrKg_53143feb_chunk029_242252-265652ms_SPEAKER_02_23399ms.wav",
+  "text": "एउटा त जो जीवन विज्ञानमा आउन सक्छ चक्र विज्ञानमा भाग लिन सक्छ प्रत्येक चक्रलाई कसरी एक्टिभेट गर्न सकिन्छ कसरी त्यो चक्रको विकारहरू हटाउन सकिन्छ जसले जान्यो उसले त गर्यो ठिक छ जान्दछ अब जो टेलिभिजन हेरेर बस्नुभएको छ जसलाई तुरुन्तै आउने सुविधा छैन आउन सक्ने स्थिति छैन अब के गर्ने त",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-10",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/6e18T4OlV7o_3af2a3e5_chunk070_1377352-1386072ms_SPEAKER_01_8720ms.wav",
+  "text": "यो भवनकै कुरामा चाहिँ तपाईँहरूले यो सपिङ कम्प्लेक्सको डिजाइन भन्ने खालका कुराहरू सुनिरहेको थिएँ के हो खासमा त्यो चाहिँ",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-11",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/1xgmtpZ6yNo_c8be22dc_chunk022_298752-305232ms_SPEAKER_01_6480ms.wav",
+  "text": "अप्सन सी निदानात्मक मूल्याङ्कन विधि अपनाउनु पर्दछ अप्सन सी",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-12",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/Or9IcPToy4g_0f401383_chunk030_417652-428832ms_SPEAKER_01_11180ms.wav",
+  "text": "रेजिस्टेन्स सन्ट हाम्रो के छ भेरी स्मल रेजिस्टेन्स धेरै कम रेजिस्टेन्स छ भने यतातिर करेन्ट के हुन्छ बहुत ज्यादा फ्लो हुन्छ यसको मतलब यो यदि",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-13",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/1sVY9LLCQyQ_e860f4d3_chunk090_1188772-1198232ms_SPEAKER_01_9460ms.wav",
+  "text": "हामी सबैले उच्च मूल्याङ्कन गर्नुपर्छ तर बाँकी कस्ता कस्ता रहे भन्ने कुराको पनि राम्रो खोजी गर्ने हो भने कुनै अधिकांशहरू अधिकांशहरू अगतिला",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-14",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/R5nHpIeuWH8_a8bc8e3a_chunk172_2037732-2050572ms_SPEAKER_02_12840ms.wav",
+  "text": "खत्रा खत्रा चित्रहरू चाहिँ मल म छ त्यसपछि तपाईँहरूले पनि देखिरहनु भएको छ भन्नुहोस् त अक्षर छ त्यसपछि भन्नुहोस् त",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-15",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/08al4qqDztU_b74ec1d9_chunk032_405172-410172ms_SPEAKER_01_5000ms.wav",
+  "text": "जे जसो गर्छु त्यसको प्रतिक्रिया र त्यसको रिजल्ट त मलाई पाँच वर्ष पछाडि फेरि जनताले दिन्छ नि",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-16",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/OJpdzRmNYxQ_afa85b7f_chunk012_256212-268232ms_SPEAKER_01_12020ms.wav",
+  "text": "बिआर अठतिस टी तिन चार एक शून्य नम्बरको मोटरसाइकलमा सवार उनलाई नेपाल प्रवेश गर्ने बेला जाँच गर्दा पाँच सयका दरको सतहत्तर थान भारतीय नोट र एक हजार दरका",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-17",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/4mZmT_KtU3k_5bf9ec26_chunk074_720332-732792ms_SPEAKER_06_12460ms.wav",
+  "text": "एकदमै दुःख लाग्छ होइन अब फेरि मलाई एउटा कुरा के उ छ भने जे हुन्छ राम्रैको लागि हुन्छ होइन म त्यति धेरै मनलाई तल तल पार्ने मन सानो बनाएको चाहिँ छैन",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-18",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/8aO0EgO_-UM_a6d50499_chunk107_1543552-1556312ms_SPEAKER_02_12759ms.wav",
+  "text": "नर्मल्ली फिक्स फिक्स कस्ट हुन्छ अथवा स्थिर खर्च हुन्छ है त्यही भएर तपाईँले का कामदारको केसमा चाहिँ के बुझ्नु पऱ्यो भन्दाखेरि अब यदि प्रत्यक्ष कामदार हो भनेपछि त्यो भनेको तपाईँको भेरिएबल कस्ट भयो अब अरू नर्मल्ली अब त्यहाँ भनौँ न",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-19",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/6FsMDAVGD5M_1f4aa891_chunk069_545792-553452ms_SPEAKER_01_7660ms.wav",
+  "text": "अहिले हामीसँग यही एउटा मात्रै हो अहिले अरू साथीहरूले इन्ट्रेस्ट देखायो भने चाहिँ अब फ्रेन्चाइजलाई दिन सकिन्छ अरू ठाउँहरूमा चाहिँ",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-20",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/7VsZwy32-LY_1b99dcc1_chunk026_291812-301972ms_SPEAKER_01_10159ms.wav",
+  "text": "आफूसँग भएको व्यवस्थामा राजी हुनुभयो भाव आफूसँग त्यसमा जे छ त्यसमा राजी हुन सक्नु भएन अभाव",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-21",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/iCbW6uO61po_858eb3a4_chunk047_771592-785572ms_SPEAKER_01_13980ms.wav",
+  "text": "सामाजिक फुलफिल भएपछि सम्मान र आत्मबोध त्यस कारणले यो भर्याङ हो भर्याङको शृङ्खला हो सिँढी जस्तै हो एउटा सिँढीमा नटेकी अर्को सिँढीमा पुग्न सकिँदैन भने जस्तै एक आवश्यकता पुरा नभएसम्म हामी अर्को आवश्यकतामा पुग्नै सक्दैनौँ",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-22",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/mlmm3id0ykE_45a22a33_chunk001_30972-46832ms_SPEAKER_02_15859ms.wav",
+  "text": "र अर्को कुरा नागरिकहरूमा केही असन्तुष्टिको ग्राफहरू बढिरहेछ जस्तै यो लोकतन्त्रमा राजनीतिक दलहरूले केही निकास दिन सकेनन् परिणाम दिन सकेनन् विकासको गति अगाडि ल्याउन सकेनन् सुशासन स्थापित गर्न सकेनन् भन्ने",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-23",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/RnNp01pDOq8_30d2d7f0_chunk015_496932-511832ms_SPEAKER_03_14899ms.wav",
+  "text": "हजुरहरूको महिमा वर्णन गर्न सरस्वती शेषनाग ब्रह्मादि देवता पनि असमर्थ छन् भने म कसरी सकुला सदैव तपाईँहरूकै भक्तिमा मेरो चित्त लागोस् भन्ने अनेक स्तुति गरेपछि हरिहर अन्तर्ध्यान भए तब नवराज ब्राह्मण सूर्य जस्तो चहकिलो भएर घर आए",
+  "src": "mahadhwani"
+ },
+ {
+  "id": "mahadhwani-24",
+  "path": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/1fvBa6kNrv0_39a2d066_chunk013_364792-379832ms_SPEAKER_01_15039ms.wav",
+  "text": "उनीमाथि लामो समयदेखि यौन शोषण गर्दै आएको अनुसन्धानको क्रममा खुलेको छ आफन्तका अनुसार बच्चीको पेट उकासिँदै गएको पाइएपछि सोधपुछको क्रममा आफूमाथि बलात्कार गरेको बताएपछि आफन्तले किटानी जाहेरी दिएका थिए",
+  "src": "mahadhwani"
+ }
+]

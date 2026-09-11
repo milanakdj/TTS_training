@@ -60,3 +60,22 @@ release/staged_parler/
 release/id_map.jsonl
 release/*.log
 release/_shards/
+
+# Per-row id -> original path for the reserve archive: data, not docs, and the same
+# provenance key id_map.jsonl is. dataset/SOURCE_CODES.md IS tracked on purpose --
+# the code -> corpus-name mapping is information we need to keep, so the GitHub
+# remote has to stay private.
+release/id_map_reserve.jsonl
+release/id_map_reserve_backfill.jsonl
+
+# whisper/: corpus-scale ASR manifests and the flex gold split are data, not source.
+# nepali_corpus_asr.jsonl is 392 MB and gold_train.jsonl 50 MB -- both regenerable
+# from the corpus by build_gold_manifest.py. The small gold_test/gold_val splits and
+# every result_*.json ARE tracked: they are what the flex null result rests on.
+whisper/nepali_corpus_asr.jsonl
+whisper/flex/gold_train.jsonl
+
+# testing_audio/: 40 reference wavs (389 MB) for listening checks. The README and the
+# per-source json manifests are tracked; the audio is not -- it is re-fetchable from
+# the sources those manifests name.
+testing_audio/**/*.wav

@@ -1,0 +1,130 @@
+[
+  {
+    "file": "00_2400647_000052_0c0b304411be53cb_0000.wav",
+    "duration_s": 315.19,
+    "how": "chunk @6s",
+    "feed_id": 2400647,
+    "feed_title": "buwb.pod",
+    "episode_title": "044 - Let’s Talk with Shiwali",
+    "author": "buwb.pod",
+    "language": "ne",
+    "languages": [
+      "en",
+      "ne"
+    ],
+    "nepali_seconds": 229.67,
+    "other_language_seconds": {
+      "en": 70.96
+    },
+    "sample_rate": 48000,
+    "channels": 2,
+    "num_speakers": 2,
+    "dnsmos_ovrl": 3.2467,
+    "snr_db": 28.318,
+    "diarization_status": "completed",
+    "text": "SPEAKER_00: Most of the things I do is to prove somebody wrong or prove myself wrong because I am second guessing myself, के, अनि I say that I am a post-structuralist because whenever something happens नि, I look at it from मेरो perspective, I look at it from someone else's perspective, I look at it हुन्छ नि, कसलाई कसरी affect भइरहेछ र त्यो pointसम्म कसरी पुग्यो भनेर I think about it, के।\n\nSPEAKER",
+    "episode_url": "https://anchor.fm/s/341a0278/podcast/play/38228506/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2021-7-2%2F209688937-44100-2-026982c46cfd2.m4a",
+    "local_src": "/workspace/proc_data_new/_restored/podcast-index-feeds/train/audio/ne/2400647/000052_0c0b304411be53cb.wav",
+    "mb": 30.3
+  },
+  {
+    "file": "01_2239109_000002_39bf2cec0b41c3f3_0000.wav",
+    "duration_s": 307.5,
+    "how": "chunk @19s",
+    "feed_id": 2239109,
+    "feed_title": "The False 9 Podcast",
+    "episode_title": "False Nine Podcast #17 Champions League RO16 first leg review",
+    "author": "Ishan Sharma, Susajjan Dhungana and Ojash Dangal",
+    "language": "ne",
+    "languages": [
+      "ne"
+    ],
+    "nepali_seconds": 289.21,
+    "other_language_seconds": null,
+    "sample_rate": 48000,
+    "channels": 2,
+    "num_speakers": 3,
+    "dnsmos_ovrl": 3.3939,
+    "snr_db": 35.896,
+    "diarization_status": "completed",
+    "text": "SPEAKER_00: Hello and welcome, this is Ishan, this is Susajjan.\n\nSPEAKER_01: This is Ojas. तपाईँलाई the First Nine podcastमा स्वागत छ।\n\nSPEAKER_00: आजको हाम्रो topic चाहिँ Champions League round of sixteen को review हो र हामीले चाहिँ, अब अस्ति नै हामीले हाम्रो preview episode upload गरेको थियौँ र अब सबै tiesहरू भइसकेको छ, अब त्यसलाई नै हामीले preview मा के भनेको थियौँ र actually के भयो त्यसको comp",
+    "episode_url": "https://anchor.fm/s/333e122c/podcast/play/19475297/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2021-01-04%2F0ecccd6ae052e30e20e547921714ea16.m4a",
+    "local_src": "/workspace/proc_data_new/_restored/podcast-index-feeds/train/audio/ne/2239109/000002_39bf2cec0b41c3f3.wav",
+    "mb": 29.5
+  },
+  {
+    "file": "02_4068928_000005_33bd77c93347516c_0000.wav",
+    "duration_s": 303.74,
+    "how": "chunk @0s",
+    "feed_id": 4068928,
+    "feed_title": "Zunu Y",
+    "episode_title": "Gongabu Hatyakanda",
+    "author": "Zunu Y",
+    "language": "ne",
+    "languages": [
+      "ne"
+    ],
+    "nepali_seconds": 295.11,
+    "other_language_seconds": null,
+    "sample_rate": 48000,
+    "channels": 2,
+    "num_speakers": 1,
+    "dnsmos_ovrl": 3.1123,
+    "snr_db": 37.29,
+    "diarization_status": "completed",
+    "text": "आज चाहिँ हामीहरू नेपालमै घटेको गङ्गोबु हत्याकाण्डको बारेमा कुरा गर्न जाँदैछौँ र प्रायलाई चाहिँ यो केसको बारेमा थाहा होला, तर यो केसको follow-upहरू के कस्तो थियो भन्ने विषयमा चाहिँ थाहा नहुनु सक्छ र फेरि हाम्रो नेपालमा चाहिँ के छ भने incident घट्ने बेलामा चाहिँ पुरै viral भइदिन्छ, trending भइदिन्छ मिडियाभरि नै, तर एक दुई दिनपछि, एक हप्तापछि चाहिँ त्यो केसमा के कस्तो follow-up भइरहेको छ, त्यो केस कह",
+    "episode_url": "https://anchor.fm/s/59495f1c/podcast/play/48071860/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2022-1-23%2Ff05dae2e-02c2-fbea-3952-1f184df07ea5.mp3",
+    "local_src": "/workspace/proc_data_new/_restored/podcast-index-feeds/train/audio/ne/4068928/000005_33bd77c93347516c.wav",
+    "mb": 29.2
+  },
+  {
+    "file": "03_502277_000012_d9f02d0ee114f3d7_0000.wav",
+    "duration_s": 308.57,
+    "how": "chunk @4s",
+    "feed_id": 502277,
+    "feed_title": "Nepali Entrepreneurs show",
+    "episode_title": "What is the ROI Of starting a podcast?",
+    "author": "Nepali Entrepreneurs show",
+    "language": "ne",
+    "languages": [
+      "ne"
+    ],
+    "nepali_seconds": 299.5,
+    "other_language_seconds": null,
+    "sample_rate": 48000,
+    "channels": 2,
+    "num_speakers": 1,
+    "dnsmos_ovrl": 3.3675,
+    "snr_db": 6.584,
+    "diarization_status": "completed",
+    "text": "Hello everyone, let's talk about podcast today. My name is Govinda Kharel, host of the podcast called Nepali Entrepreneurs. So yes, podcast मा हामी basically कुराकानी गर्नेछौँ content creation, startup story and investment as well as social media marketing. So if you guys are interested in this topic, then I request you guys to stick in this podcast and listen all the, all, all other previous epis",
+    "episode_url": "https://anchor.fm/s/4b695f0/podcast/play/2758977/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2020-02-15%2F28f47df6088a467c7ae08d46cedd5835.m4a",
+    "local_src": "/workspace/proc_data_new/_restored/podcast-index-feeds/train/audio/ne/502277/000012_d9f02d0ee114f3d7.wav",
+    "mb": 29.6
+  },
+  {
+    "file": "04_150423_000007_353d20405ae21333_0000.wav",
+    "duration_s": 90.42,
+    "how": "chunk @5s",
+    "feed_id": 150423,
+    "feed_title": "Manko Utpatyang KhayaalNepal",
+    "episode_title": "मेराे दुई थरी मन छ",
+    "author": "kanchan ghimire",
+    "language": "ne",
+    "languages": [
+      "ne"
+    ],
+    "nepali_seconds": 88.17,
+    "other_language_seconds": null,
+    "sample_rate": 48000,
+    "channels": 2,
+    "num_speakers": 1,
+    "dnsmos_ovrl": 3.368,
+    "snr_db": 12.041,
+    "diarization_status": "completed",
+    "text": "मलाई सधैँ लाग्छ मेरो एउटा बाहिरी मन छ, अनि मेरो अर्को भित्री मन छ। मलाई जस्तो सायद सबैलाई लाग्ला। अहिले पनि लाग्यो घरको नजिकैको यो जङ्गलसम्म आइपुग्दा, डँडेलोले बाहिरी मनलाई उजाड उजाड बनाइदियो। जसरी जङ्गल डँडेलोले रित्त्यायो, त्यसै गरी बाहिरी मन पनि रित्त्यो। बाहिरी मनको सहाराले मैले सोच्न पुगेँ—यी काला अङ्गार भएका सालका लास्राहरू, यी खरानीहरू, अनि यी सकिएका घाँसहरू कति हेर्दा पनि पीडादायक छ है? यत",
+    "episode_url": "https://anchor.fm/s/292c67c0/podcast/play/30230254/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2021-2-29%2F170293545-44100-2-923f1bbbb881e.m4a",
+    "local_src": "/workspace/proc_data_new/_restored/podcast-index-feeds/train/audio/ne/150423/000007_353d20405ae21333.wav",
+    "mb": 8.7
+  }
+]
