@@ -79,3 +79,11 @@ whisper/flex/gold_train.jsonl
 # per-source json manifests are tracked; the audio is not -- it is re-fetchable from
 # the sources those manifests name.
 testing_audio/**/*.wav
+
+# Reference/sample audio pulled from other corpora (rebuildable; see
+# extras/scripts in the nepali-oov-distilled dataset)
+indicvoices_samples/
+synthetic_pipeline/gemini_tts/
+
+# full OOV list incl. scraped phone numbers -- local only, never published
+oov_words.full.txt

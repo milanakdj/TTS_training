@@ -1,0 +1,122 @@
+[
+  {
+    "id": "01",
+    "text": "मैले Foodmandu बाट खाना अर्डर गरेँ।",
+    "oov_term": "Foodmandu",
+    "voice": "ne-NP-HemkalaNeural",
+    "file": "01_edge.mp3",
+    "ref": "01_ref_S4258631900397441_0.wav",
+    "cos_out_ref": 0.84,
+    "cos_out_src": 0.374,
+    "cos_src_ref": 0.46,
+    "gate": "weak"
+  },
+  {
+    "id": "02",
+    "text": "CloudFactory ले काठमाडौंमा नयाँ कार्यालय खोल्यो।",
+    "oov_term": "CloudFactory",
+    "voice": "ne-NP-HemkalaNeural",
+    "file": "02_edge.mp3",
+    "ref": "02_ref_S4259070600380854_1.wav",
+    "cos_out_ref": 0.809,
+    "cos_out_src": 0.408,
+    "cos_src_ref": 0.256,
+    "gate": "weak"
+  },
+  {
+    "id": "03",
+    "text": "Hamro Patro एप नेपालीहरूमाझ धेरै लोकप्रिय छ।",
+    "oov_term": "Hamro Patro",
+    "voice": "ne-NP-HemkalaNeural",
+    "file": "03_edge.mp3",
+    "ref": "03_ref_S4258190400398711_0.wav",
+    "cos_out_ref": 0.904,
+    "cos_out_src": 0.125,
+    "cos_src_ref": 0.212,
+    "gate": "PASS"
+  },
+  {
+    "id": "04",
+    "text": "Big Mart मा आज ठूलो छुट छ।",
+    "oov_term": "Big Mart",
+    "voice": "ne-NP-HemkalaNeural",
+    "file": "04_edge.mp3",
+    "ref": "04_ref_S4258070000301753_1.wav",
+    "cos_out_ref": 0.567,
+    "cos_out_src": 0.291,
+    "cos_src_ref": 0.024,
+    "gate": "FAIL"
+  },
+  {
+    "id": "05",
+    "text": "Deerwalk ले सूचना प्रविधि क्षेत्रमा काम गर्छ।",
+    "oov_term": "Deerwalk",
+    "voice": "ne-NP-HemkalaNeural",
+    "file": "05_edge.mp3",
+    "ref": "05_ref_S4259301400373204_0.wav",
+    "cos_out_ref": 0.847,
+    "cos_out_src": 0.289,
+    "cos_src_ref": 0.242,
+    "gate": "weak"
+  },
+  {
+    "id": "06",
+    "text": "F1Soft ले डिजिटल भुक्तानी सेवा दिन्छ।",
+    "oov_term": "F1Soft",
+    "voice": "ne-NP-HemkalaNeural",
+    "file": "06_edge.mp3",
+    "ref": "06_ref_S4259810900332710_0.wav",
+    "cos_out_ref": 0.818,
+    "cos_out_src": 0.334,
+    "cos_src_ref": 0.274,
+    "gate": "weak"
+  },
+  {
+    "id": "07",
+    "text": "Century Bank ले नयाँ ब्याज दर घोषणा गर्‍यो।",
+    "oov_term": "Century Bank",
+    "voice": "ne-NP-HemkalaNeural",
+    "file": "07_edge.mp3",
+    "ref": "07_ref_S4258145700306807_1.wav",
+    "cos_out_ref": 0.89,
+    "cos_out_src": 0.135,
+    "cos_src_ref": 0.212,
+    "gate": "PASS"
+  },
+  {
+    "id": "08",
+    "text": "बौद्धनाथ र Khokana दुवै ऐतिहासिक स्थल हुन्।",
+    "oov_term": "Bouddhanath / Khokana",
+    "voice": "ne-NP-HemkalaNeural",
+    "file": "08_edge.mp3",
+    "ref": "08_ref_S4257688200303485_1.wav",
+    "cos_out_ref": 0.69,
+    "cos_out_src": 0.421,
+    "cos_src_ref": 0.291,
+    "gate": "FAIL"
+  },
+  {
+    "id": "09",
+    "text": "मैले HDMI केबल किन्न Classic Tech गएँ।",
+    "oov_term": "HDMI / Classic Tech",
+    "voice": "ne-NP-HemkalaNeural",
+    "file": "09_edge.mp3",
+    "ref": "09_ref_S4259332200382171_1.wav",
+    "cos_out_ref": 0.754,
+    "cos_out_src": 0.222,
+    "cos_src_ref": 0.053,
+    "gate": "weak"
+  },
+  {
+    "id": "10",
+    "text": "Goldstar जुत्ता नेपालमै बन्छ।",
+    "oov_term": "Goldstar",
+    "voice": "ne-NP-HemkalaNeural",
+    "file": "10_edge.mp3",
+    "ref": "10_ref_S4257014200351599_1.wav",
+    "cos_out_ref": 0.885,
+    "cos_out_src": 0.246,
+    "cos_src_ref": 0.225,
+    "gate": "PASS"
+  }
+]
