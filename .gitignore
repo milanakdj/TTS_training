@@ -99,3 +99,32 @@ pretrain/asr_bilingual/data/
 pretrain/asr_bilingual/*.model
 pretrain/asr_bilingual/*.vocab
 pretrain/asr_bilingual/tok_corpus.txt
+
+# oov_distill/: moved off /workspace 2026-09-18. The code, the logs and the small
+# report/coverage json ARE tracked -- they are the provenance of the 854 h figure.
+# The audio and the row-level jsonl are not: every one of them is regenerable, and
+# the published shards (all 213) live at milanakdj/nepali-oov-distilled.
+oov_distill/out/ref_pool/
+oov_distill/out/ref_pool_v2/
+oov_distill/out/ref_pool_v3/
+oov_distill/out/vc/
+oov_distill/out/scan_cache.jsonl
+oov_distill/out/selected*.jsonl
+oov_distill/out/number_pairs.jsonl
+oov_distill/logs/vc_all*.log
+oov_distill/logs/upload*.log
+
+# milan_archive/c9_data/: 24 GB of raw c9 audio plus its segments. The manifests
+# and the two scripts are tracked; the audio is re-fetchable from the c9 source.
+milan_archive/c9_data/raw/
+milan_archive/c9_data/segments/
+
+# gold_eval/: the FLEURS gold set that the 0.302 WER rests on. Every script, the
+# raw manifest, the disjointness reports and the per-model score json ARE tracked.
+# The two big inputs are not: the clips re-fetch with fetch_fleurs.py and the
+# averaged checkpoint rebuilds from the run_v7 ckpts with avg_ckpt.py.
+pretrain/asr_bilingual/gold_eval/*.nemo
+pretrain/asr_bilingual/gold_eval/clips/
+
+# pre-correction backup of the v7 card, kept locally while the card settles
+pretrain/asr_bilingual/release_v7/README.md.pre_correction
