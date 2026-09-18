@@ -1,0 +1,20 @@
+- type: nemo
+  manifest_filepath: /workspace/asr_pretrain_v2/manifests/train_en_pseudo.jsonl
+  weight: 0.379898
+  tags:
+    bucket: en_pseudo
+- type: nemo
+  manifest_filepath: /workspace/asr_pretrain_v2/manifests/train_ne_human.jsonl
+  weight: 0.211453
+  tags:
+    bucket: ne_human
+- type: nemo
+  manifest_filepath: /workspace/asr_pretrain_v2/manifests/train_ne_pseudo.jsonl
+  weight: 0.392353
+  tags:
+    bucket: ne_pseudo
+- type: nemo
+  manifest_filepath: /workspace/asr_pretrain_v2/manifests/train_ne_script.jsonl
+  weight: 0.016296
+  tags:
+    bucket: ne_script

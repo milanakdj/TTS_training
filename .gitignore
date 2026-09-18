@@ -87,3 +87,15 @@ synthetic_pipeline/gemini_tts/
 
 # full OOV list incl. scraped phone numbers -- local only, never published
 oov_words.full.txt
+
+# ASR pretrain artifacts: model weights, manifests and checkpoints are large
+# binaries / regenerable data -- source-control the code, not these.
+pretrain/asr_bilingual/release/*.nemo
+pretrain/asr_bilingual/release_v7/*.nemo
+pretrain/asr_bilingual/train.py.pre_langid
+pretrain/asr_bilingual/manifests/
+pretrain/asr_bilingual/ckpt/
+pretrain/asr_bilingual/data/
+pretrain/asr_bilingual/*.model
+pretrain/asr_bilingual/*.vocab
+pretrain/asr_bilingual/tok_corpus.txt
