@@ -67,6 +67,7 @@ pocket_TTS/
 ├── scripts/                   manifest building, alignment, train launchers
 ├── infer/                     inference configs, benchmarks, generation
 │   └── final/                 the evaluation harness and its results
+├── frontend/                  ne_frontend.py -- MUST wrap every input string
 ├── docs/                      ADR.md, INTERN_GUIDE.md
 └── train_{teacher,student}.log
 ```
@@ -144,6 +145,15 @@ to a long run.
 ---
 
 ## Traps
+
+**The tokenizer cannot represent English, digits or a hyphen.** `nepali_bpe4000`
+has no `byte_fallback`, so every Latin word, every ASCII digit, `४`-`९`, `-`, `(`
+and `;` encode to one `<unk>` — and the model *deletes the word or truncates the
+rest of the utterance* rather than mispronouncing it. `gen_samples.py`'s
+`05_numeric` case was written pre-verbalized ("सन् दुई हजार पच्चीसमा"), which is
+why 200k steps of training never surfaced this. Run every string through
+`frontend/ne_frontend.py:normalize()` before `generate_audio()`; fixing it
+properly needs a new tokenizer and a retrain.
 
 **Pin CPU threads for any latency measurement.** The first benchmark called
 `torch.set_num_threads(os.cpu_count())` = 16 on a 16-core box the training job held
