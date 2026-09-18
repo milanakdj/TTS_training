@@ -1,0 +1,14 @@
+{
+ "wer": 0.32400932400932403,
+ "cer": 0.11226568867155665,
+ "wer_norm": 0.28528775098902737,
+ "cer_norm": 0.10499205808940322,
+ "n": 726,
+ "empty": 0,
+ "seconds": 14.768682956695557,
+ "ckpt": "/workspace/gold_eval_dl/nemotron_ne_nepali_best.nemo",
+ "manifest": "/root/tts/TTS_training/pretrain/asr_bilingual/gold_eval/fleurs_ne_test.raw.jsonl",
+ "lang": "ne-NP",
+ "prompt_mode": "langID",
+ "batch_size": 16
+}

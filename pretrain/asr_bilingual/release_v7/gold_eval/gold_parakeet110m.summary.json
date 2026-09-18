@@ -1,0 +1,14 @@
+{
+ "label": "parakeet-ctc-nepali-110m (run_v7)",
+ "manifest": "fleurs_ne_test.raw.jsonl",
+ "n": 726,
+ "wer": 0.30208562019758506,
+ "cer": 0.10747334671428199,
+ "empty_hyp": 0,
+ "wer_nodigit": 0.28043827335411353,
+ "cer_nodigit": 0.09903100457444541,
+ "n_nodigit": 588,
+ "wer_digit": 0.3765432098765432,
+ "cer_digit": 0.14019701302828091,
+ "n_digit": 138
+}

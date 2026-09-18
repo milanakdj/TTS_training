@@ -1,0 +1,14 @@
+{
+ "label": "parakeet-110m AVG(4 ckpts)",
+ "manifest": "fleurs_ne_test.raw.jsonl",
+ "n": 726,
+ "wer": 0.3039151115989755,
+ "cer": 0.10832051716497668,
+ "empty_hyp": 0,
+ "wer_nodigit": 0.2828941154245773,
+ "cer_nodigit": 0.10019511075404568,
+ "n_nodigit": 588,
+ "wer_digit": 0.3762183235867446,
+ "cer_digit": 0.1398156974896727,
+ "n_digit": 138
+}

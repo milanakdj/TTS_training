@@ -1,0 +1,18 @@
+{
+ "run_v7 (parakeet-110m)": {
+  "rows": 1256757,
+  "exact_text": 0,
+  "basename": 0,
+  "near_jaccard_ge_0.6": 0,
+  "max_jaccard": 0.1481,
+  "verdict": "DISJOINT"
+ },
+ "nemotron-0.6b": {
+  "rows": 1521426,
+  "exact_text": 0,
+  "basename": 0,
+  "near_jaccard_ge_0.6": 0,
+  "max_jaccard": 0.1481,
+  "verdict": "DISJOINT"
+ }
+}

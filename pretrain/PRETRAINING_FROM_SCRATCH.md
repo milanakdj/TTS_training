@@ -1,8 +1,13 @@
 # How to pretrain a Nepali + English ASR model from scratch
 
-Last updated: 2026-09-12
+Last updated: 2026-09-18
 Companion to `WHAT_WE_ARE_BUILDING.md` — read that first for *whether* to do this.
 This file is the *how*.
+
+> **2026-09-18 — corrections after run_v7 shipped.** Three claims in this doc were
+> wrong and are fixed below: the tokenizer numbers in Step 0/Step 3, and Step 8's
+> treatment of held-out sets, which named the right trap but did not say how to
+> avoid it — and run_v7 walked into it anyway. Details at each site.
 
 ---
 
@@ -21,7 +26,7 @@ stop and use the finetune.
 | on-device size | 0.6b is too big for phones; we want ~30–120M |
 | streaming latency | base encoder's att-context is fixed |
 | license independence | not bound to NVIDIA's weights |
-| tokenizer | shipped BPE is 5.12 tok/word on Nepali; ours is 2.39 |
+| tokenizer | the shipped BPE **cannot encode Nepali at all** (48.9% UNK); ours is 1.70 tok/word at 0% UNK — see Step 3 |
 
 "Better Nepali WER" is **not** on this list. The binding lever there is
 human-labeled hours, not GPU-days or parameters.
@@ -81,13 +86,31 @@ NeMo config to start from:
 ## Step 3 — Tokenizer
 
 **Already done** — `/workspace/asr_bilingual/ne_en_bpe.model`, built from
-`tok_corpus.txt`, **2.39 tok/word** vs the shipped 5.12.
+`tok_corpus.txt`. (Identical file to `/workspace/asr_pretrain_v2/tokenizer/tokenizer.model`,
+md5 `17ea43f5` — they are the same tokenizer under two names.)
 
-This is worth restating because it is one of the four valid reasons to pretrain at
-all: it shortens RNN-T targets ~2.1x, which shrinks the joint tensor and cuts both
-memory and step time. In a finetune you cannot use it (swapping the vocab
-reinitialises the joint + prediction net and forces the English head to be
-relearned). **From scratch, it is free.** Use it.
+> **Corrected 2026-09-18.** This section used to say "**2.39 tok/word** vs the
+> shipped 5.12", and claimed a ~2.1x shortening of RNN-T targets. Both numbers
+> were wrong. Measured on 20k rows each of `train_ne_pseudo` and `train_ne_human`:
+
+| tokenizer | vocab | tok/word (ne) | UNK rate |
+|---|---|---|---|
+| shipped `parakeet-tdt_ctc-110m` BPE | 1,024 | 2.06 — *meaningless* | **48.9%** |
+| ours (`ne_en_bpe.model`) | 4,000 | **1.69–1.74** | **0.0%** |
+
+The shipped BPE is 1,024 English pieces with **no byte fallback**, so essentially
+every Devanagari word collapses to one `<unk>`. Its apparent 2.06 tok/word is the
+cost of *discarding* Nepali, not encoding it — the tokenizer is unusable for this
+language at any token budget, which is a stronger argument for building our own
+than the old framing gave.
+
+And **5.12 was never the shipped tokenizer's output**: it is simply the character
+count per Nepali word (measured 5.09), i.e. what character-level fallback costs.
+So the real gain is ~3x over character fallback, not 2.1x over a working BPE.
+
+The conclusion is unchanged and now better supported: in a finetune you cannot
+swap the vocab (it reinitialises the joint + prediction net and forces the English
+head to be relearned). **From scratch, it is free.** Use it.
 
 Sanity checks before committing:
 ```bash
@@ -161,7 +184,7 @@ in a multi-source config — use them rather than physically duplicating rows.
 ```yaml
 model:
   sample_rate: 16000
-  tokenizer: { dir: /workspace/asr_bilingual, type: bpe }   # the 2.39 tok/word one
+  tokenizer: { dir: /workspace/asr_bilingual, type: bpe }   # the 1.70 tok/word one (Step 3)
   train_ds:
     is_tarred: true
     use_lhotse: true
@@ -219,26 +242,81 @@ Non-negotiables learned the hard way (all in `WHAT_WE_ARE_BUILDING.md`):
 Use `/workspace/asr_bilingual/eval_ckpt.py`. Test sets: `ne_test.jsonl` (600,
 human), `en_test.jsonl` (600).
 
-**The trap:** a from-scratch model will score ~3–6% WER on a held-out split of the
-training corpus, and **that number is meaningless** — it measures agreement with
-canary's labels, not accuracy. This is the same artifact that made `flex` look
-like 0.013 when it was really 0.155. Never quote an in-domain number.
+**Trap 1 — the in-domain number.** A from-scratch model will score ~3–6% WER on a
+held-out split of the training corpus, and **that number is meaningless** — it
+measures agreement with canary's labels, not accuracy. This is the same artifact
+that made `flex` look like 0.013 when it was really 0.155. Never quote an
+in-domain number.
+
+**Trap 2 — the "held-out" set that isn't. Added 2026-09-18, because run_v7 fell
+into it while this doc was open.** The version of this section that only warned
+about trap 1 was not enough. run_v7's eval set, `hum_heldout.jsonl`, was built by
+*sampling* 200 human rows — and never *removing* them from
+`train_ne_human.jsonl`, which then trained at weight 0.2115. All 200 clips were
+seen ~61 times. The published WER of 0.176 was a memorisation score; the real
+figure on a genuinely unseen human set is **0.302** (FLEURS `ne_np`), a 1.7x gap.
+Nobody noticed for a month, because the filename said `heldout`.
+
+**So: build eval sets by subtraction, and prove it.** Never by sampling.
+
+```bash
+# 1. carve the eval set OUT of the training manifest, and rewrite training
+python - <<'PY'
+import json, random
+rows = [json.loads(l) for l in open("train_ne_human.jsonl")]
+random.Random(0).shuffle(rows)
+held, keep = rows[:200], rows[200:]
+for name, rs in (("hum_heldout.jsonl", held), ("train_ne_human.jsonl", keep)):
+    with open(name, "w") as f:
+        for r in rs: f.write(json.dumps(r, ensure_ascii=False) + "\n")
+PY
+
+# 2. PREFLIGHT, as a hard gate before any launch: zero overlap, or do not train
+python - <<'PY'
+import json, sys, glob
+held = {json.loads(l)["audio_filepath"] for l in open("hum_heldout.jsonl")}
+for m in glob.glob("train_*.jsonl"):
+    n = sum(json.loads(l)["audio_filepath"] in held for l in open(m))
+    if n: sys.exit(f"ABORT: {n} eval rows are in {m}")
+print("preflight ok: eval set disjoint from all training manifests")
+PY
+```
+
+Path identity is the cheap check; also compare **canonical text**, since a
+re-scrape under a different filename is the realistic way contamination enters.
+`release_v7/gold_eval/verify_disjoint2.py` is the worked version (path, basename,
+exact text, and Jaccard near-duplicates). Two lessons from writing it: a
+">=3 shared 5-grams" near-dup rule fires on ~5% of a news corpus and tells you
+nothing — use Jaccard ≥ 0.6; and make the canonical form *lossier* than the real
+text, so it over-collides and a zero-overlap verdict is conservative.
 
 Gates, checked at every eval:
 
 | gate | threshold | action if failed |
 |---|---|---|
+| eval set disjoint from training | **0 overlapping rows** | abort; this is a preflight, not an eval-time check |
 | Nepali WER on **human gold** | improving | if flat 3 evals running, stop |
 | English WER | not regressing >10% relative | rebalance sampling |
 | in-domain vs gold WER gap | < 3x | you are fitting canary, not speech |
 | loss | finite | NaN -> lower LR, lengthen warmup |
+
+The "flat 3 evals -> stop" gate is only as good as your willingness to obey it.
+run_v7 was flat from step ~35k to 50k — six consecutive evals — and ran to 50k
+anyway. Write the stop into the driver script, not into your intentions.
 
 Final claims go through the himalaya-ai whisper instrument with the doubled-SOT
 prefix, plus **human spot-checks**. Automatic scorers are not valid instruments
 for Nepali on their own.
 
 Average the top 5–10 checkpoints before the final eval (`scripts/checkpoint_averaging`)
-— reliably worth ~3–5% relative for free.
+— usually worth ~3–5% relative for free.
+
+**But check, don't assume.** On run_v7 it was a null: averaging all four saved
+checkpoints scored 0.3039 WER on gold against the final step's 0.3021 — slightly
+*worse*. With `save_top_k: 3` on a run that had already plateaued and annealed,
+every saved checkpoint sits in the last ~5k steps, i.e. at effectively the same
+point in weight space, so there is nothing to average away. If you want this to
+pay, save checkpoints further apart than the plateau is wide.
 
 ---
 
