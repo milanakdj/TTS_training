@@ -1,0 +1,25 @@
+{
+ "model": "teacher_24l_v3_guided",
+ "criterion": "CER on calib_v3.json (40 utts, disjoint from pairs.json)",
+ "results": {
+  "1": {
+   "n": 35,
+   "discarded": 0,
+   "wer": 0.7325300793943471,
+   "cer": 0.5904158261340343
+  },
+  "2": {
+   "n": 34,
+   "discarded": 0,
+   "wer": 0.610462403140491,
+   "cer": 0.4131725031121183
+  },
+  "3": {
+   "n": 32,
+   "discarded": 0,
+   "wer": 0.6303241803101937,
+   "cer": 0.4071973417714251
+  }
+ },
+ "best": 3.0
+}

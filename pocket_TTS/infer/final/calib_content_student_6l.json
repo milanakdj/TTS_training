@@ -1,0 +1,19 @@
+{
+ "model": "student_6l",
+ "criterion": "CER on calib_v3.json (40 utts, disjoint from pairs.json)",
+ "results": {
+  "real_human": {
+   "n": 40,
+   "discarded": 0,
+   "wer": 0.41848665841712523,
+   "cer": 0.14866482654386867
+  },
+  "-4": {
+   "n": 40,
+   "discarded": 0,
+   "wer": 0.32990348999300406,
+   "cer": 0.10665472075584444
+  }
+ },
+ "best": -4.0
+}

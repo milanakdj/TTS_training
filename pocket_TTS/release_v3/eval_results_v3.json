@@ -1,0 +1,154 @@
+{
+ "verdict": "v3 FAILED. Both stages trained to completion and neither produces intelligible Nepali. v2 (milanakdj/pocket-tts-nepali-6l) remains the shipping model.",
+ "eval_set": {
+  "n_utterances": 100,
+  "n_identities": 77,
+  "sources": [
+   "ans_snr40-50",
+   "ans_snr50",
+   "indicvoices-r",
+   "indicvoices-r-long",
+   "mahadhwani",
+   "rasa"
+  ],
+  "protocol": "held-out target utterance; voice prompt is a different clip of the same speaker identity taken from the train split. Verified: all 100 targets are in valid_v3 and none appear in train_v3, so these numbers are directly comparable with the published v2 table."
+ },
+ "inference_settings": {
+  "student_6l_v3": {
+   "eos_threshold": 0.0,
+   "temperature": 0.3
+  },
+  "teacher_24l_v3": {
+   "eos_threshold": 1.0,
+   "temperature": 0.3,
+   "guidance": "none (the pocket-tts inference path has no cfg_coef; this teacher was trained to be sampled at sample_cfg_coef 2.0, so this is its weakest mode)"
+  },
+  "v2_models": "pocket-tts defaults (eos_threshold -4.0, temperature 0.7)",
+  "note": "the v3 thresholds were chosen on 40 calibration utterances disjoint from this eval set; at the -4.0 default the v3 student emits 0.26x the reference duration"
+ },
+ "asr_finetuned_nepali_whisper": {
+  "real_human": {
+   "n": 100,
+   "wer": 0.3426,
+   "cer": 0.1219
+  },
+  "teacher_24l": {
+   "n": 100,
+   "wer": 0.4022,
+   "cer": 0.1774
+  },
+  "student_6l": {
+   "n": 100,
+   "wer": 0.3224,
+   "cer": 0.1391
+  },
+  "teacher_24l_v3": {
+   "n": 100,
+   "wer": 0.8118,
+   "cer": 0.6316
+  },
+  "student_6l_v3": {
+   "n": 100,
+   "wer": 0.7237,
+   "cer": 0.5778
+  }
+ },
+ "asr_base_whisper_large_v3_turbo": {
+  "real_human": {
+   "n": 98,
+   "wer": 0.9159,
+   "cer": 0.3481
+  },
+  "teacher_24l": {
+   "n": 95,
+   "wer": 0.9812,
+   "cer": 0.3903
+  },
+  "student_6l": {
+   "n": 97,
+   "wer": 0.9482,
+   "cer": 0.3659
+  },
+  "teacher_24l_v3": {
+   "n": 93,
+   "wer": 1.0713,
+   "cer": 0.6831
+  },
+  "student_6l_v3": {
+   "n": 86,
+   "wer": 1.014,
+   "cer": 0.6206
+  }
+ },
+ "speaker_similarity_resemblyzer": {
+  "real_human": {
+   "n": 100,
+   "sim": 0.8069
+  },
+  "teacher_24l": {
+   "n": 100,
+   "sim": 0.8259
+  },
+  "student_6l": {
+   "n": 100,
+   "sim": 0.8409
+  },
+  "teacher_24l_v3": {
+   "n": 100,
+   "sim": 0.7012
+  },
+  "student_6l_v3": {
+   "n": 100,
+   "sim": 0.6349
+  }
+ },
+ "cpu_real_time_factor": {
+  "teacher_24l": 2.1,
+  "student_6l": 5.88,
+  "teacher_24l_v3": 2.1,
+  "student_6l_v3": 5.93
+ },
+ "calibration_set_40_utts_disjoint": {
+  "purpose": "choose eos_threshold/temperature without touching the eval set, and carry a real-human ceiling plus a v2 control so the v3 CER is readable",
+  "real_human": {
+   "wer": 0.418,
+   "cer": 0.149
+  },
+  "v2_student_6l": {
+   "wer": 0.33,
+   "cer": 0.107
+  },
+  "v3_student_6l_best": {
+   "wer": 0.685,
+   "cer": 0.506,
+   "temp": 0.3,
+   "eos_threshold": 0.0
+  },
+  "v3_teacher_guided_best": {
+   "wer": 0.63,
+   "cer": 0.407,
+   "temp": 0.3,
+   "cfg_coef": 3.0,
+   "note": "6-8 of 40 utterances returned an empty generation"
+  }
+ },
+ "training_objective": {
+  "note": "the run's own loss said it failed; v3 at step 200000 is worse than v2 at step 5000",
+  "teacher_valid_at_200k": {
+   "v2": {
+    "flow_loss": -0.0746,
+    "eos_loss": 0.0078,
+    "flow_diag": 14.43
+   },
+   "v3": {
+    "flow_loss": 0.0831,
+    "eos_loss": 0.0276,
+    "flow_diag": 16.93
+   }
+  },
+  "v2_teacher_valid_at_5k": {
+   "flow_loss": 0.0453
+  }
+ },
+ "notes": "real_human rows are the ceiling: the genuine recording of the same utterance scored through the identical pipeline, not a competitor. Absolute values are not comparable across the two ASR rows. The v2 rows here reproduce the published v2 table exactly, which is the check that the harness is unchanged."
+}

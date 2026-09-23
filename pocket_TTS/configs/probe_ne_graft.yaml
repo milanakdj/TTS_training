@@ -1,0 +1,61 @@
+# PHASE 1 PROBE: is the v3 tokenizer graft itself sound?
+#
+# Nepali-only, no English replay, otherwise IDENTICAL to nepali_finetune_v3.yaml
+# (same grafted tokenizer, same graft_text_embedding: 4000, same lr 2e-4 constant).
+# The single variable against v2 is therefore the tokenizer + embedding init.
+#
+# Validation runs on valid_v2_aligned VERBATIM -- the exact set v2's logged curve
+# was measured on, and verified 0/999 leaked into train_v3_ne_only -- so the
+# numbers are directly comparable to v2's history:
+#
+#     step     v2        v3 (with 27% English)
+#     5000     0.0453    0.1771
+#     12500   -0.0232    0.1314
+#     200000  -0.0746    0.0831
+#
+# READ IT AT 5k AND 12.5k. If this probe tracks v2, the graft is innocent and v3
+# died of its recipe (one global LR across inherited + fresh rows, 27% replay).
+# If it tracks v3, the tokenizer/graft is the cause and no recipe change saves it.
+#
+# Caveat: the probe TRAINS on normalize()d transcripts and VALIDATES on v2's
+# un-normalized ones. normalize() changed 1.8% of Nepali text, which is noise
+# against the effect size above.
+model_config: pocket_tts/config/english_2026-04_24l.yaml
+model_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+start_from_pretrained: true
+reset_text_embedding: false
+graft_text_embedding: 4000
+
+data:
+  train_jsonl: /root/tts/TTS_training/pocket_TTS/manifests/train_v3_ne_only.jsonl
+  valid_jsonl: /root/tts/TTS_training/pocket_TTS/manifests/valid_probe_ne.jsonl
+  max_duration_sec: 30.0
+  max_voice_prompt_sec: 5.0
+
+flow:
+  type: lsd
+  kwargs: {}
+
+flow_batch_multiplier: 4
+eos_loss_weight: 0.1
+text_dropout: 0.2
+voice_dropout: 0.2
+
+optim:
+  lr: 2e-4
+  schedule: constant
+  warmup_steps: 1000
+
+run_dir: /workspace/probe_ne_graft
+batch_size: 64
+grad_accum_steps: 1
+max_steps: 20000
+stats_ema_steps: 1000
+ema_decay: 0.999
+log_freq: 50
+valid_freq: 2500
+ckpt_freq: 2500
+num_ckpt_keep: 2
+sample_cfg_coef: 2.0

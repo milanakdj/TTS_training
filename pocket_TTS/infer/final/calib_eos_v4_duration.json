@@ -1,0 +1,17 @@
+{
+ "n": 40,
+ "results": {
+  "1.0": {
+   "abs_log_err": 0.1535247915884293,
+   "median_log_ratio": -0.13255422462569424,
+   "degenerate": 0,
+   "mean_dur_ratio": 0.869878242399808
+  },
+  "2.0": {
+   "abs_log_err": 0.1493655012946552,
+   "median_log_ratio": -0.11084466319872532,
+   "degenerate": 0,
+   "mean_dur_ratio": 0.9107424678769903
+  }
+ }
+}

@@ -1504,5 +1504,1009 @@
    "source": "mahadhwani",
    "sim": 0.897722065448761
   }
+ ],
+ "teacher_24l_v3": [
+  {
+   "id": "000",
+   "source": "rasa",
+   "sim": 0.8189727067947388
+  },
+  {
+   "id": "001",
+   "source": "rasa",
+   "sim": 0.8255909085273743
+  },
+  {
+   "id": "002",
+   "source": "rasa",
+   "sim": 0.8320992588996887
+  },
+  {
+   "id": "003",
+   "source": "rasa",
+   "sim": 0.7403364181518555
+  },
+  {
+   "id": "004",
+   "source": "rasa",
+   "sim": 0.41538703441619873
+  },
+  {
+   "id": "005",
+   "source": "rasa",
+   "sim": 0.7448389530181885
+  },
+  {
+   "id": "006",
+   "source": "rasa",
+   "sim": 0.6779949069023132
+  },
+  {
+   "id": "007",
+   "source": "rasa",
+   "sim": 0.8121083974838257
+  },
+  {
+   "id": "008",
+   "source": "rasa",
+   "sim": 0.47193029522895813
+  },
+  {
+   "id": "009",
+   "source": "rasa",
+   "sim": 0.44105327129364014
+  },
+  {
+   "id": "010",
+   "source": "rasa",
+   "sim": 0.6421855688095093
+  },
+  {
+   "id": "011",
+   "source": "rasa",
+   "sim": 0.7723971605300903
+  },
+  {
+   "id": "012",
+   "source": "rasa",
+   "sim": 0.7871464490890503
+  },
+  {
+   "id": "013",
+   "source": "rasa",
+   "sim": 0.6350122094154358
+  },
+  {
+   "id": "014",
+   "source": "rasa",
+   "sim": 0.7557990550994873
+  },
+  {
+   "id": "015",
+   "source": "rasa",
+   "sim": 0.7714908719062805
+  },
+  {
+   "id": "016",
+   "source": "ans_snr40-50",
+   "sim": 0.8380547165870667
+  },
+  {
+   "id": "017",
+   "source": "ans_snr40-50",
+   "sim": 0.8291803598403931
+  },
+  {
+   "id": "018",
+   "source": "ans_snr40-50",
+   "sim": 0.6515102386474609
+  },
+  {
+   "id": "019",
+   "source": "ans_snr40-50",
+   "sim": 0.7175648212432861
+  },
+  {
+   "id": "020",
+   "source": "ans_snr40-50",
+   "sim": 0.7391072511672974
+  },
+  {
+   "id": "021",
+   "source": "ans_snr40-50",
+   "sim": 0.7018592357635498
+  },
+  {
+   "id": "022",
+   "source": "ans_snr40-50",
+   "sim": 0.6289002299308777
+  },
+  {
+   "id": "023",
+   "source": "ans_snr40-50",
+   "sim": 0.6809508800506592
+  },
+  {
+   "id": "024",
+   "source": "ans_snr40-50",
+   "sim": 0.7756580710411072
+  },
+  {
+   "id": "025",
+   "source": "ans_snr40-50",
+   "sim": 0.7778379321098328
+  },
+  {
+   "id": "026",
+   "source": "ans_snr40-50",
+   "sim": 0.7752349972724915
+  },
+  {
+   "id": "027",
+   "source": "ans_snr40-50",
+   "sim": 0.49915647506713867
+  },
+  {
+   "id": "028",
+   "source": "ans_snr40-50",
+   "sim": 0.7921422719955444
+  },
+  {
+   "id": "029",
+   "source": "ans_snr40-50",
+   "sim": 0.8083786964416504
+  },
+  {
+   "id": "030",
+   "source": "ans_snr40-50",
+   "sim": 0.8116770386695862
+  },
+  {
+   "id": "031",
+   "source": "ans_snr40-50",
+   "sim": 0.7123546600341797
+  },
+  {
+   "id": "032",
+   "source": "ans_snr40-50",
+   "sim": 0.823732852935791
+  },
+  {
+   "id": "033",
+   "source": "ans_snr50",
+   "sim": 0.7936630845069885
+  },
+  {
+   "id": "034",
+   "source": "ans_snr50",
+   "sim": 0.5694361925125122
+  },
+  {
+   "id": "035",
+   "source": "ans_snr50",
+   "sim": 0.7611690163612366
+  },
+  {
+   "id": "036",
+   "source": "ans_snr50",
+   "sim": 0.7630777359008789
+  },
+  {
+   "id": "037",
+   "source": "ans_snr50",
+   "sim": 0.7619892358779907
+  },
+  {
+   "id": "038",
+   "source": "ans_snr50",
+   "sim": 0.7927221059799194
+  },
+  {
+   "id": "039",
+   "source": "ans_snr50",
+   "sim": 0.7062693238258362
+  },
+  {
+   "id": "040",
+   "source": "ans_snr50",
+   "sim": 0.8548656105995178
+  },
+  {
+   "id": "041",
+   "source": "ans_snr50",
+   "sim": 0.6891198754310608
+  },
+  {
+   "id": "042",
+   "source": "ans_snr50",
+   "sim": 0.817194938659668
+  },
+  {
+   "id": "043",
+   "source": "ans_snr50",
+   "sim": 0.7255774736404419
+  },
+  {
+   "id": "044",
+   "source": "ans_snr50",
+   "sim": 0.854871928691864
+  },
+  {
+   "id": "045",
+   "source": "ans_snr50",
+   "sim": 0.7878895998001099
+  },
+  {
+   "id": "046",
+   "source": "ans_snr50",
+   "sim": 0.5106922388076782
+  },
+  {
+   "id": "047",
+   "source": "ans_snr50",
+   "sim": 0.7037840485572815
+  },
+  {
+   "id": "048",
+   "source": "ans_snr50",
+   "sim": 0.8052766919136047
+  },
+  {
+   "id": "049",
+   "source": "ans_snr50",
+   "sim": 0.7169369459152222
+  },
+  {
+   "id": "050",
+   "source": "indicvoices-r-long",
+   "sim": 0.8479642868041992
+  },
+  {
+   "id": "051",
+   "source": "indicvoices-r-long",
+   "sim": 0.45114070177078247
+  },
+  {
+   "id": "052",
+   "source": "indicvoices-r-long",
+   "sim": 0.4835922122001648
+  },
+  {
+   "id": "053",
+   "source": "indicvoices-r-long",
+   "sim": 0.5124995708465576
+  },
+  {
+   "id": "054",
+   "source": "indicvoices-r-long",
+   "sim": 0.46307533979415894
+  },
+  {
+   "id": "055",
+   "source": "indicvoices-r-long",
+   "sim": 0.5395435094833374
+  },
+  {
+   "id": "056",
+   "source": "indicvoices-r-long",
+   "sim": 0.44029438495635986
+  },
+  {
+   "id": "057",
+   "source": "indicvoices-r-long",
+   "sim": 0.6812790632247925
+  },
+  {
+   "id": "058",
+   "source": "indicvoices-r-long",
+   "sim": 0.7102946043014526
+  },
+  {
+   "id": "059",
+   "source": "indicvoices-r-long",
+   "sim": 0.4848233759403229
+  },
+  {
+   "id": "060",
+   "source": "indicvoices-r-long",
+   "sim": 0.6100388765335083
+  },
+  {
+   "id": "061",
+   "source": "indicvoices-r-long",
+   "sim": 0.6827600002288818
+  },
+  {
+   "id": "062",
+   "source": "indicvoices-r-long",
+   "sim": 0.6227916479110718
+  },
+  {
+   "id": "063",
+   "source": "indicvoices-r-long",
+   "sim": 0.6545138359069824
+  },
+  {
+   "id": "064",
+   "source": "indicvoices-r-long",
+   "sim": 0.522871196269989
+  },
+  {
+   "id": "065",
+   "source": "indicvoices-r-long",
+   "sim": 0.39745527505874634
+  },
+  {
+   "id": "066",
+   "source": "indicvoices-r",
+   "sim": 0.652072548866272
+  },
+  {
+   "id": "067",
+   "source": "indicvoices-r",
+   "sim": 0.8081932663917542
+  },
+  {
+   "id": "068",
+   "source": "indicvoices-r",
+   "sim": 0.531815767288208
+  },
+  {
+   "id": "069",
+   "source": "indicvoices-r",
+   "sim": 0.6867789626121521
+  },
+  {
+   "id": "070",
+   "source": "indicvoices-r",
+   "sim": 0.5173295140266418
+  },
+  {
+   "id": "071",
+   "source": "indicvoices-r",
+   "sim": 0.7839837074279785
+  },
+  {
+   "id": "072",
+   "source": "indicvoices-r",
+   "sim": 0.6649681925773621
+  },
+  {
+   "id": "073",
+   "source": "indicvoices-r",
+   "sim": 0.6530494093894958
+  },
+  {
+   "id": "074",
+   "source": "indicvoices-r",
+   "sim": 0.7523858547210693
+  },
+  {
+   "id": "075",
+   "source": "indicvoices-r",
+   "sim": 0.6952044367790222
+  },
+  {
+   "id": "076",
+   "source": "indicvoices-r",
+   "sim": 0.8066266179084778
+  },
+  {
+   "id": "077",
+   "source": "indicvoices-r",
+   "sim": 0.3947374224662781
+  },
+  {
+   "id": "078",
+   "source": "indicvoices-r",
+   "sim": 0.8016979098320007
+  },
+  {
+   "id": "079",
+   "source": "indicvoices-r",
+   "sim": 0.8098527193069458
+  },
+  {
+   "id": "080",
+   "source": "indicvoices-r",
+   "sim": 0.7830195426940918
+  },
+  {
+   "id": "081",
+   "source": "indicvoices-r",
+   "sim": 0.8252843618392944
+  },
+  {
+   "id": "082",
+   "source": "indicvoices-r",
+   "sim": 0.8010194897651672
+  },
+  {
+   "id": "083",
+   "source": "indicvoices-r",
+   "sim": 0.6710454821586609
+  },
+  {
+   "id": "084",
+   "source": "mahadhwani",
+   "sim": 0.8306126594543457
+  },
+  {
+   "id": "085",
+   "source": "mahadhwani",
+   "sim": 0.7576905488967896
+  },
+  {
+   "id": "086",
+   "source": "mahadhwani",
+   "sim": 0.7730779051780701
+  },
+  {
+   "id": "087",
+   "source": "mahadhwani",
+   "sim": 0.7770117521286011
+  },
+  {
+   "id": "088",
+   "source": "mahadhwani",
+   "sim": 0.7006491422653198
+  },
+  {
+   "id": "089",
+   "source": "mahadhwani",
+   "sim": 0.785800039768219
+  },
+  {
+   "id": "090",
+   "source": "mahadhwani",
+   "sim": 0.7008479833602905
+  },
+  {
+   "id": "091",
+   "source": "mahadhwani",
+   "sim": 0.6972458958625793
+  },
+  {
+   "id": "092",
+   "source": "mahadhwani",
+   "sim": 0.7307106852531433
+  },
+  {
+   "id": "093",
+   "source": "mahadhwani",
+   "sim": 0.7221927642822266
+  },
+  {
+   "id": "094",
+   "source": "mahadhwani",
+   "sim": 0.8231152892112732
+  },
+  {
+   "id": "095",
+   "source": "mahadhwani",
+   "sim": 0.6333246827125549
+  },
+  {
+   "id": "096",
+   "source": "mahadhwani",
+   "sim": 0.7741654515266418
+  },
+  {
+   "id": "097",
+   "source": "mahadhwani",
+   "sim": 0.7115491032600403
+  },
+  {
+   "id": "098",
+   "source": "mahadhwani",
+   "sim": 0.7713744044303894
+  },
+  {
+   "id": "099",
+   "source": "mahadhwani",
+   "sim": 0.8627974390983582
+  }
+ ],
+ "student_6l_v3": [
+  {
+   "id": "000",
+   "source": "rasa",
+   "sim": 0.7672359347343445
+  },
+  {
+   "id": "001",
+   "source": "rasa",
+   "sim": 0.7841137647628784
+  },
+  {
+   "id": "002",
+   "source": "rasa",
+   "sim": 0.47586601972579956
+  },
+  {
+   "id": "003",
+   "source": "rasa",
+   "sim": 0.8999126553535461
+  },
+  {
+   "id": "004",
+   "source": "rasa",
+   "sim": 0.4943731427192688
+  },
+  {
+   "id": "005",
+   "source": "rasa",
+   "sim": 0.6576085686683655
+  },
+  {
+   "id": "006",
+   "source": "rasa",
+   "sim": 0.47909262776374817
+  },
+  {
+   "id": "007",
+   "source": "rasa",
+   "sim": 0.8020389080047607
+  },
+  {
+   "id": "008",
+   "source": "rasa",
+   "sim": 0.4329410791397095
+  },
+  {
+   "id": "009",
+   "source": "rasa",
+   "sim": 0.4284061789512634
+  },
+  {
+   "id": "010",
+   "source": "rasa",
+   "sim": 0.5046865344047546
+  },
+  {
+   "id": "011",
+   "source": "rasa",
+   "sim": 0.8446292281150818
+  },
+  {
+   "id": "012",
+   "source": "rasa",
+   "sim": 0.749342143535614
+  },
+  {
+   "id": "013",
+   "source": "rasa",
+   "sim": 0.6135525703430176
+  },
+  {
+   "id": "014",
+   "source": "rasa",
+   "sim": 0.5204695463180542
+  },
+  {
+   "id": "015",
+   "source": "rasa",
+   "sim": 0.6865134239196777
+  },
+  {
+   "id": "016",
+   "source": "ans_snr40-50",
+   "sim": 0.8652652502059937
+  },
+  {
+   "id": "017",
+   "source": "ans_snr40-50",
+   "sim": 0.8559846878051758
+  },
+  {
+   "id": "018",
+   "source": "ans_snr40-50",
+   "sim": 0.6590496897697449
+  },
+  {
+   "id": "019",
+   "source": "ans_snr40-50",
+   "sim": 0.6350448727607727
+  },
+  {
+   "id": "020",
+   "source": "ans_snr40-50",
+   "sim": 0.7586694359779358
+  },
+  {
+   "id": "021",
+   "source": "ans_snr40-50",
+   "sim": 0.7727864980697632
+  },
+  {
+   "id": "022",
+   "source": "ans_snr40-50",
+   "sim": 0.6356790661811829
+  },
+  {
+   "id": "023",
+   "source": "ans_snr40-50",
+   "sim": 0.6581332087516785
+  },
+  {
+   "id": "024",
+   "source": "ans_snr40-50",
+   "sim": 0.6854032278060913
+  },
+  {
+   "id": "025",
+   "source": "ans_snr40-50",
+   "sim": 0.661290168762207
+  },
+  {
+   "id": "026",
+   "source": "ans_snr40-50",
+   "sim": 0.8106458783149719
+  },
+  {
+   "id": "027",
+   "source": "ans_snr40-50",
+   "sim": 0.5173004269599915
+  },
+  {
+   "id": "028",
+   "source": "ans_snr40-50",
+   "sim": 0.7202408313751221
+  },
+  {
+   "id": "029",
+   "source": "ans_snr40-50",
+   "sim": 0.679034411907196
+  },
+  {
+   "id": "030",
+   "source": "ans_snr40-50",
+   "sim": 0.6738327145576477
+  },
+  {
+   "id": "031",
+   "source": "ans_snr40-50",
+   "sim": 0.41155219078063965
+  },
+  {
+   "id": "032",
+   "source": "ans_snr40-50",
+   "sim": 0.8407118320465088
+  },
+  {
+   "id": "033",
+   "source": "ans_snr50",
+   "sim": 0.7427253127098083
+  },
+  {
+   "id": "034",
+   "source": "ans_snr50",
+   "sim": 0.5660098791122437
+  },
+  {
+   "id": "035",
+   "source": "ans_snr50",
+   "sim": 0.7430359125137329
+  },
+  {
+   "id": "036",
+   "source": "ans_snr50",
+   "sim": 0.7914382815361023
+  },
+  {
+   "id": "037",
+   "source": "ans_snr50",
+   "sim": 0.6635890603065491
+  },
+  {
+   "id": "038",
+   "source": "ans_snr50",
+   "sim": 0.6114654541015625
+  },
+  {
+   "id": "039",
+   "source": "ans_snr50",
+   "sim": 0.5517174601554871
+  },
+  {
+   "id": "040",
+   "source": "ans_snr50",
+   "sim": 0.8431136012077332
+  },
+  {
+   "id": "041",
+   "source": "ans_snr50",
+   "sim": 0.8003070950508118
+  },
+  {
+   "id": "042",
+   "source": "ans_snr50",
+   "sim": 0.5394399166107178
+  },
+  {
+   "id": "043",
+   "source": "ans_snr50",
+   "sim": 0.7009204626083374
+  },
+  {
+   "id": "044",
+   "source": "ans_snr50",
+   "sim": 0.7293567061424255
+  },
+  {
+   "id": "045",
+   "source": "ans_snr50",
+   "sim": 0.6473767161369324
+  },
+  {
+   "id": "046",
+   "source": "ans_snr50",
+   "sim": 0.4185773432254791
+  },
+  {
+   "id": "047",
+   "source": "ans_snr50",
+   "sim": 0.5799853801727295
+  },
+  {
+   "id": "048",
+   "source": "ans_snr50",
+   "sim": 0.6583606004714966
+  },
+  {
+   "id": "049",
+   "source": "ans_snr50",
+   "sim": 0.6573399305343628
+  },
+  {
+   "id": "050",
+   "source": "indicvoices-r-long",
+   "sim": 0.5269123315811157
+  },
+  {
+   "id": "051",
+   "source": "indicvoices-r-long",
+   "sim": 0.3797072172164917
+  },
+  {
+   "id": "052",
+   "source": "indicvoices-r-long",
+   "sim": 0.5598047971725464
+  },
+  {
+   "id": "053",
+   "source": "indicvoices-r-long",
+   "sim": 0.5090875029563904
+  },
+  {
+   "id": "054",
+   "source": "indicvoices-r-long",
+   "sim": 0.6088036894798279
+  },
+  {
+   "id": "055",
+   "source": "indicvoices-r-long",
+   "sim": 0.48786020278930664
+  },
+  {
+   "id": "056",
+   "source": "indicvoices-r-long",
+   "sim": 0.3558385968208313
+  },
+  {
+   "id": "057",
+   "source": "indicvoices-r-long",
+   "sim": 0.48749351501464844
+  },
+  {
+   "id": "058",
+   "source": "indicvoices-r-long",
+   "sim": 0.5726189017295837
+  },
+  {
+   "id": "059",
+   "source": "indicvoices-r-long",
+   "sim": 0.5082676410675049
+  },
+  {
+   "id": "060",
+   "source": "indicvoices-r-long",
+   "sim": 0.5976850986480713
+  },
+  {
+   "id": "061",
+   "source": "indicvoices-r-long",
+   "sim": 0.42180073261260986
+  },
+  {
+   "id": "062",
+   "source": "indicvoices-r-long",
+   "sim": 0.6729442477226257
+  },
+  {
+   "id": "063",
+   "source": "indicvoices-r-long",
+   "sim": 0.5305531620979309
+  },
+  {
+   "id": "064",
+   "source": "indicvoices-r-long",
+   "sim": 0.4348389506340027
+  },
+  {
+   "id": "065",
+   "source": "indicvoices-r-long",
+   "sim": 0.4493248462677002
+  },
+  {
+   "id": "066",
+   "source": "indicvoices-r",
+   "sim": 0.6787762641906738
+  },
+  {
+   "id": "067",
+   "source": "indicvoices-r",
+   "sim": 0.5711235404014587
+  },
+  {
+   "id": "068",
+   "source": "indicvoices-r",
+   "sim": 0.6492044925689697
+  },
+  {
+   "id": "069",
+   "source": "indicvoices-r",
+   "sim": 0.7640262842178345
+  },
+  {
+   "id": "070",
+   "source": "indicvoices-r",
+   "sim": 0.60725998878479
+  },
+  {
+   "id": "071",
+   "source": "indicvoices-r",
+   "sim": 0.7046762108802795
+  },
+  {
+   "id": "072",
+   "source": "indicvoices-r",
+   "sim": 0.5115956664085388
+  },
+  {
+   "id": "073",
+   "source": "indicvoices-r",
+   "sim": 0.5474599003791809
+  },
+  {
+   "id": "074",
+   "source": "indicvoices-r",
+   "sim": 0.6612977981567383
+  },
+  {
+   "id": "075",
+   "source": "indicvoices-r",
+   "sim": 0.5235719680786133
+  },
+  {
+   "id": "076",
+   "source": "indicvoices-r",
+   "sim": 0.6886670589447021
+  },
+  {
+   "id": "077",
+   "source": "indicvoices-r",
+   "sim": 0.39548546075820923
+  },
+  {
+   "id": "078",
+   "source": "indicvoices-r",
+   "sim": 0.768153190612793
+  },
+  {
+   "id": "079",
+   "source": "indicvoices-r",
+   "sim": 0.4667333960533142
+  },
+  {
+   "id": "080",
+   "source": "indicvoices-r",
+   "sim": 0.4789212644100189
+  },
+  {
+   "id": "081",
+   "source": "indicvoices-r",
+   "sim": 0.5876215100288391
+  },
+  {
+   "id": "082",
+   "source": "indicvoices-r",
+   "sim": 0.8135393261909485
+  },
+  {
+   "id": "083",
+   "source": "indicvoices-r",
+   "sim": 0.6274281144142151
+  },
+  {
+   "id": "084",
+   "source": "mahadhwani",
+   "sim": 0.8567260503768921
+  },
+  {
+   "id": "085",
+   "source": "mahadhwani",
+   "sim": 0.8173156380653381
+  },
+  {
+   "id": "086",
+   "source": "mahadhwani",
+   "sim": 0.7223146557807922
+  },
+  {
+   "id": "087",
+   "source": "mahadhwani",
+   "sim": 0.751132071018219
+  },
+  {
+   "id": "088",
+   "source": "mahadhwani",
+   "sim": 0.6601203083992004
+  },
+  {
+   "id": "089",
+   "source": "mahadhwani",
+   "sim": 0.6076095104217529
+  },
+  {
+   "id": "090",
+   "source": "mahadhwani",
+   "sim": 0.4659734070301056
+  },
+  {
+   "id": "091",
+   "source": "mahadhwani",
+   "sim": 0.6516106128692627
+  },
+  {
+   "id": "092",
+   "source": "mahadhwani",
+   "sim": 0.6861863732337952
+  },
+  {
+   "id": "093",
+   "source": "mahadhwani",
+   "sim": 0.5480012893676758
+  },
+  {
+   "id": "094",
+   "source": "mahadhwani",
+   "sim": 0.7689666748046875
+  },
+  {
+   "id": "095",
+   "source": "mahadhwani",
+   "sim": 0.5646152496337891
+  },
+  {
+   "id": "096",
+   "source": "mahadhwani",
+   "sim": 0.7876714468002319
+  },
+  {
+   "id": "097",
+   "source": "mahadhwani",
+   "sim": 0.7405961155891418
+  },
+  {
+   "id": "098",
+   "source": "mahadhwani",
+   "sim": 0.6226323246955872
+  },
+  {
+   "id": "099",
+   "source": "mahadhwani",
+   "sim": 0.8592808842658997
+  }
  ]
 }

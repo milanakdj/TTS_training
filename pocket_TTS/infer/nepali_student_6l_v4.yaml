@@ -1,0 +1,69 @@
+# Inference config for the v4 Nepali+English 6-LAYER STUDENT (stage 2,
+# depth-distilled from the v4 bilingual 24-layer teacher with
+# distill_cfg_coef 2.0).
+#
+# Weights are model.safetensors, the step-200000 EMA export written when
+# train_student_v4.sh exited cleanly on 2026-09-23.
+#
+# Same grafted tokenizer as v3/the v4 teacher: Kyutai's original 4,000 pieces
+# kept byte-identical, plus 5,682 appended Nepali pieces, n_bins 9682. Unlike
+# v3, the recipe that trained this checkpoint (5% English replay, unpinned
+# inherited rows) tracked v2's own Nepali loss curve at every matched step and
+# renders intelligible English -- see pocket-tts-v4-bilingual-recipe memory.
+weights_path: /workspace/v4_student_6l/model.safetensors
+
+default_temperature: 0.3
+
+flow_lm:
+  insert_bos_before_voice: true
+  dtype: float32
+  flow:
+    depth: 6
+    dim: 512
+  transformer:
+    d_model: 1024
+    hidden_scale: 4
+    max_period: 10000
+    num_heads: 16
+    num_layers: 6
+  lookup_table:
+    dim: 1024
+    n_bins: 9682
+    tokenizer: sentencepiece
+    tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+
+mimi:
+  dtype: float32
+  sample_rate: 24000
+  inner_dim: 32
+  outer_dim: 512
+  channels: 1
+  frame_rate: 12.5
+  seanet:
+    dimension: 512
+    channels: 1
+    n_filters: 64
+    n_residual_layers: 1
+    ratios:
+    - 6
+    - 5
+    - 4
+    kernel_size: 7
+    residual_kernel_size: 3
+    last_kernel_size: 3
+    dilation_base: 2
+    pad_mode: constant
+    compress: 2
+  transformer:
+    d_model: 512
+    num_heads: 8
+    num_layers: 2
+    layer_scale: 0.01
+    context: 250
+    dim_feedforward: 2048
+    input_dimension: 512
+    output_dimensions:
+    - 512
+  quantizer:
+    dimension: 32
+    output_dimension: 512

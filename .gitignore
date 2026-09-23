@@ -41,6 +41,7 @@ pocket_TTS/infer/final/wav/
 pocket_TTS/infer/final/listen/
 pocket_TTS/**/*.wav
 pocket_TTS/**/*.safetensors
+pocket_TTS/release_v*/stage/
 
 # packaged datasets belong on the Hub, not in git
 synthetic_pipeline/dataset_nepali_neutral_20h/*.parquet

@@ -1,0 +1,362 @@
+[
+ {
+  "id": "cne000",
+  "lang": "ne",
+  "source": "rasa",
+  "text": "ओहो! मेट्रोमा साइकल चलाउने अनुमति रहेछ नि। मलाई त कहिल्यै थाहा थिएन।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_SURPRISE_00339.wav",
+  "duration": 6.568,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_NAMES_00286.wav"
+ },
+ {
+  "id": "cne001",
+  "lang": "ne",
+  "source": "rasa",
+  "text": "के तपाईँँ आर्किटेक्चरमा एआइसिटिई स्वीकृत सबै कलेजहरू सूचीबद्ध गर्न सक्नुहुन्छ?",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_UMANG_00077.wav",
+  "duration": 6.824,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_BOOK_00305.wav"
+ },
+ {
+  "id": "cne002",
+  "lang": "ne",
+  "source": "rasa",
+  "text": "गोपद सोन नदीको प्रमुख शाखा हो र यसको उत्पत्ति मेन्द्रा गाउँबाट लगभग दस किलोमिटर उत्तरमा भएको छ।",
+  "real_audio": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_WIKI_02474.wav",
+  "duration": 8.57,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_M_NAMES_00531.wav"
+ },
+ {
+  "id": "cne003",
+  "lang": "ne",
+  "source": "ans_snr40-50",
+  "text": "यसरी एकै वर्ष बजेटको झन्डै आधा अंश रकमान्तर हुँदा बजेट लेखन प्रक्रियामाथि नै प्रश्न उठेको छ।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/6KidCp7oV6E/chunk_004_7.42s.wav",
+  "duration": 7.42,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC3yDoaqQzOd1bNP74ZrGPTA/ueSjWDiyph0/chunk_181_4.56s.wav"
+ },
+ {
+  "id": "cne004",
+  "lang": "ne",
+  "source": "ans_snr40-50",
+  "text": "अब मैले आफूले चाहिँ कमाउँदिनँ किनभने धन पाप हो, तर मलाई पाल्न बराबर त अरू कसैले कमाइदिनु त पऱ्यो नि।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC41lrNBYb9fNWnQHFyuv9wQ/uptDdTWEtdA/chunk_224_7.08s.wav",
+  "duration": 7.08,
+  "prompt": "/workspace/proc_data_new/ai4bharat___rasa/train/audio/Nepali/NEP_F_NAMES_01999.wav"
+ },
+ {
+  "id": "cne005",
+  "lang": "ne",
+  "source": "ans_snr40-50",
+  "text": "इमेल आइडी राखिसकेपछि अब तपाईँहरू के गर्नुहोला? सेभ एन्ड कन्टिन्यूमा क्लिक गर्नुहोला। क्लिक गरिसकेपछि यहाँबाट तपाईँहरूले आफ्नो इन्फर्मेसनहरू एकचोटि हेर्नुहोला। त्यसपछि यहाँनिर प्रोसिडको अप्सन देख्नुहुन्छ, यसमा क्लिक गर्नुहोला।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UC83Ct59NOdym4HQkz_soI7Q/G7flhbx9LOk/chunk_006_10.82s.wav",
+  "duration": 10.82,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCf6nojv-VgL0IXk8c1eWIyQ/vWZyeWfnRgc/chunk_282_4.56s.wav"
+ },
+ {
+  "id": "cne006",
+  "lang": "ne",
+  "source": "ans_snr40-50",
+  "text": "भनेपछि त्यो चाहिँ हाम्रोमा छ, यो अब मातृसत्ता छ भनेर गफ ठोक्ने थेसिसहरू लेख्ने।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCPjHEeafcMdr-balIMiEwrg/EYjMmsLDAFY/chunk_046_6.46s.wav",
+  "duration": 6.46,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UClDw4ijXzb9YxiU5nWinEfQ/FZ0x4K5wA_Q/chunk_397_4.54s.wav"
+ },
+ {
+  "id": "cne007",
+  "lang": "ne",
+  "source": "ans_snr40-50",
+  "text": "र त्यो बेलामा भारतले नेपालमाथि नाकाबन्दी लगाएको थियो।",
+  "real_audio": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/AZLdaf0Fv4Y/chunk_065_3.30s.wav",
+  "duration": 3.3,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part2of2/train/audio/automated_new_set/UCczsYSRGukY9LA7Fd_govMw/AZLdaf0Fv4Y/chunk_014_4.46s.wav"
+ },
+ {
+  "id": "cne008",
+  "lang": "ne",
+  "source": "ans_snr50",
+  "text": "अर्को प्रश्न अब तपाईँ कतिको राम्रोसँग गाउन सक्नुहुन्छ?",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCCIg2o64yeZNvECqROUbeEA/MGY93KVL57Y/chunk_264_4.94s.wav",
+  "duration": 4.94,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCCIg2o64yeZNvECqROUbeEA/MGY93KVL57Y/chunk_235_4.04s.wav"
+ },
+ {
+  "id": "cne009",
+  "lang": "ne",
+  "source": "ans_snr50",
+  "text": "त्यस्तो कुन सहमति थियो र त्यो सहमति पालना नभएपछि तपाईँहरूले सुदूरपश्चिममा कङ्ग्रेस समेतको समर्थनमा नागरिक उन्मुक्ति पार्टीका लक्ष्मण किशोर चौधरीलाई मुख्यमन्त्रीमा समर्थन गर्नुपर्ने अवस्था आयो?",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCOXTBJUKRtQ7Z5r9cwj-9lw/H0AxxOeRTX0/chunk_013_11.82s.wav",
+  "duration": 11.82,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCOXTBJUKRtQ7Z5r9cwj-9lw/H0AxxOeRTX0/chunk_057_3.12s.wav"
+ },
+ {
+  "id": "cne010",
+  "lang": "ne",
+  "source": "ans_snr50",
+  "text": "अलिकति तपाईँहरूले अध्ययन गर्दै गर्दा गाइडको आवश्यक पर्छ नि, इन्स्ट्रक्टरको आवश्यकता पर्छ अनि तपाईँहरूलाई टाइम दिने।",
+  "real_audio": "/workspace/proc_data_new/ans_snr50.part2of2/train/audio/automated_new_set/UCy8n-9fLtjiwufwaReDsGaA/ufi4hg25czA/chunk_017_6.46s.wav",
+  "duration": 6.46,
+  "prompt": "/workspace/proc_data_new/ans_snr50.part1of2/train/audio/automated_new_set/UCfEbPed90ktzPgJi8q_WynA/50sW4aK70WM/chunk_182_4.02s.wav"
+ },
+ {
+  "id": "cne011",
+  "lang": "ne",
+  "source": "indicvoices-r-long",
+  "text": "अमन आयुष अर्पण सुजल अनि पूजा",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649673972263.wav",
+  "duration": 5.875,
+  "prompt": "/workspace/proc_data_new/ans_snr40-50.part1of2/train/audio/automated_new_set/UCtjmWttibtOsdow5lYBD-7A/JzHSEqHaf0s/chunk_112_4.24s.wav"
+ },
+ {
+  "id": "cne012",
+  "lang": "ne",
+  "source": "indicvoices-r-long",
+  "text": "के त्याहाँ कुनै बजाज फाइनियेन्सका केन्द्र ब्याङ्क ल्यापटप बिमा बिमा पोलेसी छ जसले मलाई मेरो सम्पूर्ण परिवारको बिमा गर्न दिन्छ",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674016915.wav",
+  "duration": 10.913,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v3/3940649674016911.wav"
+ },
+ {
+  "id": "cne013",
+  "lang": "ne",
+  "source": "indicvoices-r-long",
+  "text": "के साबुन कुनै अन्य ब्रान्डमा उपलब्ध छन्",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v6/3940649674098861.wav",
+  "duration": 4.49,
+  "prompt": "/workspace/proc_data_new/indicvoices-r-long/train/audios/Nepali/v6/3940649674098859.wav"
+ },
+ {
+  "id": "cne014",
+  "lang": "ne",
+  "source": "indicvoices-r",
+  "text": "त्यस्तै गोडगाड गर्यो त्यही कामहरू गर्यो",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649673959256_chunk_8.wav",
+  "duration": 3.329,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649673959269_chunk_10.wav"
+ },
+ {
+  "id": "cne015",
+  "lang": "ne",
+  "source": "indicvoices-r",
+  "text": "पकाउनका लागि दिएँ कसैलाई मर मसालाहरू ठिक पार्नका लागि दिएँ कसैलाई साग सब्जीहरू धुन लगाएँ कसैलाई प्याज आलु छिल्न लगाएँ यसो गर्नाले गर्दा मैले सिमित समयमा",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673950957_chunk_10.wav",
+  "duration": 11.68,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673950960_chunk_1.wav"
+ },
+ {
+  "id": "cne016",
+  "lang": "ne",
+  "source": "indicvoices-r",
+  "text": "फोटो खिच्ने क्रममा चाहिँ आफ्नै फोनमा",
+  "real_audio": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673966140_chunk_9.wav",
+  "duration": 4.095,
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v3/train/audios/3940649673966096_chunk_2.wav"
+ },
+ {
+  "id": "cne017",
+  "lang": "ne",
+  "source": "mahadhwani",
+  "text": "यो खुर्मा बनाउनको लागि हामीलाई त्यति धेरै समय पनि चाहिँदैन र धेरै सामग्रीहरू पनि चाहिँदैन",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/6dBksLXCN3U_e788ad75_chunk002_15312-21132ms_SPEAKER_01_5820ms.wav",
+  "duration": 5.82,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/oU_riI82_Lo_5fd67c0e_chunk039_815832-820592ms_SPEAKER_01_4759ms.wav"
+ },
+ {
+  "id": "cne018",
+  "lang": "ne",
+  "source": "mahadhwani",
+  "text": "सुन्दरले भने जस्तो परिस्थिति छ त्यससँग सहमत भएर अघि बढे जीवन स्वाभाविक रूपमा चल्छ",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/D17SZK_1GbA_0ac04757_chunk019_266932-274352ms_SPEAKER_01_7420ms.wav",
+  "duration": 7.42,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/AM4Y1yU94-0_0d3412d2_chunk024_535712-539392ms_SPEAKER_01_3679ms.wav"
+ },
+ {
+  "id": "cne019",
+  "lang": "ne",
+  "source": "mahadhwani",
+  "text": "अब त्यहाँ बसेपछि अब त्यहाँ के अरे युनिटमा त",
+  "real_audio": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/fwEhDS-TyRE_3c57ec0a_chunk034_209392-213752ms_SPEAKER_02_4360ms.wav",
+  "duration": 4.36,
+  "prompt": "/workspace/proc_data_new/mahadhwani/train/audio/yt-md/_OpPL_xaw8g_a586c93e_chunk555_2647952-2651052ms_SPEAKER_02_3099ms.wav"
+ },
+ {
+  "id": "cen020",
+  "lang": "en",
+  "source": "en-in_snr40-50",
+  "text": "I thought today we could do a quick deep dive into the proceedings of the Taiwan Affairs Conference to unravel some of what was said and discussed at this event.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UC5AVrL4ryKhR1Vi0HxdgP2Q/4cin3_jD9Yo/chunk_008_11.08s.wav",
+  "duration": 11.08,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCz8QaiQxApLq8sLNcszYyJw/itnd4XrLDXU/chunk_006_3.50s.wav"
+ },
+ {
+  "id": "cen021",
+  "lang": "en",
+  "source": "en-in_snr40-50",
+  "text": "Both. Okay. So my physical health, well, my job is quite physical because I'm lifting furniture every day.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UC5TurWFv5PtQ3qsmlnbIl3Q/FnhE_L_goH8/chunk_066_10.02s.wav",
+  "duration": 10.02,
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCScrBmJXu5pS2q7Cz_55DDA/BgVshfAmVzU/chunk_135_4.86s.wav"
+ },
+ {
+  "id": "cen022",
+  "lang": "en",
+  "source": "en-in_snr40-50",
+  "text": "Okay, and when it comes to sports or any other thing, there's so many theaters, dance, music, art. Do you think there could be any other skill that you could have taken with yourself?",
+  "real_audio": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCWcn693OKoTKbMvA0AY-jbg/tkw5-WqEb9M/chunk_036_11.02s.wav",
+  "duration": 11.02,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCafpueX9hFLls24ed6UddEQ/Dg7jJF_CWTQ/chunk_008_4.58s.wav"
+ },
+ {
+  "id": "cen023",
+  "lang": "en",
+  "source": "en-in_snr40-50",
+  "text": "So this asteroid, you know, as we've learned more about its orbit and refined it, meaning that we know more precisely where it's going to be, but not exactly in 2032, that the",
+  "real_audio": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UC_gUM8rL-Lrg6O3adPW9K1g/2VBHyjvBT6E/chunk_008_10.16s.wav",
+  "duration": 10.16,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCmZ8CtXFfMJjyfbOkiB0bpA/ZCu6xBos6kQ/chunk_531_3.36s.wav"
+ },
+ {
+  "id": "cen024",
+  "lang": "en",
+  "source": "en-in_snr40-50",
+  "text": "warning that if Prime Minister Netanyahu does not boost humanitarian aid to Gaza, he risks losing military assistance and weapons as well. Some are wondering, is this duplicity?",
+  "real_audio": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UC_gUM8rL-Lrg6O3adPW9K1g/GHIiMz1LRtY/chunk_014_11.48s.wav",
+  "duration": 11.48,
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCafpueX9hFLls24ed6UddEQ/nOxknhPbgjI/chunk_043_5.00s.wav"
+ },
+ {
+  "id": "cen025",
+  "lang": "en",
+  "source": "en-in_snr40-50",
+  "text": "So, this travel is the best education. This was said by some English people because they're trapped in a small little island. When you're in an island, you must travel.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCcYzLCs3zrQIBVHYA1sK2sw/rroAz0SgksE/chunk_033_11.10s.wav",
+  "duration": 11.1,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCafpueX9hFLls24ed6UddEQ/Agms_GjWVtk/chunk_026_3.82s.wav"
+ },
+ {
+  "id": "cen026",
+  "lang": "en",
+  "source": "en-in_snr40-50",
+  "text": "not having accurately or precisely labeled data. So because you created certain work, you sort of devalued certain work.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCmZ8CtXFfMJjyfbOkiB0bpA/NZsbEVPr1WA/chunk_121_8.66s.wav",
+  "duration": 8.66,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCGDQNvybfDDeGTf4GtigXaw/XnF8rXkk1Vw/chunk_025_4.72s.wav"
+ },
+ {
+  "id": "cen027",
+  "lang": "en",
+  "source": "en-in_snr40-50",
+  "text": "I was very inspired by this concept of the MVB, especially since all habit change is about following the exact same process. For example, you have a vision for where you want to be with your habit.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCmZ8CtXFfMJjyfbOkiB0bpA/VTaACNTRc2k/chunk_007_11.74s.wav",
+  "duration": 11.74,
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCS0s6BFzIcvC2gTH52_vBEA/HKCIJYIP2hA/chunk_097_3.56s.wav"
+ },
+ {
+  "id": "cen028",
+  "lang": "en",
+  "source": "en-in_snr40-50",
+  "text": "What do we call it as? We call it as the equivalent mass. Equivalent mass calculation, right? And my dear students, one more thing, that is your titration part. This is again something which needs to be discussed.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCvQSK6a7gfYbNL11KalRfOw/8NJF03kxhZg/chunk_011_10.46s.wav",
+  "duration": 10.46,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UC3njZ48-FDxLleBYaP0SZIg/bmRN9XjmnOs/chunk_117_3.00s.wav"
+ },
+ {
+  "id": "cen029",
+  "lang": "en",
+  "source": "en-in_snr40-50",
+  "text": "When siblings clash, worlds hang in the balance, and important questions are raised like who started the fight, who is in the right, who is the favorite, and maybe the biggest question here is...",
+  "real_audio": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCz8QaiQxApLq8sLNcszYyJw/oaD238SsExs/chunk_002_11.46s.wav",
+  "duration": 11.46,
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCmrWFBL_eA3g94MrE4JQnwA/bxwit9wCKzA/chunk_864_4.64s.wav"
+ },
+ {
+  "id": "cen030",
+  "lang": "en",
+  "source": "en-in_snr50",
+  "text": "So US chip sanctions put temporary check, temporary checkmate on China. That's what this article says. It's in the EE Times, whatever that is. Yeah.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UC2bBsPXFWZWiBmkRiNlz8vg/IBladEVMC10/chunk_002_10.40s.wav",
+  "duration": 10.4,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UC7Q0EfPzTwtanMVSWuK_QXA/fdbnPXPnG4E/chunk_243_4.40s.wav"
+ },
+ {
+  "id": "cen031",
+  "lang": "en",
+  "source": "en-in_snr50",
+  "text": "And the last thing that I learned, social media is so...",
+  "real_audio": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCITRdg1QRLSgyKQCgqBYVig/3Yw_zqyqfhQ/chunk_011_5.34s.wav",
+  "duration": 5.34,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UChLpZtmxPs2nb6Xq7IXFOug/sBU_DuSuqjo/chunk_005_4.60s.wav"
+ },
+ {
+  "id": "cen032",
+  "lang": "en",
+  "source": "en-in_snr50",
+  "text": "You know, right now I'm feeling very happy, very glad because lots of people are coming out and they are appreciating my work. Even after all, my English is not good, you know, like.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCWcn693OKoTKbMvA0AY-jbg/p9zvRJgaA0w/chunk_103_11.64s.wav",
+  "duration": 11.64,
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCNEyf_7kaKSrW1VS_RzmQJg/JHVhr6ehhQ4/chunk_001_4.98s.wav"
+ },
+ {
+  "id": "cen033",
+  "lang": "en",
+  "source": "en-in_snr50",
+  "text": "Every single trial has to have a defined trial stoppage rule right in the beginning itself.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCYa1WtI-vb_bx-anHdmpNfA/gKgKpVLrefc/chunk_070_5.30s.wav",
+  "duration": 5.3,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCGDQNvybfDDeGTf4GtigXaw/6lVHLQoPuHU/chunk_006_4.12s.wav"
+ },
+ {
+  "id": "cen034",
+  "lang": "en",
+  "source": "en-in_snr50",
+  "text": "And if we're asking other people to abide by that, then I'm sorry, but I do think it probably is incumbent on us to do likewise.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UC_gUM8rL-Lrg6O3adPW9K1g/dxBHS-q-0g4/chunk_007_6.84s.wav",
+  "duration": 6.84,
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCDnbi1rCMzXSX0anvQlm-zQ/fWrCfe89mqY/chunk_096_4.64s.wav"
+ },
+ {
+  "id": "cen035",
+  "lang": "en",
+  "source": "en-in_snr50",
+  "text": "My last question to you, which is the largest fund related to climate change, which is currently existing?",
+  "real_audio": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCafpueX9hFLls24ed6UddEQ/sr1d0XEO5wE/chunk_176_6.78s.wav",
+  "duration": 6.78,
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCDE41FV_oCBCHmQ6KonVIpA/1t691uHmO2I/chunk_136_4.50s.wav"
+ },
+ {
+  "id": "cen036",
+  "lang": "en",
+  "source": "en-in_snr50",
+  "text": "I think if you look at Dwayne Johnson, Ryan Reynolds, they've done something which is different from how a lot of other, let's say celebrities do this, right? Celebrities often feel that just through their celebrity power, people are going to buy the brand.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCmZ8CtXFfMJjyfbOkiB0bpA/U7l6OOR_k3g/chunk_276_11.80s.wav",
+  "duration": 11.8,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCafpueX9hFLls24ed6UddEQ/5PC6CyzgWrs/chunk_100_4.08s.wav"
+ },
+ {
+  "id": "cen037",
+  "lang": "en",
+  "source": "en-in_snr50",
+  "text": "become a yellow fellow a campaign by cry to raise awareness for every child's right to a happy childhood",
+  "real_audio": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCo9nqyIE8U98lc9PuARTjrA/dN6jie1vK28/chunk_008_8.28s.wav",
+  "duration": 8.28,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCiHIgSzJWm7yauhz_LVZo5w/HI6aXrIXSgE/chunk_190_3.92s.wav"
+ },
+ {
+  "id": "cen038",
+  "lang": "en",
+  "source": "en-in_snr50",
+  "text": "I've been tortured by being told the PCB invested a lot in me. I'll just say two people invested in me. Najam Sethi and Shahid Afridi.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCz8QaiQxApLq8sLNcszYyJw/m2YDf4QBD60/chunk_044_10.46s.wav",
+  "duration": 10.46,
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCDgPKiP4iYli0_bXg2QkPiA/ZZ9uttVVDG4/chunk_261_4.48s.wav"
+ },
+ {
+  "id": "cen039",
+  "lang": "en",
+  "source": "en-in_snr50",
+  "text": "They captured the town shortly after the presidents of the DRC and Rwanda held surprise talks in Doha, their first since the latest escalation.",
+  "real_audio": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCz8QaiQxApLq8sLNcszYyJw/qIy6ksmcieM/chunk_006_10.94s.wav",
+  "duration": 10.94,
+  "prompt": "/workspace/proc_data_new/en-in_snr40-50/train/audio/en_in_set/UCDESpUxd0MEDum-k1_0nuwA/Xx1Xv68ZTf8/chunk_226_4.96s.wav"
+ }
+]

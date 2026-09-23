@@ -1,0 +1,71 @@
+# v4a: 5% English replay + the inherited rows PROTECTED.
+#
+# v3 spent 27% of its budget on replay AND let one global lr plus weight decay
+# move the inherited English rows a median 143% of their magnitude -- it paid for
+# English twice and got a broken Nepali model. Here the inherited rows are pinned
+# (grad masked, decay off) so English is preserved structurally, and replay drops
+# to the level the VLM-forgetting result says is sufficient.
+#
+# Validates on ne= and en= SEPARATELY. A pooled bilingual loss cannot tell
+# "good at English, broken at Nepali" from "mediocre at both" -- v3's whole
+# failure hid behind one pooled number for 200k steps.
+#
+# Phase 1 established the tokenizer graft is innocent: Nepali-only on this exact
+# tokenizer matched v2 at step 2500 (flow_loss 0.1827 vs 0.1843, eos_loss 0.0090
+# vs 0.0087) while v3 sat at 0.2815 / 0.0272. So what follows varies only the
+# data mix and the optimizer treatment of inherited vs fresh weights.
+model_config: pocket_tts/config/english_2026-04_24l.yaml
+model_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+start_from_pretrained: true
+reset_text_embedding: false
+graft_text_embedding: 4000
+
+data:
+  train_jsonl: /workspace/manifests_v4/train_mix5en_latents.jsonl
+  valid_jsonl: ne=/root/tts/TTS_training/pocket_TTS/manifests/valid_probe_ne.jsonl,en=/root/tts/TTS_training/pocket_TTS/manifests/valid_v3_en_split.jsonl
+  max_duration_sec: 30.0
+  max_voice_prompt_sec: 5.0
+
+flow:
+  type: lsd
+  kwargs: {}
+
+flow_batch_multiplier: 4
+eos_loss_weight: 0.1
+text_dropout: 0.2
+voice_dropout: 0.2
+
+optim:
+  lr: 2e-4
+  schedule: constant
+  warmup_steps: 1000
+  freeze_inherited_rows: 4000
+  embed_weight_decay: 0.0
+
+
+run_dir: /workspace/v4a_mix5_protect
+batch_size: 64
+grad_accum_steps: 1
+# Phase 2 arms stop at 7,500 steps on purpose. The v2/v3 separation is already
+# unmistakable by then (v2 -0.0034 vs v3 0.1477, and 0.1843 vs 0.2815 as early as
+# step 2,500), so 20k would buy no extra discrimination at 3x the GPU time.
+max_steps: 7500
+stats_ema_steps: 1000
+ema_decay: 0.999
+log_freq: 50
+valid_freq: 2500
+ckpt_freq: 7500
+num_ckpt_keep: 1
+sample_cfg_coef: 2.0
+# In-loop samples must span BOTH languages and the code-mixed case. v3 sampled
+# three stock English sentences for 200k steps, so "English fine, Nepali broken"
+# was invisible in the run's own artifacts.
+sample_sentences:
+- नेपाल हिमाल, पहाड र तराई गरी तीन भौगोलिक क्षेत्रमा विभाजित छ।
+- आजको बैठक बिहान दस बजे सभाकक्षमा सुरु हुनेछ।
+- The quick brown fox jumps over the lazy dog.
+- Please confirm your booking before the end of the day.
+- मैले Foodmandu बाट अर्डर गरें।
+- बैंकले RTGS मार्फत रकम पठायो।

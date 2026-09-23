@@ -1,0 +1,54 @@
+{
+  "note": "v4 bilingual student (6L), step 200000. 2x2 set: 50 utterances per cell (ne_text/ne_voice, ne_text/en_voice, en_text/ne_voice, en_text/en_voice), scored with himalaya-ai/whisper-large-v3-nepali-final for ne text cells and base whisper-large-v3-turbo for en text cells -- the two WER/CER columns are not comparable to each other, only to their own real_human row. sim = resemblyzer cosine, cross-speaker floor (not same-identity ceiling) for every cell here because the voice prompt in the English cells is an unrelated speaker by construction.",
+  "eos_threshold": 0.0,
+  "calibration": {
+    "set": "calib_v4.json, 20 ne + 20 en, disjoint from pairs_2x2.json",
+    "picked_on": "content WER via ASR, not duration alone (duration is a known-lying proxy)",
+    "sweep_en_wer": {"0.0": 0.523, "-1.0": 0.546, "-2.0": 0.644, "-4.0_default": 0.925, "1.0": 0.527, "2.0": 0.556},
+    "sweep_ne_wer": {"all_thresholds_tested": 0.236}
+  },
+  "bilingual_2x2": {
+    "real_human": {
+      "en_text/en_voice": {"n": 50, "wer": 0.024, "cer": 0.011, "sim": 0.571},
+      "en_text/ne_voice": {"n": 50, "wer": 0.024, "cer": 0.011, "sim": 0.583},
+      "ne_text/en_voice": {"n": 50, "wer": 0.347, "cer": 0.120, "sim": 0.590},
+      "ne_text/ne_voice": {"n": 50, "wer": 0.347, "cer": 0.120, "sim": 0.727}
+    },
+    "v4_student_6l": {
+      "en_text/en_voice": {"n": 50, "wer": 0.441, "cer": 0.356, "sim": 0.709},
+      "en_text/ne_voice": {"n": 50, "wer": 0.430, "cer": 0.369, "sim": 0.709},
+      "ne_text/en_voice": {"n": 50, "wer": 0.323, "cer": 0.111, "sim": 0.821},
+      "ne_text/ne_voice": {"n": 50, "wer": 0.313, "cer": 0.134, "sim": 0.829}
+    },
+    "v2_student_6l_reference": {
+      "en_text/en_voice": {"wer": 1.328, "cer": 1.030},
+      "en_text/ne_voice": {"wer": 1.030, "cer": 0.879},
+      "ne_text/en_voice": {"wer": 0.378, "cer": 0.157},
+      "ne_text/ne_voice": {"wer": 0.311, "cer": 0.117}
+    }
+  },
+  "cpu_speed": {
+    "threads": 4,
+    "mean_rtf": 5.87,
+    "per_utterance": [
+      {"lang": "ne", "audio_s": 4.08, "wall_s": 0.77, "rtf": 5.29},
+      {"lang": "ne", "audio_s": 4.16, "wall_s": 0.74, "rtf": 5.66},
+      {"lang": "ne", "audio_s": 5.92, "wall_s": 0.95, "rtf": 6.26},
+      {"lang": "en", "audio_s": 3.04, "wall_s": 0.49, "rtf": 6.26}
+    ]
+  },
+  "training": {
+    "teacher": {
+      "run_dir": "/workspace/v4_teacher_24l",
+      "steps": 250000,
+      "final_valid_flow_loss_ne": -0.0698,
+      "final_valid_flow_loss_en": 0.1887
+    },
+    "student": {
+      "run_dir": "/workspace/v4_student_6l",
+      "steps": 200000,
+      "final_valid_distill_mse_ne": 0.011845,
+      "final_valid_distill_mse_en": 0.011196
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+ "model": "student_6l_v3",
+ "n": 40,
+ "results": {
+  "-4.0": {
+   "abs_log_err": 1.011591541451439,
+   "median_log_ratio": -1.011591541451439,
+   "degenerate": 0,
+   "mean_dur_ratio": 0.25848290975264593
+  },
+  "-2.0": {
+   "abs_log_err": 0.572097182287513,
+   "median_log_ratio": -0.572097182287513,
+   "degenerate": 0,
+   "mean_dur_ratio": 0.4274750878259398
+  },
+  "-1.0": {
+   "abs_log_err": 0.3791776394353482,
+   "median_log_ratio": -0.3791776394353482,
+   "degenerate": 0,
+   "mean_dur_ratio": 0.49879303838210404
+  },
+  "0.0": {
+   "abs_log_err": 0.3015735898562586,
+   "median_log_ratio": -0.23964817199657873,
+   "degenerate": 0,
+   "mean_dur_ratio": 0.5981098194279262
+  },
+  "1.0": {
+   "abs_log_err": 0.21308744652425923,
+   "median_log_ratio": -0.1308147430184585,
+   "degenerate": 0,
+   "mean_dur_ratio": 0.7118189481084851
+  },
+  "2.0": {
+   "abs_log_err": 0.26764225365500094,
+   "median_log_ratio": 0.050868412109858124,
+   "degenerate": 0,
+   "mean_dur_ratio": 0.8737012336878759
+  },
+  "4.0": {
+   "abs_log_err": 0.41333928659223396,
+   "median_log_ratio": 0.24883094682412987,
+   "degenerate": 0,
+   "mean_dur_ratio": 1.0845417652033524
+  }
+ },
+ "best": 1.0
+}

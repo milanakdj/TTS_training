@@ -1,0 +1,203 @@
+{
+ "frontend": false,
+ "rows": [
+  {
+   "id": "dev_year",
+   "kind": "devanagari-digits",
+   "text": "सन् २०२४ मा ४५ जना विद्यार्थी थिए।",
+   "hyp": "सन् त्युरिकल पत्कल्कल्पन मापन उसमार्ने काम गरे।",
+   "audio_sec": 4.08,
+   "tail_kept": false,
+   "cer": 1.0606060606060606
+  },
+  {
+   "id": "dev_count",
+   "kind": "devanagari-digits",
+   "text": "कक्षामा ६७ जना बालबालिका छन्।",
+   "hyp": "कक्षामा सुद्धौप्त जनावबाल बालिकासन",
+   "audio_sec": 2.24,
+   "tail_kept": false,
+   "cer": 0.5
+  },
+  {
+   "id": "dev_big",
+   "kind": "devanagari-digits",
+   "text": "कुल बजेट १७ खर्ब ५१ अर्ब रहेको छ।",
+   "hyp": "कुल बजेट नौक्नुपर्छ खर्ब निमाम अवस्था",
+   "audio_sec": 3.76,
+   "tail_kept": false,
+   "cer": 0.6875
+  },
+  {
+   "id": "ascii_money",
+   "kind": "ascii-digits",
+   "text": "मैले 45 रुपैयाँ तिरें।",
+   "hyp": "मैले ५० फाइ रुपैयाँ तिरेँ",
+   "audio_sec": 1.76,
+   "tail_kept": true,
+   "cer": 0.2857142857142857
+  },
+  {
+   "id": "ascii_year",
+   "kind": "ascii-digits",
+   "text": "यो 2024 को तथ्याङ्क हो।",
+   "hyp": "यो २०२४ को कथ्याङ्क हो",
+   "audio_sec": 1.6,
+   "tail_kept": true,
+   "cer": 0.22727272727272727
+  },
+  {
+   "id": "decimal",
+   "kind": "decimal",
+   "text": "मुद्रास्फीति ७.५ प्रतिशत पुग्यो।",
+   "hyp": "मुद्रा स्फितिटि टकी",
+   "audio_sec": 2.4,
+   "tail_kept": false,
+   "cer": 0.6
+  },
+  {
+   "id": "percent",
+   "kind": "symbol",
+   "text": "बिक्री 20% ले बढ्यो।",
+   "hyp": "विकि २० प्रसेन्टले बढेर",
+   "audio_sec": 1.36,
+   "tail_kept": false,
+   "cer": 0.8333333333333334
+  },
+  {
+   "id": "currency",
+   "kind": "symbol",
+   "text": "मूल्य ₹ 1500 पर्छ।",
+   "hyp": "१५०० पर्छ",
+   "audio_sec": 2.0,
+   "tail_kept": true,
+   "cer": 0.7058823529411765
+  },
+  {
+   "id": "phone",
+   "kind": "phone",
+   "text": "मेरो नम्बर ९८४१२३४५६७ हो।",
+   "hyp": "मेरो नम्बर नान्तिस्तिकी पनुमु तिनकी त्यसको वृत्तिकै महत्त्वपूर्ण छ।",
+   "audio_sec": 5.68,
+   "tail_kept": false,
+   "cer": 2.2083333333333335
+  },
+  {
+   "id": "brand_food",
+   "kind": "latin-brand",
+   "text": "मैले Foodmandu बाट अर्डर गरें।",
+   "hyp": "मैले फुदमाण्डुबाट अर्डर गरे",
+   "audio_sec": 2.0,
+   "tail_kept": false,
+   "cer": 0.3793103448275862
+  },
+  {
+   "id": "brand_wlink",
+   "kind": "latin-brand",
+   "text": "हाम्रो घरमा Worldlink को इन्टरनेट छ।",
+   "hyp": "हाम्रो घरमा वर्ल्डिलिङ्कको इन्टरनेट",
+   "audio_sec": 1.76,
+   "tail_kept": true,
+   "cer": 0.4
+  },
+  {
+   "id": "brand_pathao",
+   "kind": "latin-brand",
+   "text": "म Pathao चढेर अफिस जान्छु।",
+   "hyp": "पाथाउँ चढेर अपिच्चान",
+   "audio_sec": 1.36,
+   "tail_kept": false,
+   "cer": 0.6
+  },
+  {
+   "id": "acro_bams",
+   "kind": "acronym",
+   "text": "उनले BAMS पढेका हुन्।",
+   "hyp": "उनले बिएम्स पढेका हुन्",
+   "audio_sec": 1.6,
+   "tail_kept": true,
+   "cer": 0.3
+  },
+  {
+   "id": "acro_rtgs",
+   "kind": "acronym",
+   "text": "बैंकले RTGS मार्फत रकम पठायो।",
+   "hyp": "बैङ्कले आरटिजिएसमार्फत रकम पठाए",
+   "audio_sec": 2.96,
+   "tail_kept": false,
+   "cer": 0.42857142857142855
+  },
+  {
+   "id": "mixed_covid",
+   "kind": "alphanumeric",
+   "text": "COVID-19 खोप लगाउनुहोस्।",
+   "hyp": "कोविड १९ खोप लगाउनुहोस्",
+   "audio_sec": 2.32,
+   "tail_kept": true,
+   "cer": 0.36363636363636365
+  },
+  {
+   "id": "mixed_f1soft",
+   "kind": "alphanumeric",
+   "text": "F1Soft नेपालको ठूलो फिनटेक कम्पनी हो।",
+   "hyp": "एफवनसफ नेपालको ठूल फिनेटिक कम्पना",
+   "audio_sec": 2.0,
+   "tail_kept": false,
+   "cer": 0.3611111111111111
+  },
+  {
+   "id": "mixed_g20",
+   "kind": "alphanumeric",
+   "text": "G20 सम्मेलन भारतमा भयो।",
+   "hyp": "जी २० सम्मेलन भारत नभयो",
+   "audio_sec": 1.6,
+   "tail_kept": true,
+   "cer": 0.36363636363636365
+  },
+  {
+   "id": "hyphen",
+   "kind": "punctuation",
+   "text": "यो सन् २०२० - २०२५ को योजना हो।",
+   "hyp": "यो सन्त्रिकोटकी तेरकको किकक",
+   "audio_sec": 2.16,
+   "tail_kept": false,
+   "cer": 0.75
+  },
+  {
+   "id": "paren_gloss",
+   "kind": "punctuation",
+   "text": "मैले ट्याक्सी (Taxi) चढें।",
+   "hyp": "मैले ट्याक्सी टाक्सी, चढे",
+   "audio_sec": 1.76,
+   "tail_kept": false,
+   "cer": 0.30434782608695654
+  },
+  {
+   "id": "en_sentence",
+   "kind": "english",
+   "text": "The next step is to open your bank account online.",
+   "hyp": "पग्या नेक्स स्टेप इस्टो ओपन यो बैँक अकाउन्ट अनलाइन्",
+   "audio_sec": 2.4,
+   "tail_kept": false,
+   "cer": 0.9387755102040817
+  },
+  {
+   "id": "en_short",
+   "kind": "english",
+   "text": "There are thirty-six students in the class.",
+   "hyp": "देर अ थर्टिसिक स्टुडेन्ट्स इन द क्लास",
+   "audio_sec": 2.16,
+   "tail_kept": false,
+   "cer": 0.9024390243902439
+  },
+  {
+   "id": "control_ne",
+   "kind": "control",
+   "text": "नेपाल हिमाल, पहाड र तराई गरी तीन भौगोलिक क्षेत्रमा विभाजित छ।",
+   "hyp": "नेपाल हिमाल पाहाडका",
+   "audio_sec": 1.6,
+   "tail_kept": false,
+   "cer": 0.711864406779661
+  }
+ ]
+}

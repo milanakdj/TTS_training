@@ -10,8 +10,19 @@ from pocket_tts.models.tts_model import TTSModel
 
 R = "/root/tts/TTS_training/pocket_TTS"
 F = f"{R}/infer/final"
-CFG = {"teacher_24l": f"{R}/infer/nepali_teacher_24l.yaml",
-       "student_6l":  f"{R}/infer/nepali_student_6l.yaml"}
+CFG = {"teacher_24l":    f"{R}/infer/nepali_teacher_24l.yaml",
+       "student_6l":     f"{R}/infer/nepali_student_6l.yaml",
+       "teacher_24l_v3": f"{R}/infer/nepali_teacher_24l_v3.yaml",
+       "student_6l_v3":  f"{R}/infer/nepali_student_6l_v3.yaml"}
+
+# Per-model EOS threshold. The v1/v2 models terminate correctly at the shipped
+# default (-4.0). The v3 models do not: their backbone regressed onto the
+# teacher's cfg-2.0-combined activations while out_eos stayed frozen, so the
+# head is miscalibrated against the z it now sees and fires within a few frames.
+# These values are chosen on calib_v3.json -- 40 valid-split utterances with the
+# 100 eval ids removed -- by duration fidelity, never on pairs.json.
+# See calib_eos_{model}.json and docs/V3_PLAN.md.
+EOS = json.load(open(f"{F}/eos_thresholds.json")) if os.path.exists(f"{F}/eos_thresholds.json") else {}
 pairs = json.load(open(f"{F}/pairs.json"))
 _lim = int(os.environ.get("EVAL_LIMIT", "0"))
 if _lim:
@@ -24,7 +35,9 @@ for name, cfg in CFG.items():
         continue
     out = f"{F}/wav/{name}"
     os.makedirs(out, exist_ok=True)
-    m = TTSModel.load_model(config=cfg); m.to("cpu")
+    kw = {"eos_threshold": EOS[name]} if name in EOS else {}
+    m = TTSModel.load_model(config=cfg, **kw); m.to("cpu")
+    print(f"== {name}: eos_threshold={kw.get('eos_threshold', 'default -4.0')}", flush=True)
     SR = m.config.mimi.sample_rate
     t_start, done, failed = time.time(), 0, []
     for p in pairs:

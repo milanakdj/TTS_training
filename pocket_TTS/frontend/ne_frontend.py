@@ -72,6 +72,11 @@ SAFE = set(
     "क़ख़ग़ज़ड़ढ़फ़य़ॠ।०१२३"
 ) | set("!\"',.:? \t\n…\u200c")
 
+# v3 only: ne_en_9682 inherits Kyutai's byte_fallback, so Latin is representable
+# and must survive the final guard rather than being stripped out of existence.
+SAFE_LATIN = SAFE | set("abcdefghijklmnopqrstuvwxyz"
+                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
 # Latin letters spelled the way a Nepali speaker says them, for acronyms.
 LETTER = {
     "a": "ए", "b": "बी", "c": "सी", "d": "डी", "e": "ई", "f": "एफ", "g": "जी",
@@ -199,7 +204,14 @@ def _num(tok):
     return say_int(int(a))
 
 
-def _word(w):
+def _word(w, keep_latin=False):
+    # v3: the grafted tokenizer (ne_en_9682) encodes Latin with zero <unk>, so a
+    # Latin word no longer has to be transliterated to survive. Keeping the
+    # surface is what puts code-switched Nepali ("... नाइकीको Airforce ...") into
+    # the training distribution at all; transliterating it away is why v2 never
+    # saw a single Latin character inside a Devanagari sentence.
+    if keep_latin and re.fullmatch(r"[A-Za-z]+", w):
+        return w
     low = w.lower()
     if low in LEXICON:
         return LEXICON[low]
@@ -213,8 +225,17 @@ def _word(w):
     return w
 
 
-def normalize(text):
-    """Return text the tokenizer can encode with zero <unk>."""
+def normalize(text, keep_latin=False):
+    """Return text the tokenizer can encode with zero <unk>.
+
+    `keep_latin=True` targets the v3 tokenizer (`tokenizer_v3/ne_en_9682`), which
+    inherits Kyutai's byte_fallback and therefore encodes Latin cleanly. It keeps
+    pure-Latin words as-is instead of transliterating them; digits are still
+    verbalized, glosses still dropped, and the output is still restricted to a
+    representable character set (SAFE plus ASCII letters). Default stays False so
+    the v2 model and its `nepali_bpe4000` tokenizer are unaffected.
+    """
+    safe = SAFE_LATIN if keep_latin else SAFE
     t = unicodedata.normalize("NFC", text or "")
     # A Latin gloss in brackets -- "ट्याक्सी (Taxi)" -- is a transcription
     # convention, not something anyone says. Reading it back doubles the word,
@@ -228,18 +249,22 @@ def normalize(text):
     t = t.replace("%", " प्रतिशत ").replace("₹", " रुपैयाँ ").replace("$", " डलर ")
     t = t.replace("&", " एन्ड ").replace("@", " एट ").replace("+", " प्लस ")
 
-    for p in _PHRASES:                             # multi-word entries first
-        t = re.sub(re.escape(p), LEXICON[p], t, flags=re.IGNORECASE)
+    if not keep_latin:
+        # Multi-word lexicon entries are transliterations; under keep_latin the
+        # Latin surface is what we want in the text, so skip them.
+        for p in _PHRASES:                         # multi-word entries first
+            t = re.sub(re.escape(p), LEXICON[p], t, flags=re.IGNORECASE)
 
     # decimals, which say_int cannot take whole
     t = re.sub(r"([0-9०-९]+)[.]([0-9०-९]+)",
                lambda m: f"{_num(m.group(1))} दशमलव {say_digits(to_ascii(m.group(2)))}", t)
 
-    t = re.sub(r"[A-Za-z0-9]+|[०-९]+", lambda m: _word(m.group(0)) or "", t)
+    t = re.sub(r"[A-Za-z0-9]+|[०-९]+",
+               lambda m: _word(m.group(0), keep_latin) or "", t)
 
     # Final guard: anything still outside the tokenizer's charset is dropped
     # rather than allowed through to become <unk>.
-    t = "".join(c for c in t if c in SAFE)
+    t = "".join(c for c in t if c in safe)
     return re.sub(r"\s+", " ", t).strip()
 
 

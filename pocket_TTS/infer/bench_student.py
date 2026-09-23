@@ -16,15 +16,23 @@ TEXTS = [
     "आजको बैठक बिहान दस बजे सभाकक्षमा सुरु हुनेछ।",
     "नेपाल हिमाल, पहाड र तराई गरी तीन भौगोलिक क्षेत्रमा विभाजित छ।",
 ]
-CFG = {"teacher_24l": f"{R}/infer/nepali_teacher_24l.yaml",
-       "student_6l":  f"{R}/infer/nepali_student_6l.yaml"}
+CFG = {"teacher_24l":    f"{R}/infer/nepali_teacher_24l.yaml",
+       "student_6l":     f"{R}/infer/nepali_student_6l.yaml",
+       "teacher_24l_v3": f"{R}/infer/nepali_teacher_24l_v3.yaml",
+       "student_6l_v3":  f"{R}/infer/nepali_student_6l_v3.yaml"}
+# The v3 models need their calibrated eos_threshold here too. At the shipped
+# default they stop after a few frames, and a real-time factor measured on a
+# truncated utterance is a number about nothing.
+_E = f"{R}/infer/final/eos_thresholds.json"
+EOS = json.load(open(_E)) if os.path.exists(_E) else {}
 # Oversubscribing (16 threads on a 16-core box that the distill job already
 # had at load ~13.6) made both models thrash and measured 0.15x/0.17x RT --
 # no speedup, which is what profile_stages.py disproved. Pin the thread count.
 torch.set_num_threads(int(os.environ.get("BENCH_THREADS", "4")))
 res = {}
 for name, cfg in CFG.items():
-    m = TTSModel.load_model(config=cfg); m.to("cpu")
+    kw = {"eos_threshold": EOS[name]} if name in EOS else {}
+    m = TTSModel.load_model(config=cfg, **kw); m.to("cpu")
     SR = m.config.mimi.sample_rate
     st = m.get_state_for_audio_prompt(VOICE)
     d = f"{R}/infer/bench/{name}"; os.makedirs(d, exist_ok=True)

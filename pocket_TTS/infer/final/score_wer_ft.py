@@ -101,7 +101,9 @@ if _lim:
 BS = int(os.environ.get("ASR_BS", "8"))
 SYS = {"real_human": None,
        "teacher_24l": f"{F}/wav/teacher_24l",
-       "student_6l": f"{F}/wav/student_6l"}
+       "student_6l": f"{F}/wav/student_6l",
+       "teacher_24l_v3": f"{F}/wav/teacher_24l_v3",
+       "student_6l_v3": f"{F}/wav/student_6l_v3"}
 rows = {}
 for name, d in SYS.items():
     items = [(p, p["real_audio"] if d is None else f"{d}/{p['id']}.wav") for p in pairs]

@@ -1,0 +1,72 @@
+# v4e: 15% English replay, everything else identical to v4b (the winning
+# Phase 2 arm: 5% replay, unpinned inherited rows, plain optimizer).
+#
+# WHY: the shipped v4 student (5% replay) matches v2 on Nepali but its English
+# is weak on two axes -- content (CER 0.356 vs a 0.011 ceiling) and especially
+# speaker-identity retention (resemblyzer sim-to-prompt 0.535-0.709 vs
+# Nepali's 0.833-0.829). v3's 27% replay destroyed Nepali, but that run also
+# pinned the inherited embedding rows and changed the optimizer -- confounded,
+# not a clean ratio measurement. This is the first clean data point between
+# the two: same recipe as v4b, only the ratio changes. 798h of English is
+# available in the corpus and 5% only draws ~40k of 223k available English
+# rows, so there is no data-scarcity reason to stay at 5%.
+#
+# Judge this arm on THREE things, not just flow_loss like Phase 2 did:
+#   1. Nepali flow_loss vs v2/v4b's curve at matched steps (curve_vs.py) --
+#      the thing that actually broke in v3.
+#   2. English flow_loss vs v4b's curve -- does more replay even move this.
+#   3. Speaker-identity fidelity via GUIDED generation (sample_cfg_coef 2.0,
+#      gen_calib_teacher_guided.py) + resemblyzer sim-to-prompt, compared
+#      against v4b's checkpoint_00007500.pt at the SAME step. flow_loss was
+#      never a good proxy for identity fidelity -- it's a next-frame
+#      prediction loss, not a speaker-conditioning metric -- and Phase 2 never
+#      measured this, which is exactly how the identity gap shipped unnoticed.
+model_config: pocket_tts/config/english_2026-04_24l.yaml
+model_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+start_from_pretrained: true
+reset_text_embedding: false
+graft_text_embedding: 4000
+
+data:
+  train_jsonl: /workspace/manifests_v4/train_mix15en_latents.jsonl
+  valid_jsonl: ne=/root/tts/TTS_training/pocket_TTS/manifests/valid_probe_ne.jsonl,en=/root/tts/TTS_training/pocket_TTS/manifests/valid_v3_en_split.jsonl
+  max_duration_sec: 30.0
+  max_voice_prompt_sec: 5.0
+
+flow:
+  type: lsd
+  kwargs: {}
+
+flow_batch_multiplier: 4
+eos_loss_weight: 0.1
+text_dropout: 0.2
+voice_dropout: 0.2
+
+optim:
+  lr: 2e-4
+  schedule: constant
+  warmup_steps: 1000
+
+run_dir: /workspace/v4e_en15
+batch_size: 64
+grad_accum_steps: 1
+max_steps: 7500
+stats_ema_steps: 1000
+ema_decay: 0.999
+log_freq: 50
+valid_freq: 2500
+# Keep every checkpoint this time (Phase 2 kept only the last) so the guided
+# identity-fidelity probe can be run at 2500/5000/7500 and matched against
+# v4b's curve at the same steps, not just the endpoint.
+ckpt_freq: 2500
+num_ckpt_keep: 3
+sample_cfg_coef: 2.0
+sample_sentences:
+- नेपाल हिमाल, पहाड र तराई गरी तीन भौगोलिक क्षेत्रमा विभाजित छ।
+- आजको बैठक बिहान दस बजे सभाकक्षमा सुरु हुनेछ।
+- The quick brown fox jumps over the lazy dog.
+- Please confirm your booking before the end of the day.
+- मैले Foodmandu बाट अर्डर गरें।
+- बैंकले RTGS मार्फत रकम पठायो।

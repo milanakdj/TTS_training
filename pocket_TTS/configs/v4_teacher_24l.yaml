@@ -1,0 +1,72 @@
+# v4 STAGE 1: the full bilingual 24-layer teacher.
+#
+# Recipe chosen by the Phase 2 arms, all at 7,500 steps against v2's curve on the
+# same Nepali valid set:
+#
+#            Nepali(7.5k)  English(7.5k)
+#   v2          -0.0034        n/a        the shipped monolingual model
+#   v3 (27% en)  0.1477        n/a        DEAD -- replay ratio was the killer
+#   v4b (5% en) -0.0018       0.1736      <-- this config
+#   v4a (+pin)   0.0031       0.1849      pinning capped English and cost Nepali
+#   v4c (0% en)   see v4c_ne_protect.log
+#
+# So: keep the grafted tokenizer (Phase 1 cleared it -- Nepali-only on this exact
+# tokenizer matched v2 at every step), drop replay from 27% to 5%, and leave the
+# optimizer alone. Freezing the inherited rows LOOKED better at 5k and then
+# plateaued; it buys a head start and pays for it with a ceiling.
+#
+# max_steps 250k rather than v2's 200k: 5% of each batch is English, so Nepali
+# sees ~5% fewer updates per step, and English was still improving steeply at
+# 7.5k. Checkpoints every 5k -- watch it with scripts/curve_vs.py against v2 and
+# STOP EARLY once both languages flatten. Do not let it run blind for 200k the
+# way v3 did.
+model_config: pocket_tts/config/english_2026-04_24l.yaml
+model_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+start_from_pretrained: true
+reset_text_embedding: false
+graft_text_embedding: 4000
+
+data:
+  train_jsonl: /workspace/manifests_v4/train_mix5en_latents.jsonl
+  valid_jsonl: ne=/root/tts/TTS_training/pocket_TTS/manifests/valid_probe_ne.jsonl,en=/root/tts/TTS_training/pocket_TTS/manifests/valid_v3_en_split.jsonl
+  max_duration_sec: 30.0
+  max_voice_prompt_sec: 5.0
+
+flow:
+  type: lsd
+  kwargs: {}
+
+flow_batch_multiplier: 4
+eos_loss_weight: 0.1
+text_dropout: 0.2
+voice_dropout: 0.2
+
+optim:
+  lr: 2e-4
+  schedule: constant
+  warmup_steps: 1000
+
+
+run_dir: /workspace/v4_teacher_24l
+batch_size: 64
+grad_accum_steps: 1
+max_steps: 250000
+stats_ema_steps: 1000
+ema_decay: 0.999
+log_freq: 50
+valid_freq: 2500
+ckpt_freq: 5000
+num_ckpt_keep: 3
+sample_cfg_coef: 2.0
+# In-loop samples must span BOTH languages and the code-mixed case. v3 sampled
+# three stock English sentences for 200k steps, so "English fine, Nepali broken"
+# was invisible in the run's own artifacts.
+sample_sentences:
+- नेपाल हिमाल, पहाड र तराई गरी तीन भौगोलिक क्षेत्रमा विभाजित छ।
+- आजको बैठक बिहान दस बजे सभाकक्षमा सुरु हुनेछ।
+- The quick brown fox jumps over the lazy dog.
+- Please confirm your booking before the end of the day.
+- मैले Foodmandu बाट अर्डर गरें।
+- बैंकले RTGS मार्फत रकम पठायो।

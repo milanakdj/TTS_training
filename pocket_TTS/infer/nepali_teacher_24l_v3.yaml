@@ -1,0 +1,68 @@
+# Inference config for the v3 24-layer teacher, FINAL step-200000 EMA export.
+# Same architecture as nepali_teacher_24l.yaml, but with the grafted v3
+# vocabulary: ne+en SentencePiece at 9682 bins instead of Nepali-only BPE-4000.
+#
+# Weights are model_final_200k.safetensors, a snapshot of the step-200000 EMA
+# export copied 2026-09-20 after the training process exited, so it cannot be
+# a torn read and cannot change under a running eval.
+#
+# NOTE: the pocket_tts inference path has no cfg_coef, and this teacher was only
+# ever sampled with guidance (sample_cfg_coef 2.0). Loading it through TTSModel
+# measures the UNGUIDED teacher -- the only teacher anyone could deploy, but not
+# the model the student was distilled from. For the guided teacher use
+# infer/final/gen_oov_probe_teacher.py.
+weights_path: /workspace/nepali_teacher_24l_v3/model_final_200k.safetensors
+
+default_temperature: 0.3
+flow_lm:
+  insert_bos_before_voice: true
+  dtype: float32
+  flow:
+    depth: 6
+    dim: 512
+  transformer:
+    d_model: 1024
+    hidden_scale: 4
+    max_period: 10000
+    num_heads: 16
+    num_layers: 24
+  lookup_table:
+    dim: 1024
+    n_bins: 9682
+    tokenizer: sentencepiece
+    tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+mimi:
+  dtype: float32
+  sample_rate: 24000
+  inner_dim: 32
+  outer_dim: 512
+  channels: 1
+  frame_rate: 12.5
+  seanet:
+    dimension: 512
+    channels: 1
+    n_filters: 64
+    n_residual_layers: 1
+    ratios:
+    - 6
+    - 5
+    - 4
+    kernel_size: 7
+    residual_kernel_size: 3
+    last_kernel_size: 3
+    dilation_base: 2
+    pad_mode: constant
+    compress: 2
+  transformer:
+    d_model: 512
+    num_heads: 8
+    num_layers: 2
+    layer_scale: 0.01
+    context: 250
+    dim_feedforward: 2048
+    input_dimension: 512
+    output_dimensions:
+    - 512
+  quantizer:
+    dimension: 32
+    output_dimension: 512

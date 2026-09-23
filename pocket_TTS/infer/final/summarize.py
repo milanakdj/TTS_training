@@ -7,7 +7,8 @@ wer = json.load(open(f"{F}/wer.json"))
 sim = json.load(open(f"{F}/sim.json"))
 bench = json.load(open(f"{F}/bench.json")) if os.path.exists(f"{F}/bench.json") else {}
 wer_ft = json.load(open(f"{F}/wer_ft.json")) if os.path.exists(f"{F}/wer_ft.json") else None
-ORDER = ["real_human", "teacher_24l", "student_6l"]
+ORDER = ["real_human", "teacher_24l", "student_6l",
+         "teacher_24l_v3", "student_6l_v3"]
 
 def mean(xs):
     return statistics.mean(xs) if xs else float("nan")
@@ -20,21 +21,21 @@ print("Voice prompt is a different clip of the same identity; the target utteran
 print("is held out. real_human = the genuine recording of that same utterance,")
 print("scored through the identical pipeline. It is the ceiling, not a competitor.\n")
 
-print(f"{'system':<14} {'n':>4} {'WER':>8} {'CER':>8} {'SIM':>8}")
+print(f"{'system':<16} {'n':>4} {'WER':>8} {'CER':>8} {'SIM':>8}")
 print("-" * 78)
 for k in ORDER:
     w = [r for r in wer.get(k, []) if r["dev_ratio"] >= 0.5]
     s = sim.get(k, [])
-    print(f"{k:<14} {len(w):>4} {mean([r['wer'] for r in w]):>8.3f} "
+    print(f"{k:<16} {len(w):>4} {mean([r['wer'] for r in w]):>8.3f} "
           f"{mean([r['cer'] for r in w]):>8.3f} {mean([r['sim'] for r in s]):>8.3f}")
 
 if wer_ft:
     print("\nSame set, Nepali-finetuned Whisper (the sharper instrument):")
-    print(f"{'system':<14} {'n':>4} {'WER':>8} {'CER':>8}")
+    print(f"{'system':<16} {'n':>4} {'WER':>8} {'CER':>8}")
     print("-" * 78)
     for k in ORDER:
         w = [r for r in wer_ft.get(k, []) if r["dev_ratio"] >= 0.5]
-        print(f"{k:<14} {len(w):>4} {mean([r['wer'] for r in w]):>8.3f} "
+        print(f"{k:<16} {len(w):>4} {mean([r['wer'] for r in w]):>8.3f} "
               f"{mean([r['cer'] for r in w]):>8.3f}")
 
 print("\nBy source (CER, the more stable of the two on Nepali):")
