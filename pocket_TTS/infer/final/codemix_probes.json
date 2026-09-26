@@ -1,0 +1,82 @@
+[
+ {
+  "id": "cm00_ne",
+  "text": "It's small enough to fit in your pocket. नेपाली विकिपिडिया एक स्वतन्त्र विश्वकोश हो। हाल नेपाली विकिपिडियामा",
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674021891_chunk_1.wav"
+ },
+ {
+  "id": "cm00_en",
+  "text": "It's small enough to fit in your pocket. नेपाली विकिपिडिया एक स्वतन्त्र विश्वकोश हो। हाल नेपाली विकिपिडियामा",
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCYa1WtI-vb_bx-anHdmpNfA/iZe79sXB8yQ/chunk_099_3.46s.wav"
+ },
+ {
+  "id": "cm01_ne",
+  "text": "नमस्ते, तपाईंलाई कस्तो छ? The one that got away.",
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674021891_chunk_1.wav"
+ },
+ {
+  "id": "cm01_en",
+  "text": "नमस्ते, तपाईंलाई कस्तो छ? The one that got away.",
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCYa1WtI-vb_bx-anHdmpNfA/iZe79sXB8yQ/chunk_099_3.46s.wav"
+ },
+ {
+  "id": "cm02_ne",
+  "text": "नमस्ते, तपाईंलाई कस्तो छ। The one that got away.",
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674021891_chunk_1.wav"
+ },
+ {
+  "id": "cm02_en",
+  "text": "नमस्ते, तपाईंलाई कस्तो छ। The one that got away.",
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCYa1WtI-vb_bx-anHdmpNfA/iZe79sXB8yQ/chunk_099_3.46s.wav"
+ },
+ {
+  "id": "cm03_ne",
+  "text": "मैले Foodmandu बाट अर्डर गरें।",
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674021891_chunk_1.wav"
+ },
+ {
+  "id": "cm03_en",
+  "text": "मैले Foodmandu बाट अर्डर गरें।",
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCYa1WtI-vb_bx-anHdmpNfA/iZe79sXB8yQ/chunk_099_3.46s.wav"
+ },
+ {
+  "id": "cm04_ne",
+  "text": "बैंकले RTGS मार्फत रकम पठायो।",
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674021891_chunk_1.wav"
+ },
+ {
+  "id": "cm04_en",
+  "text": "बैंकले RTGS मार्फत रकम पठायो।",
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCYa1WtI-vb_bx-anHdmpNfA/iZe79sXB8yQ/chunk_099_3.46s.wav"
+ },
+ {
+  "id": "cm05_ne",
+  "text": "मेरो phone को battery low भयो, त्यसैले म call गर्न सकिनँ।",
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674021891_chunk_1.wav"
+ },
+ {
+  "id": "cm05_en",
+  "text": "मेरो phone को battery low भयो, त्यसैले म call गर्न सकिनँ।",
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCYa1WtI-vb_bx-anHdmpNfA/iZe79sXB8yQ/chunk_099_3.46s.wav"
+ },
+ {
+  "id": "cm06_ne",
+  "text": "Please confirm your booking, अनि भोलि बिहान आठ बजे आउनुहोस्।",
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674021891_chunk_1.wav"
+ },
+ {
+  "id": "cm06_en",
+  "text": "Please confirm your booking, अनि भोलि बिहान आठ बजे आउनुहोस्।",
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCYa1WtI-vb_bx-anHdmpNfA/iZe79sXB8yQ/chunk_099_3.46s.wav"
+ },
+ {
+  "id": "cm07_ne",
+  "text": "All the pretty girls in the foreground of my mind.",
+  "prompt": "/workspace/proc_data_new/indicvoices-r/train/audio/Nepali/mdx_extra/v2/train/audios/3940649674021891_chunk_1.wav"
+ },
+ {
+  "id": "cm07_en",
+  "text": "All the pretty girls in the foreground of my mind.",
+  "prompt": "/workspace/proc_data_new/en-in_snr50/train/audio/en_in_set/UCYa1WtI-vb_bx-anHdmpNfA/iZe79sXB8yQ/chunk_099_3.46s.wav"
+ }
+]
