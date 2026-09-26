@@ -28,15 +28,21 @@ key = lambda r: (os.path.dirname(r["path"]), r.get("speaker"))
 def texts(pattern):
     seen, out = set(), []
     for f in sorted(glob.glob(pattern)):
+        rows = []
         for line in open(f):
-            line = line.strip()
-            if not line:
-                continue
             try:
-                t = json.loads(line)["text"].strip()
+                rows.append(json.loads(line)["text"].strip())
             except (json.JSONDecodeError, KeyError):
                 continue
-            if t and t.lower() not in seen:
+        rows = [t for t in rows if t]
+        # Some Haiku agents scripted word-list templates instead of writing: those
+        # files are ~10% unique with broken grammar. Real writing is >=78% unique (dedup handles the rest).
+        uniq = len({t.lower() for t in rows}) / max(len(rows), 1)
+        if uniq < 0.7:
+            print(f"  REJECT {os.path.basename(f)}: {uniq:.0%} unique (templated)")
+            continue
+        for t in rows:
+            if 1 <= len(t.split()) <= 30 and t.lower() not in seen:
                 seen.add(t.lower())
                 out.append(t)
     rng.shuffle(out)

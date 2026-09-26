@@ -1,0 +1,60 @@
+# v5 stage 2: 6-layer student depth-distilled from the v5 bilingual teacher
+# (v5_teacher_24l.yaml, the v5m_lwf recipe).
+#
+# Same recipe as nepali_distill_v4.yaml -- distill_cfg_coef 2.0 bakes in the
+# guidance the inference path cannot express -- with two changes: the teacher is
+# the v5 run, and the data is the teacher's own v5m mix (~15% English incl.
+# LibriHeavy) instead of v4's 5% mix. No lwf_weight: the Kyutai anchor was there to
+# stop the teacher forgetting English while it learned Nepali. The student learns
+# both from the teacher, and build_models deep-copies args into the teacher, so
+# setting it here would also rebuild the anchor for no reason.
+# ckpt_freq 5000 / keep 10 (~7 GB) rather than v4's 2500 / 999 (~58 GB).
+model_config: pocket_tts/config/english.yaml   # 6-layer student
+model_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+start_from_pretrained: false
+distill_cfg_coef: 2.0
+distill_teacher_config: pocket_tts/config/english_2026-04_24l.yaml
+distill_teacher_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+# builders.py does a plain torch.load here and reads payload["ema"], so this must
+# be a local TRAINING checkpoint -- an hf:// path or the safetensors export will
+# not work.
+distill_teacher_weights: /workspace/v5_teacher_24l/checkpoint_00250000.pt
+
+data:
+  train_jsonl: /workspace/manifests_v4/train_v5m_latents.jsonl
+  valid_jsonl: ne=/root/tts/TTS_training/pocket_TTS/manifests/valid_probe_ne.jsonl,en=/root/tts/TTS_training/pocket_TTS/manifests/valid_v3_en_split.jsonl
+
+flow:
+  type: lsd
+  kwargs: {}
+
+text_dropout: 0.0
+voice_dropout: 0.0
+
+optim:
+  lr: 4e-4
+  schedule: cosine
+  warmup_steps: 1000
+
+run_dir: /workspace/v5_student_6l
+batch_size: 64
+grad_accum_steps: 1
+max_steps: 200000
+ema_decay: 0.9999
+log_freq: 50
+valid_freq: 2500
+ckpt_freq: 5000
+num_ckpt_keep: 10
+# The v4 student used the default English-only sample_sentences. Use the teacher's
+# bilingual + code-mixed set so the in-loop samples show both languages.
+sample_sentences:
+- नेपाल हिमाल, पहाड र तराई गरी तीन भौगोलिक क्षेत्रमा विभाजित छ।
+- आजको बैठक बिहान दस बजे सभाकक्षमा सुरु हुनेछ।
+- The quick brown fox jumps over the lazy dog.
+- Please confirm your booking before the end of the day.
+- मैले Foodmandu बाट अर्डर गरें।
+- बैंकले RTGS मार्फत रकम पठायो।
