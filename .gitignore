@@ -129,3 +129,6 @@ pretrain/asr_bilingual/gold_eval/clips/
 
 # pre-correction backup of the v7 card, kept locally while the card settles
 pretrain/asr_bilingual/release_v7/README.md.pre_correction
+
+# listening clips are regenerable; keep only the texts.tsv / index files
+pocket_TTS/listen/**/*.wav
