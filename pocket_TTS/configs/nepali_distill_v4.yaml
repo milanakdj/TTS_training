@@ -1,0 +1,53 @@
+# v4 stage 2: 6-layer student depth-distilled from the v4 bilingual teacher.
+#
+# Same recipe as nepali_distill_v3.yaml -- distill_cfg_coef 2.0 bakes in the
+# guidance the inference path cannot express -- with the v4 tokenizer/vocab and
+# teacher checkpoint threaded through. Student is built fresh
+# (start_from_pretrained: false), so there is no embedding to graft here;
+# graft_text_embedding applies only to stage 1.
+#
+# Data and valid split mirror v4_teacher_24l.yaml's own training distribution
+# (5% English replay) so the student is distilled on the same mix the teacher
+# was trained on, and Nepali/English are scored separately -- see
+# pocket-tts-v4-bilingual-recipe memory note on why a pooled bilingual loss
+# can't distinguish "good at English, broken at Nepali".
+model_config: pocket_tts/config/english.yaml   # 6-layer student
+model_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+start_from_pretrained: false
+distill_cfg_coef: 2.0
+distill_teacher_config: pocket_tts/config/english_2026-04_24l.yaml
+distill_teacher_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+# builders.py does a plain torch.load here and reads payload["ema"], so this must
+# be a local TRAINING checkpoint -- an hf:// path or the safetensors export will
+# not work.
+distill_teacher_weights: /workspace/v4_teacher_24l/checkpoint_00250000.pt
+
+data:
+  train_jsonl: /workspace/manifests_v4/train_mix5en_latents.jsonl
+  valid_jsonl: ne=/root/tts/TTS_training/pocket_TTS/manifests/valid_probe_ne.jsonl,en=/root/tts/TTS_training/pocket_TTS/manifests/valid_v3_en_split.jsonl
+
+flow:
+  type: lsd
+  kwargs: {}
+
+text_dropout: 0.0
+voice_dropout: 0.0
+
+optim:
+  lr: 4e-4
+  schedule: cosine
+  warmup_steps: 1000
+
+run_dir: /workspace/v4_student_6l
+batch_size: 64
+grad_accum_steps: 1
+max_steps: 200000
+ema_decay: 0.9999
+log_freq: 50
+valid_freq: 2500
+ckpt_freq: 2500
+num_ckpt_keep: 999

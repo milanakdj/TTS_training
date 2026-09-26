@@ -1,0 +1,66 @@
+# v3 stage 1: 24-layer teacher, Nepali + Indian-English, on a GRAFTED tokenizer.
+#
+# What changed from nepali_finetune.yaml and why:
+#
+#   tokenizer     nepali_bpe4000 -> tokenizer_v3/ne_en_9682. The v2 tokenizer was
+#                 trained from scratch on Nepali and dropped byte_fallback, which
+#                 the Kyutai base ships with. Consequence: every Latin word, every
+#                 ASCII digit, ४-९, and `-` encoded to <unk>, and the model deletes
+#                 <unk> rather than mispronouncing it. v3 EXTENDS Kyutai's vocab
+#                 instead: ids 0..3999 are byte-identical, Nepali is appended at
+#                 4000+. Also ~10% fewer tokens per Nepali utterance (34.8 vs 38.7).
+#
+#   embedding     reset_text_embedding -> graft_text_embedding: 4000. Because the
+#                 inherited ids still mean what they meant, the pretrained English
+#                 embedding rows transfer directly. English survives as inherited
+#                 weights, not as something relearned from replay -- which is a far
+#                 stronger guarantee than any data mix ratio.
+#
+#   data          + ~800 h Indian English (en-in_snr{50,40-50}) as replay, ~27% of
+#                 the mix. Indian rather than US English on purpose: the register
+#                 this model needs is a South Asian speaker reading Nepali brand
+#                 names, not a General American voice.
+#
+# Numbers are still verbalized in text (ne_frontend.normalize) rather than taught
+# from audio. Nepali 0-99 is an irregular lookup table; a verbalizer is right every
+# time and costs no training signal. The tokenizer change is what makes a bypassed
+# frontend degrade to reading digits instead of deleting the sentence.
+model_config: pocket_tts/config/english_2026-04_24l.yaml
+model_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+start_from_pretrained: true
+reset_text_embedding: false
+graft_text_embedding: 4000
+
+data:
+  train_jsonl: /root/tts/TTS_training/pocket_TTS/manifests/train_v3_aligned.jsonl
+  valid_jsonl: /root/tts/TTS_training/pocket_TTS/manifests/valid_v3_aligned.jsonl
+  max_duration_sec: 30.0
+  max_voice_prompt_sec: 5.0
+
+flow:
+  type: lsd
+  kwargs: {}
+
+flow_batch_multiplier: 4
+eos_loss_weight: 0.1
+text_dropout: 0.2
+voice_dropout: 0.2
+
+optim:
+  lr: 2e-4
+  schedule: constant
+  warmup_steps: 1000
+
+run_dir: /workspace/smoke_v3
+batch_size: 64
+grad_accum_steps: 1
+max_steps: 60
+stats_ema_steps: 1000
+ema_decay: 0.999
+log_freq: 10
+valid_freq: 50
+ckpt_freq: 50
+num_ckpt_keep: 3
+sample_cfg_coef: 2.0
