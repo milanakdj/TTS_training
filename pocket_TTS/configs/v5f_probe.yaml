@@ -1,0 +1,60 @@
+# v5f probe (#5, partial training): v5l's exact mix, but the top 12 of 24 layers,
+# the flow head and the EOS head are frozen at Kyutai's weights. Hypothesis: the
+# acoustic end (where speaker similarity is lost) stays Kyutai's, while the text
+# embedding + bottom 12 layers learn Nepali. Compare against v5l at 7.5k.
+# Judged on the guided 2x2 vs untouched Kyutai 6L (English) and v2's curve (Nepali).
+model_config: pocket_tts/config/english_2026-04_24l.yaml
+model_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+start_from_pretrained: true
+reset_text_embedding: false
+graft_text_embedding: 4000
+
+data:
+  train_jsonl: /workspace/manifests_v4/train_v5l_latents.jsonl
+  valid_jsonl: ne=/root/tts/TTS_training/pocket_TTS/manifests/valid_probe_ne.jsonl,en=/root/tts/TTS_training/pocket_TTS/manifests/valid_v3_en_split.jsonl
+  max_duration_sec: 30.0
+  max_voice_prompt_sec: 5.0
+
+flow:
+  type: lsd
+  kwargs: {}
+
+flow_batch_multiplier: 4
+eos_loss_weight: 0.1
+text_dropout: 0.2
+voice_dropout: 0.2
+
+optim:
+  lr: 2e-4
+  schedule: constant
+  warmup_steps: 1000
+
+
+run_dir: /workspace/v5f_probe
+batch_size: 64
+grad_accum_steps: 1
+# Phase 2 arms stop at 7,500 steps on purpose. The v2/v3 separation is already
+# unmistakable by then (v2 -0.0034 vs v3 0.1477, and 0.1843 vs 0.2815 as early as
+# step 2,500), so 20k would buy no extra discrimination at 3x the GPU time.
+max_steps: 7500
+stats_ema_steps: 1000
+ema_decay: 0.999
+log_freq: 50
+valid_freq: 2500
+ckpt_freq: 7500
+num_ckpt_keep: 1
+sample_cfg_coef: 2.0
+# In-loop samples must span BOTH languages and the code-mixed case. v3 sampled
+# three stock English sentences for 200k steps, so "English fine, Nepali broken"
+# was invisible in the run's own artifacts.
+sample_sentences:
+- नेपाल हिमाल, पहाड र तराई गरी तीन भौगोलिक क्षेत्रमा विभाजित छ।
+- आजको बैठक बिहान दस बजे सभाकक्षमा सुरु हुनेछ।
+- The quick brown fox jumps over the lazy dog.
+- Please confirm your booking before the end of the day.
+- मैले Foodmandu बाट अर्डर गरें।
+- बैंकले RTGS मार्फत रकम पठायो।
+
+freeze_params_regex: ^flow_lm\.(transformer\.layers\.(1[2-9]|2[0-3])\.|flow_net\.|out_eos\.)

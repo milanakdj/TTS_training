@@ -1,0 +1,62 @@
+# v5 STAGE 1: the full bilingual 24-layer teacher, on the v5m_lwf recipe.
+#
+# Chosen by the v5 probes at 7.5k (guided 2x2, CER / sim, en_text/en_voice):
+#   Kyutai 6L untouched   0.009 / 0.848   the English bar
+#   v5m (15% LibriHeavy)  0.012 / 0.801
+#   v5m_lwf (lwf 1.0)     0.010 / 0.826   <-- this config; Nepali valid -0.0005 (tracks v2)
+#   v5m_lwf3 (lwf 3.0)    0.012 / 0.836   worse CER on both en cells, Nepali 0.0055
+#
+# Watch it with scripts/curve_vs.py against v2 (health_loop_v5.sh every 6 h) and
+# STOP EARLY once both languages flatten.
+model_config: pocket_tts/config/english_2026-04_24l.yaml
+model_overrides:
+  flow_lm.lookup_table.tokenizer_path: /root/tts/TTS_training/pocket_TTS/tokenizer_v3/ne_en_9682.model
+  flow_lm.lookup_table.n_bins: 9682
+start_from_pretrained: true
+reset_text_embedding: false
+graft_text_embedding: 4000
+
+data:
+  train_jsonl: /workspace/manifests_v4/train_v5m_latents.jsonl
+  valid_jsonl: ne=/root/tts/TTS_training/pocket_TTS/manifests/valid_probe_ne.jsonl,en=/root/tts/TTS_training/pocket_TTS/manifests/valid_v3_en_split.jsonl
+  max_duration_sec: 30.0
+  max_voice_prompt_sec: 5.0
+
+flow:
+  type: lsd
+  kwargs: {}
+
+flow_batch_multiplier: 4
+eos_loss_weight: 0.1
+text_dropout: 0.2
+voice_dropout: 0.2
+
+optim:
+  lr: 2e-4
+  schedule: constant
+  warmup_steps: 1000
+
+
+run_dir: /workspace/v5_teacher_24l
+batch_size: 64
+grad_accum_steps: 1
+max_steps: 250000
+stats_ema_steps: 1000
+ema_decay: 0.999
+log_freq: 50
+valid_freq: 2500
+ckpt_freq: 5000
+num_ckpt_keep: 3
+sample_cfg_coef: 2.0
+# In-loop samples must span BOTH languages and the code-mixed case. v3 sampled
+# three stock English sentences for 200k steps, so "English fine, Nepali broken"
+# was invisible in the run's own artifacts.
+sample_sentences:
+- नेपाल हिमाल, पहाड र तराई गरी तीन भौगोलिक क्षेत्रमा विभाजित छ।
+- आजको बैठक बिहान दस बजे सभाकक्षमा सुरु हुनेछ।
+- The quick brown fox jumps over the lazy dog.
+- Please confirm your booking before the end of the day.
+- मैले Foodmandu बाट अर्डर गरें।
+- बैंकले RTGS मार्फत रकम पठायो।
+
+lwf_weight: 1.0
